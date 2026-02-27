@@ -20,31 +20,40 @@ In today's fast-paced world, mindfulness is more important than ever! '**Iederee
 
 This project was developed in collaboration with **Affect-Us** and **Bartiméus**, focusing on accessibility and usability for people with visual impairments. Extensive research and user testing ensured the app meets the needs of the target audience.
 
+**Key updates in this version:**
+-   Improved accessibility based on WCAG 2.1 guidelines
+-   Enhanced frontend design for better usability
+-   ....
+- .....
+
 ## 🔍 Features
 
 ✅ **Guided mindfulness exercises** 🎧
+✅ **Pre- and post-exercise mood tracking** 📊
 ✅ **Relaxation techniques to reduce stress** 😌
 ✅ **Accessible design with screen reader support** 🦻
-✅ **Speech-controlled navigation for ease of use** 🗣️
+✅ **Speech-controlled navigation for ease of use** 🗣️ ???
 ✅ **Customizable settings to fit your needs** 🔧
 ✅ **Integration with care systems for monitoring progress** 📊
 ✅ **Designed for visually and cognitively impaired users** 🦮
-✅ **Available for both beginners and advanced users** 🚀
+✅ **Admin panel for managing exercises** ⚙️
+✅ **Built with modern technologies:** Laravel, React, MariaDB
 
 ## 🛠 Installation
 
-Follow these simple steps to get started with '**Everyone Mindful**' on your local machine:
+Follow these simple steps to get started with '**Mindfulness Webapp**' on your local machine:
 
 1. **Clone the repository:** 🖥️
    ```bash
-   git clone https://github.com/DaanFrankhuizen/iedereen_mindful.git
+   git clone https://github.com/Danae02/mindfulness-webapp.git
    ```
 
 2. **Navigate to the project folder:** 📂
    ```bash
    cd iedereen_mindful
+   cd iedereen_mindful-main
    ```
-cd iedereen_mindful-main
+
 3. **Install PHP dependencies via Composer:** 🎼
    ```bash
    composer install
@@ -84,6 +93,30 @@ cd iedereen_mindful-main
    ```bash
    php artisan migrate
    ```
+
+
+### 🔐 Default user accounts
+
+After running the seeders, you can log in with the following accounts:
+
+| Role       | Email                 | Password     |
+|------------|-----------------------|--------------|
+| **Admin**  | `admin@example.com`   | `admin`      |
+| **Researcher** | `researcher@example.com` | `onderzoeker` |
+
+> **Note:** These accounts are for testing purposes only. Change the passwords in a production environment!
+
+### 👤 Creating a Begeleider (Supervisor)
+
+From the **admin account**, you can easily create new supervisors to test with:
+
+1. Log in with the admin account (`admin@example.com` / `admin`)
+2. Go to the **admin dashboard**
+3. Click on **"Lijst van alle gebruikers"**
+4. Click on the role of the person you want to change, click on edit and then you can change the role
+
+This way, you don't need to manually add supervisors to the database – the admin can do it directly through the web interface.
+
 
 ## 🚀 Usage
 
