@@ -1,24 +1,38 @@
-import { usePage } from "@inertiajs/react";
+import { usePage, Link } from "@inertiajs/react";
 
 export default function ProfileOverview({ exerciseCountLastWeek }) {
     const user = usePage().props.auth.user;
 
     return (
-        <div className="flex items-center justify-center max-w-7xl sm:px-6 lg:px-8">
-            <div className="w-full bg-white shadow-card rounded-xl p-8 text-center">
-                <h1 className="text-3xl font-heading font-bold text-darkGray mb-4">
-                    Hallo <span className="text-primary">{user.name}</span>! Welkom terug.
-                </h1>
-                <p className="text-lg text-gray-600">
-                    Deze week heb je <span className="font-bold text-primary">{exerciseCountLastWeek}</span> oefeningen geluisterd.
-                </p>
-                <div className="mt-6">
-                    <button className="border-2 border-primary text-primary bg-white px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-primary hover:text-white hover:shadow-md">
-                        Bekijk mijn oefeningen
-                    </button>
-                </div>
+        <div className="text-center">
+            <h1 className="text-3xl font-heading font-bold text-darkGray mb-3">
+                Hallo <span className="text-primary">{user.name}</span>, welkom terug!
+            </h1>
+            <p className="text-lg mb-6" style={{color: '#5F5F5F'}}>
+                Je hebt deze week {exerciseCountLastWeek} oefeningen gedaan! Blijf oefenen voor de beste resultaten.
+            </p>
+            <div className="flex justify-center">
+                <Link
+                    href={route('favorites')}
+                    className="inline-flex items-center gap-3 px-8 py-4 rounded-full border-2 font-bold text-base transition-all duration-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7B5EA7]"
+                    style={{
+                        backgroundColor: '#F0E8FF',
+                        borderColor: '#7B5EA7',
+                        color: '#7B5EA7',
+                    }}
+                    aria-label="Bekijk mijn favoriete oefeningen"
+                >
+                    <svg
+                        className="w-7 h-7"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                    Bekijk mijn favoriete oefeningen
+                </Link>
             </div>
         </div>
     );
 }
-

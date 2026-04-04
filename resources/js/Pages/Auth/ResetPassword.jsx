@@ -48,7 +48,7 @@ export default function ResetPassword({ token, email }) {
                 </div>
 
                 <div className="mb-6 flex justify-center">
-                    <AccessibilityButton />
+                    <AccessibilityButton variant="button" />
                 </div>
 
                 <input type="hidden" name="token" value={data.token} />

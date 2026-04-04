@@ -46,7 +46,7 @@ export default function ForgotPassword({ status }) {
                 </div>
 
                 <div className="mb-4 flex justify-center">
-                    <AccessibilityButton />
+                    <AccessibilityButton variant="button" />
                 </div>
 
                 <div className="mb-6 flex justify-center">

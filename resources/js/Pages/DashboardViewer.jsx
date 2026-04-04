@@ -3,16 +3,14 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import ProfileOverview from "@/Components/ProfileOverview.jsx";
 import CourseList from "@/Components/CourseList.jsx";
+import AccessibilityButton from "@/Components/AccessibilityButton";
 import axios from "axios";
 
-export default function DashboardViewer({
-                                            exerciseCountLastWeek,
-                                            showSurvey,
-                                        }) {
-    const [question, setQuestion] = useState(""); // Vraag
-    const [answers, setAnswers] = useState([]); // Antwoordopties
-    const [selectedAnswer, setSelectedAnswer] = useState(null); // Gekozen antwoord
-    const [hasAnswered, setHasAnswered] = useState(false); // Beheert of de gebruiker een antwoord heeft ingediend
+export default function DashboardViewer({ exerciseCountLastWeek, showSurvey }) {
+    const [question, setQuestion] = useState("");
+    const [answers, setAnswers] = useState([]);
+    const [selectedAnswer, setSelectedAnswer] = useState(null);
+    const [hasAnswered, setHasAnswered] = useState(false);
 
     // Haal de vraag en antwoorden op bij het laden van de component
     useEffect(() => {
@@ -46,10 +44,6 @@ export default function DashboardViewer({
         if (selectedAnswer) {
             alert(`Bedankt voor je antwoord: ${selectedAnswer}`);
             setHasAnswered(true); // Markeer als beantwoord
-
-
-
-
         } else {
             alert("Selecteer een antwoord voordat je verdergaat.");
         }
@@ -57,13 +51,7 @@ export default function DashboardViewer({
 
     if (showSurvey && !hasAnswered) {
         return (
-            <AuthenticatedLayout
-                header={
-                    <h2 className="text-2xl font-heading font-bold text-primary leading-tight">
-                        Dashboard Viewer
-                    </h2>
-                }
-            >
+            <AuthenticatedLayout>
                 <Head title="Vragenlijst" />
                 <section className="py-12 bg-lightGray">
                     <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -102,26 +90,48 @@ export default function DashboardViewer({
 
     return (
         <AuthenticatedLayout
-            header={
-                <h2 className="text-2xl font-heading font-bold text-primary leading-tight">
-                    Dashboard Viewer
-                </h2>
+            topBar={
+                <div
+                    className="w-full py-3 border-t-2 border-b-2"
+                    style={{
+                        backgroundColor: '#F0E8FF',
+                        borderTopColor: '#000000',
+                        borderBottomColor: '#000000'
+                    }}
+                >
+                    <div className="flex justify-end px-4 sm:px-6 lg:px-8">
+                        <AccessibilityButton variant="plain" />
+                    </div>
+                </div>
             }
         >
             <Head title="Dashboard Viewer" />
+
             {/* Profieloverzicht */}
-            <section className="py-12 bg-lightGray">
+            <section className="pt-4 pb-8 bg-lightGray">
                 <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div>
+                    <div
+                        className="w-full bg-white rounded-xl p-8"
+                        style={{
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                            border: '1px solid #5F5F5F'
+                        }}
+                    >
                         <ProfileOverview exerciseCountLastWeek={exerciseCountLastWeek} />
                     </div>
                 </div>
             </section>
 
             {/* Lijst van cursussen */}
-            <section className="py-12">
+            <section className="pb-12 bg-lightGray">
                 <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="bg-white p-6">
+                    <div
+                        className="w-full bg-white rounded-xl p-8"
+                        style={{
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                            border: '1px solid #5F5F5F'
+                        }}
+                    >
                         <CourseList />
                     </div>
                 </div>

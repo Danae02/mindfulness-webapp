@@ -48,7 +48,7 @@ export default function Register() {
                 </div>
 
                 <div className="mb-6 flex justify-center">
-                    <AccessibilityButton />
+                    <AccessibilityButton variant="button" />
                 </div>
 
                 <div>

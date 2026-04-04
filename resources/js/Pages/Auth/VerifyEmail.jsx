@@ -42,7 +42,7 @@ export default function VerifyEmail({ status }) {
                 </div>
 
                 <div className="mb-6 flex justify-center">
-                    <AccessibilityButton />
+                    <AccessibilityButton variant="button" />
                 </div>
 
                 <div className="mb-6 text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border border-blue-200">
