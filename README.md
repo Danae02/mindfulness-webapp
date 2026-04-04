@@ -32,7 +32,7 @@ This project was developed in collaboration with **Affect-Us** and **Bartiméus*
 ✅ **Pre- and post-exercise mood tracking** 📊
 ✅ **Relaxation techniques to reduce stress** 😌
 ✅ **Accessible design with screen reader support** 🦻
-✅ **Speech-controlled navigation for ease of use** 🗣️ ???
+✅ **Speech-controlled navigation for ease of use** 🗣️ niet zo ???
 ✅ **Customizable settings to fit your needs** 🔧
 ✅ **Integration with care systems for monitoring progress** 📊
 ✅ **Designed for visually and cognitively impaired users** 🦮

@@ -12,10 +12,23 @@ use App\Http\Controllers\UserExerciseLogController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Landing page route
+//// Landing page route
+//Route::get('/', function () {
+//    return auth()->check() ? redirect()->route('dashboard') : Inertia::render('Auth/Login');
+//})->name('home');
+//
+
+// Landing page route - met canResetPassword optie
 Route::get('/', function () {
-    return auth()->check() ? redirect()->route('dashboard') : Inertia::render('Auth/Login');
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    // Haal de canResetPassword op uit de config omdat die ontbrak
+    $canResetPassword = Route::has('password.request');
+    return Inertia::render('Auth/Login', ['canResetPassword' => $canResetPassword, 'status' => session('status'),]);
 })->name('home');
+
+
 
 // Dashboard route
 Route::get('/dashboard', [DashboardController::class, 'index'])

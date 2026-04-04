@@ -1,0 +1,142 @@
+/* Extra groot en ultra bold font voor slechtzienden voor de accessibilitybutton*/
+
+body.bold-font {
+    font-size: 112% !important;
+    line-height: 1.5 !important;
+    letter-spacing: 0.03em !important;
+    word-spacing: 0.05em !important;
+    -webkit-text-stroke: 0.4px currentColor !important;
+    text-stroke: 0.4px currentColor !important;
+}
+
+body.bold-font,
+body.bold-font * {
+    font-weight: 900 !important;
+    -webkit-font-smoothing: antialiased !important;
+    text-shadow: 0 0 0.5px currentColor, 0 0 0.5px currentColor !important;
+}
+
+body.bold-font input[type="checkbox"],
+body.bold-font input[type="radio"] {
+    font-weight: normal !important;
+    width: 1rem !important;
+    height: 1rem !important;
+    min-width: 1rem !important;
+    min-height: 1rem !important;
+    accent-color: #6c4092 !important;
+}
+
+body.bold-font label span,
+body.bold-font .text-sm {
+    font-weight: 500 !important;
+}
+
+body.bold-font h1 {
+    font-size: 2.5rem !important;
+    font-weight: 900 !important;
+    text-shadow: 0 0 1px currentColor !important;
+}
+
+body.bold-font h2 {
+    font-size: 2rem !important;
+    font-weight: 900 !important;
+    text-shadow: 0 0 0.8px currentColor !important;
+}
+
+body.bold-font h3 {
+    font-size: 1.75rem !important;
+    font-weight: 900 !important;
+    text-shadow: 0 0 0.8px currentColor !important;
+}
+
+body.bold-font h4 {
+    font-size: 1.5rem !important;
+    font-weight: 900 !important;
+}
+
+body.bold-font h5,
+body.bold-font h6 {
+    font-size: 1.25rem !important;
+    font-weight: 900 !important;
+}
+
+body.bold-font p,
+body.bold-font span:not(.no-bold),
+body.bold-font a,
+body.bold-font li,
+body.bold-font button,
+body.bold-font label,
+body.bold-font div:not(.no-bold) {
+    font-size: 1.1em !important;
+    text-shadow: 0 0 0.6px currentColor !important;
+}
+
+body.bold-font button,
+body.bold-font .btn,
+body.bold-font [type="submit"],
+body.bold-font [type="button"] {
+    font-size: 1.1rem !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 900 !important;
+}
+
+body.bold-font input,
+body.bold-font textarea,
+body.bold-font select {
+    font-size: 1.1rem !important;
+    padding: 0.75rem !important;
+}
+
+body.bold-font input:not([type="checkbox"]):not([type="radio"]),
+body.bold-font .relative input {
+    padding-left: 3.5rem !important;
+    padding-right: 3.5rem !important;
+}
+
+body.bold-font svg {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+}
+
+body.bold-font .absolute svg,
+body.bold-font .relative svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}
+
+body.bold-font .absolute.inset-y-0.left-0 svg,
+body.bold-font .absolute.inset-y-0.right-0 svg {
+    width: 1.375rem !important;
+    height: 1.375rem !important;
+}
+
+body.bold-font .absolute.inset-y-0.left-0 {
+    left: 0 !important;
+    padding-left: 0.75rem !important;
+}
+
+body.bold-font .absolute.inset-y-0.right-0 {
+    right: 0 !important;
+    padding-right: 0.75rem !important;
+}
+
+body.bold-font .font-bold,
+body.bold-font .font-semibold,
+body.bold-font strong,
+body.bold-font b {
+    font-weight: 900 !important;
+    text-shadow: 0 0 0.8px currentColor !important;
+}
+
+body.bold-font .inline-flex.items-center.px-4.py-3.rounded-full {
+    transform: scale(1);
+    transition: transform 0.2s ease;
+}
+
+body.bold-font .inline-flex.items-center.px-4.py-3.rounded-full span {
+    font-size: 1rem !important;
+}
+
+body.bold-font .inline-flex.items-center.px-4.py-3.rounded-full span span {
+    font-size: 1.6rem !important;
+}
