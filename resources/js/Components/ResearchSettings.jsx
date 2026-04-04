@@ -65,14 +65,14 @@ export default function ResearchSettings() {
 
             {/* Mode Selectie */}
             <div className="mb-6">
-                    <label className="flex items-center">
-                        <span className="mr-2">Mode</span>
-                        <ToolTip>
-                            Kies de modus waarin de functie werkt.
-                            <strong> Per sessie</strong> houdt gegevens bij per sessie,
-                            terwijl <strong>per oefening</strong> de gegevens voor elke oefening opslaat.
-                        </ToolTip>
-                    </label>
+                <label className="flex items-center">
+                    <span className="mr-2">Mode</span>
+                    <ToolTip>
+                        Kies de modus waarin de functie werkt.
+                        <strong> Per sessie</strong> houdt gegevens bij per sessie,
+                        terwijl <strong>per oefening</strong> de gegevens voor elke oefening opslaat.
+                    </ToolTip>
+                </label>
                 <select
                     value={mode}
                     onChange={(e) => setMode(e.target.value)}

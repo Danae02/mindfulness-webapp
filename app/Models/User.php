@@ -69,4 +69,23 @@ class User extends Authenticatable
     {
         return $this->hasMany(Session::class);
     }
+
+
+    /**
+     * Haal alle favorieten van de gebruiker op (via de favorites tabel)
+     */
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    /**
+     * Haal alle oefeningen die de gebruiker als favoriet heeft gemarkeerd
+     * Dit is een many-to-many relatie via de favorites tabel
+     */
+    public function favoriteExercises()
+    {
+        return $this->belongsToMany(Exercise::class, 'favorites');
+    }
+
 }

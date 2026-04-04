@@ -44,13 +44,16 @@ export default function ExerciseEditor({ exercise, onSave, onCancel }) {
                     {/* Antwoorden */}
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Antwoorden</label>
-                        {editedExercise.form_answers.map((answer, index) => (
+                        {(editedExercise.form_answers && Array.isArray(editedExercise.form_answers)
+                                ? editedExercise.form_answers
+                                : ["", "", "", "", ""]  // nieuw: Fallback naar lege array
+                        ).map((answer, index) => (
                             <input
                                 key={index}
                                 type="text"
-                                value={answer}
+                                value={answer || ''}
                                 onChange={(e) => {
-                                    const updatedAnswers = [...editedExercise.form_answers];
+                                    const updatedAnswers = [...(editedExercise.form_answers || ["", "", "", "", ""])];
                                     updatedAnswers[index] = e.target.value;
                                     setEditedExercise({ ...editedExercise, form_answers: updatedAnswers });
                                 }}

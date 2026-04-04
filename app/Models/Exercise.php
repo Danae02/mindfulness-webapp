@@ -40,4 +40,11 @@ class Exercise extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    // Gebruikers die deze oefening als favoriet hebben
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'favorites');
+    }
+
 }

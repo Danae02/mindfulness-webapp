@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 use App\Models\Exercise;
 use App\Models\UserExerciseLog;
+use App\Models\ResearchSettings;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -27,13 +28,31 @@ class ExerciseController extends Controller
     {
         $exercise = Exercise::find($id);
 
-        // Controleer of de oefening bestaat
         if (!$exercise) {
             abort(404, "Exercise not found");
         }
 
+        // Check of de gebruiker deze oefening vandaag al heeft gedaan
+        $alreadyCompletedToday = false;
+        if (auth()->check()) {
+            $alreadyCompletedToday = UserExerciseLog::where('user_id', auth()->id())
+                ->where('exercise_id', $id)
+                ->whereDate('date_time', today())
+                ->where('completed', true)
+                ->exists();
+        }
+
+        $researchSetting = ResearchSettings::where('key_name', 'mode')->first();
+        $researchMode = $researchSetting ? $researchSetting->value : 'per_session';
+        $researchQuestion = $researchSetting ? $researchSetting->question : null;
+        $researchAnswers = $researchSetting ? $researchSetting->answers : null;
+
         return Inertia::render('ExercisePage', [
             'exercise' => $exercise,
+            'researchMode' => $researchMode,
+            'researchQuestion' => $researchQuestion,
+            'researchAnswers' => $researchAnswers,
+            'alreadyCompletedToday' => $alreadyCompletedToday, // ← NIEUW
         ]);
     }
 

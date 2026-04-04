@@ -7,6 +7,7 @@ use App\Models\Team;
 use App\Models\User;
 use App\Models\Exercise;
 use App\Models\UserExerciseLog;
+use App\Models\Favorite;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -21,6 +22,7 @@ class DatabaseSeeder extends Seeder
             // Reset database
             DB::statement('SET FOREIGN_KEY_CHECKS=0;');
             DB::table('user_exercise_logs')->truncate();
+            DB::table('favorites')->truncate();
             DB::table('exercises')->truncate();
             DB::table('users')->truncate();
             DB::table('teams')->truncate();
@@ -37,7 +39,7 @@ class DatabaseSeeder extends Seeder
             // Seed Teams
             $teams = [
                 ['name' => 'Team Alpha'],
-                ['name' => 'Team Beta'],
+                ['name' => 'Team Beta']
             ];
             foreach ($teams as $team) {
                 Team::create($team);
@@ -65,30 +67,25 @@ class DatabaseSeeder extends Seeder
             }
 
             // Create admin
-            $admin = User::factory()->create([
+            User::factory()->create([
                 'role_id' => $adminRoleId,
                 'team_id' => Team::inRandomOrder()->first()->id,
                 'email' => 'admin@example.com',
                 'name' => 'Admin User',
             ]);
 
-            $researcher = User::factory()->create([
+
+
+            // Create researcher
+            User::factory()->create([
                 'role_id' => $researcherRoleId,
                 'team_id' => Team::inRandomOrder()->first()->id,
                 'email' => 'researcher@example.com',
                 'name' => 'Researcher User',
             ]);
 
-            if (!$admin) {
-                throw new \Exception('Admin user could not be created.');
-            }
-
-            if (!$researcher) {
-                throw new \Exception('Admin user could not be created.');
-            }
-
-            // Create viewers
-            $viewers = User::factory(9)->create()->each(function ($viewer) use ($viewerRoleId, $exercises) {
+            // Create viewers (zonder favorieten)
+            User::factory(9)->create()->each(function ($viewer) use ($viewerRoleId, $exercises) {
                 $viewer->update([
                     'role_id' => $viewerRoleId,
                     'team_id' => Team::inRandomOrder()->first()->id,
@@ -104,9 +101,13 @@ class DatabaseSeeder extends Seeder
                 }
             });
 
-            if ($viewers->isEmpty()) {
-                throw new \Exception('No viewer users were created.');
-            }
+            echo "Seeding completed successfully!\n";
+            echo "Created: " . Role::count() . " roles\n";
+            echo "Created: " . Team::count() . " teams\n";
+            echo "Created: " . Exercise::count() . " exercises\n";
+            echo "Created: " . User::count() . " users\n";
+            echo "Created: " . Favorite::count() . " favorites\n";
+
         } catch (\Throwable $e) {
             dd('Seeding Error: ' . $e->getMessage());
         }

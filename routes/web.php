@@ -10,6 +10,7 @@ use App\Http\Controllers\ResearchSettingsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserExerciseLogController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FavoriteController;
 use Inertia\Inertia;
 
 //// Landing page route
@@ -81,6 +82,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{id}/delete', [CourseController::class, 'deleteCourse'])->name('delete');
         Route::get('/{id}', [CourseController::class, 'getCourseDetails'])->name('details');
         Route::get('/{id}/exercises', [ExerciseController::class, 'getExercises'])->name('exercises');
+    });
+
+    // Favorieten routes (alleen voor ingelogde gebruikers)
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+        Route::post('/favorites/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
+        Route::get('/favorieten', function () {
+            return Inertia::render('Favorites');
+        })->name('favorites');
     });
 
     // Exercise routes

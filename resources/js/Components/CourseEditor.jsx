@@ -57,18 +57,24 @@ export default function CourseEditor() {
             const formData = new FormData();
             formData.append("exercise_name", updatedExercise.exercise_name);
             formData.append("form_question", updatedExercise.form_question);
-            updatedExercise.form_answers.forEach((answer, index) => {
-                formData.append(`form_answers[${index}]`, answer);
+
+            // Zorg dat form_answers altijd een array is met 5 waarden
+            const answers = updatedExercise.form_answers || ["", "", "", "", ""];
+            answers.forEach((answer, index) => {
+                formData.append(`form_answers[${index}]`, answer || '');
             });
 
             if (updatedExercise.newFile) {
                 formData.append("audio", updatedExercise.newFile);
             }
 
-            console.log(formData)
+            // _method  voor Laravel
+            formData.append("_method", "PUT");
 
-            // API-aanroep om de oefening bij te werken
-            const response = await axios.put(route("exercises.update", { id: updatedExercise.id }), formData , {
+            console.log("Verstuurde data:", Object.fromEntries(formData));
+
+            // Gebruik POST i.p.v. PUT met _method
+            const response = await axios.post(route("exercises.update", { id: updatedExercise.id }), formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -88,10 +94,21 @@ export default function CourseEditor() {
             }
         } catch (error) {
             console.error("Fout bij het bijwerken van de oefening:", error);
-            alert("Er ging iets mis bij het opslaan.");
+
+            if (error.response && error.response.data) {
+                console.log("Server response:", error.response.data);
+
+                if (error.response.data.errors) {
+                    const messages = Object.values(error.response.data.errors).flat().join('\n');
+                    alert('Validatiefouten:\n' + messages);
+                } else if (error.response.data.message) {
+                    alert('Fout: ' + error.response.data.message);
+                }
+            } else {
+                alert("Er ging iets mis bij het opslaan. Check de console voor details.");
+            }
         }
     };
-
 
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
@@ -109,7 +126,6 @@ export default function CourseEditor() {
         </div>
     );
 }
-
 
 
 // import { useEffect, useState } from "react";
