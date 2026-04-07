@@ -145,4 +145,4 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 
 We hope '**Iedereen Mindful**' helps you create a more balanced, peaceful, and joyful life! 💖✨
 
-Happy Mindfulness! 🌿😊
+Happy Mindfulness! � ^=^l�😊
