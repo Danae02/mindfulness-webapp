@@ -17,8 +17,11 @@ export default {
                 heading: ['"Poppins"', ...defaultTheme.fontFamily.sans], // Voor koppen
             },
             colors: {
-                primary: '#6c4092', // Hoofdaccentkleur (gebaseerd op de paarse tint op de site)
-                secondary: '#008245', // Groene kleur
+                primary: '#6c4092',      // Hoofdaccentkleur (gebaseerd op de paarse tint op de site)
+                secondary: '#008245',    // Groene kleur
+                danger: '#C0392B',       // Rood voor gevaarlijke acties (toegankelijk)
+                'danger-dark': '#A93226', // Donkerder rood voor hover
+                'danger-darker': '#922B21', // Nog donkerder voor active
                 lightGray: '#F5F5F5', // Achtergrondkleur
                 darkGray: '#333333', // Voor tekst en contrast
                 offWhite: '#FEFEFE', // Witte tinten
@@ -43,7 +46,7 @@ export default {
             },
             borderRadius: {
                 'lg': '12px',
-                'xl': '24px', // Ronde randen voor buttons en kaarten
+                'xl': '24px', // ROnde randen voor buttons en kaarten
             },
         },
     },

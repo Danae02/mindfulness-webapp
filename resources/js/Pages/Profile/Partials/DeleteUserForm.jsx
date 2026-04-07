@@ -46,38 +46,33 @@ export default function DeleteUserForm({ className = '' }) {
     };
 
     return (
-        <section className={`space-y-6 ${className}`}>
-            <header>
-                <h2 className="text-lg font-medium text-gray-900">
-                    Delete Account
-                </h2>
-
-                <p className="mt-1 text-sm text-gray-600">
-                    Once your account is deleted, all of its resources and data
-                    will be permanently deleted. Before deleting your account,
-                    please download any data or information that you wish to
-                    retain.
+        <div className={`border-2 border-red-600 rounded-xl overflow-hidden ${className}`}>
+            <div className="px-6 py-5">
+                <h2 className="text-lg font-semibold text-red-800">Account verwijderen</h2>
+                <p className="text-sm text-red-600 mt-0.5">
+                    Als je je account verwijdert, worden al de gegevens permanent gewist. Dit kan niet ongedaan worden gemaakt.
+                    Zorg dat je eerst alles hebt opgeslagen wat je wil bewaren.
                 </p>
-            </header>
+            </div>
 
-            <DangerButton onClick={confirmUserDeletion}>
-                Delete Account
-            </DangerButton>
+            <div className="px-6 py-5 bg-white">
+                <DangerButton onClick={confirmUserDeletion}>
+                    Account verwijderen
+                </DangerButton>
+            </div>
 
             <Modal show={confirmingUserDeletion} onClose={closeModal}>
                 <form onSubmit={deleteUser} className="p-6">
                     <h2 className="text-lg font-medium text-gray-900">
-                        Are you sure you want to delete your account?
+                        Weet je zeker dat je je account wilt verwijderen?
                     </h2>
 
-                    <p className="mt-1 text-sm text-gray-600">
-                        Once your account is deleted, all of its resources and
-                        data will be permanently deleted. Please enter your
-                        password to confirm you would like to permanently delete
-                        your account.
+                    <p className="mt-2 text-sm text-gray-600">
+                        Als je je account verwijdert, worden al je gegevens permanent gewist.
+                        Dit kan niet ongedaan worden gemaakt. Voer je wachtwoord in om te bevestigen.
                     </p>
 
-                    <div className="mt-6">
+                    <div className="mt-4">
                         <InputLabel
                             htmlFor="password"
                             value="Password"
@@ -90,12 +85,11 @@ export default function DeleteUserForm({ className = '' }) {
                             name="password"
                             ref={passwordInput}
                             value={data.password}
-                            onChange={(e) =>
-                                setData('password', e.target.value)
-                            }
-                            className="mt-1 block w-3/4"
+                            onChange={(e) => setData('password', e.target.value)}
+                            className="mt-1 block w-full"
                             isFocused
-                            placeholder="Password"
+                            placeholder="Wachtwoord"
+                            aria-required="true"
                         />
 
                         <InputError
@@ -104,17 +98,17 @@ export default function DeleteUserForm({ className = '' }) {
                         />
                     </div>
 
-                    <div className="mt-6 flex justify-end">
+                    <div className="mt-6 flex justify-end gap-3">
                         <SecondaryButton onClick={closeModal}>
-                            Cancel
+                            Annuleren
                         </SecondaryButton>
 
-                        <DangerButton className="ms-3" disabled={processing}>
-                            Delete Account
+                        <DangerButton disabled={processing}>
+                            Account verwijderen
                         </DangerButton>
                     </div>
                 </form>
             </Modal>
-        </section>
+        </div>
     );
 }
