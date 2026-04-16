@@ -1,31 +1,68 @@
+import { useState } from 'react';
+
 export default function Sidebar({ setView }) {
+    // Huidige actieve view bijhouden voor styling
+    const [activeView, setActiveView] = useState("courses");
+
+    const handleViewChange = (view) => {
+        setActiveView(view);
+        setView(view);
+    };
+
     return (
-        <div className="w-1/4 bg-gray-800 text-white h-screen">
+        <div className="w-full md:w-1/4 bg-[#312C50] text-white md:min-h-screen">
             <div className="p-4">
-                <h3 className="text-lg font-semibold">Admin Menu</h3>
+                <h3 className="text-lg font-semibold break-words">Admin Menu</h3>
                 <ul className="mt-4 space-y-2">
                     <li>
                         <button
-                            onClick={() => setView("courses")}
-                            className="w-full text-left p-2 hover:bg-gray-700 rounded"
+                            onClick={() => handleViewChange("courses")}
+                            className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
+                                activeView === "courses"
+                                    ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
+                                    : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
+                            }`}
+                            style={{
+                                ...(activeView === "courses" && {
+                                    boxShadow: 'inset 3px 0 0 #9B6DD4'
+                                })
+                            }}
                         >
-                            Alle Cursussen
+                            <span className="break-words">Alle Cursussen</span>
                         </button>
                     </li>
                     <li>
                         <button
-                            onClick={() => setView("addCourse")}
-                            className="w-full text-left p-2 hover:bg-gray-700 rounded"
+                            onClick={() => handleViewChange("addCourse")}
+                            className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
+                                activeView === "addCourse"
+                                    ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
+                                    : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
+                            }`}
+                            style={{
+                                ...(activeView === "addCourse" && {
+                                    boxShadow: 'inset 3px 0 0 #9B6DD4'
+                                })
+                            }}
                         >
-                            Cursus Toevoegen
+                            <span className="break-words">Cursus Toevoegen</span>
                         </button>
                     </li>
                     <li>
                         <button
-                            onClick={() => setView("allDatapoints")}
-                            className="w-full text-left p-2 hover:bg-gray-700 rounded"
+                            onClick={() => handleViewChange("allDatapoints")}
+                            className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
+                                activeView === "allDatapoints"
+                                    ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
+                                    : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
+                            }`}
+                            style={{
+                                ...(activeView === "allDatapoints" && {
+                                    boxShadow: 'inset 3px 0 0 #9B6DD4'
+                                })
+                            }}
                         >
-                            Lijst van alle datapunten
+                            <span className="break-words">Lijst van alle datapunten</span>
                         </button>
                     </li>
                     {/*<li>*/}
@@ -38,18 +75,36 @@ export default function Sidebar({ setView }) {
                     {/*</li>*/}
                     <li>
                         <button
-                            onClick={() => setView("listOfAllUsers")}
-                            className="w-full text-left p-2 hover:bg-gray-700 rounded"
+                            onClick={() => handleViewChange("listOfAllUsers")}
+                            className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
+                                activeView === "listOfAllUsers"
+                                    ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
+                                    : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
+                            }`}
+                            style={{
+                                ...(activeView === "listOfAllUsers" && {
+                                    boxShadow: 'inset 3px 0 0 #9B6DD4'
+                                })
+                            }}
                         >
-                            Lijst van alle gebruikers
+                            <span className="break-words">Lijst van alle gebruikers</span>
                         </button>
                     </li>
                     <li>
                         <button
-                            onClick={() => setView("researchSettings")}
-                            className="w-full text-left p-2 hover:bg-gray-700 rounded"
+                            onClick={() => handleViewChange("researchSettings")}
+                            className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
+                                activeView === "researchSettings"
+                                    ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
+                                    : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
+                            }`}
+                            style={{
+                                ...(activeView === "researchSettings" && {
+                                    boxShadow: 'inset 3px 0 0 #9B6DD4'
+                                })
+                            }}
                         >
-                            Instellingen voor onderzoek
+                            <span className="break-words">Instellingen voor onderzoek</span>
                         </button>
                     </li>
                 </ul>

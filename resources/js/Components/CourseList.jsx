@@ -230,7 +230,7 @@ export default function CourseList() {
     return (
         <>
             <h2 className="text-2xl font-bold text-darkGray mb-4" id="courses-heading">
-                Mijn cursussen
+                Mindfulness oefeningen
             </h2>
 
             <div className="flex flex-col gap-3" role="list" aria-labelledby="courses-heading">

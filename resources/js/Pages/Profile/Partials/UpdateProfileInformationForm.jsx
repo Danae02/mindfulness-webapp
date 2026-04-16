@@ -97,7 +97,7 @@ export default function UpdateProfileInformation({
                     leaveTo="opacity-0"
                 >
                     <p className="text-sm text-green-600">
-                        Opgeslagen.
+                        Opgeslagen.git push origin main
                     </p>
                 </Transition>
             </div>
