@@ -1,11 +1,8 @@
 import { useState } from 'react';
 
-export default function Sidebar({ setView }) {
-    // Huidige actieve view bijhouden voor styling
-    const [activeView, setActiveView] = useState("courses");
+export default function Sidebar({ setView, currentView }) {
 
     const handleViewChange = (view) => {
-        setActiveView(view);
         setView(view);
     };
 
@@ -18,12 +15,12 @@ export default function Sidebar({ setView }) {
                         <button
                             onClick={() => handleViewChange("courses")}
                             className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
-                                activeView === "courses"
+                                currentView === "courses"
                                     ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
                                     : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
                             }`}
                             style={{
-                                ...(activeView === "courses" && {
+                                ...(currentView === "courses" && {
                                     boxShadow: 'inset 3px 0 0 #9B6DD4'
                                 })
                             }}
@@ -35,12 +32,12 @@ export default function Sidebar({ setView }) {
                         <button
                             onClick={() => handleViewChange("addCourse")}
                             className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
-                                activeView === "addCourse"
+                                currentView === "addCourse"
                                     ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
                                     : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
                             }`}
                             style={{
-                                ...(activeView === "addCourse" && {
+                                ...(currentView === "addCourse" && {
                                     boxShadow: 'inset 3px 0 0 #9B6DD4'
                                 })
                             }}
@@ -52,12 +49,12 @@ export default function Sidebar({ setView }) {
                         <button
                             onClick={() => handleViewChange("allDatapoints")}
                             className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
-                                activeView === "allDatapoints"
+                                currentView === "allDatapoints"
                                     ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
                                     : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
                             }`}
                             style={{
-                                ...(activeView === "allDatapoints" && {
+                                ...(currentView === "allDatapoints" && {
                                     boxShadow: 'inset 3px 0 0 #9B6DD4'
                                 })
                             }}
@@ -77,12 +74,12 @@ export default function Sidebar({ setView }) {
                         <button
                             onClick={() => handleViewChange("listOfAllUsers")}
                             className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
-                                activeView === "listOfAllUsers"
+                                currentView === "listOfAllUsers"
                                     ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
                                     : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
                             }`}
                             style={{
-                                ...(activeView === "listOfAllUsers" && {
+                                ...(currentView === "listOfAllUsers" && {
                                     boxShadow: 'inset 3px 0 0 #9B6DD4'
                                 })
                             }}
@@ -94,17 +91,17 @@ export default function Sidebar({ setView }) {
                         <button
                             onClick={() => handleViewChange("researchSettings")}
                             className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
-                                activeView === "researchSettings"
+                                currentView === "researchSettings"
                                     ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
                                     : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
                             }`}
                             style={{
-                                ...(activeView === "researchSettings" && {
+                                ...(currentView === "researchSettings" && {
                                     boxShadow: 'inset 3px 0 0 #9B6DD4'
                                 })
                             }}
                         >
-                            <span className="break-words">Instellingen voor onderzoek</span>
+                            <span className="break-words">Gevoelsvragen beheren</span>
                         </button>
                     </li>
                 </ul>

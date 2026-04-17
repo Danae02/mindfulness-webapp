@@ -35,8 +35,11 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
     };
 
     const currentQuestion = getQuestion();
-    const currentAnswers = getAnswers();
-    const hasQuestions = currentQuestion && currentAnswers && currentAnswers.length > 0;
+    const currentAnswers  = getAnswers();
+    const hasQuestions    = currentQuestion && currentAnswers && currentAnswers.length > 0;
+
+    // Het aantal antwoordopties dat nu actief is
+    const feelingScale = currentAnswers?.length ?? 5;
 
     useEffect(() => {
         if (alreadyCompletedToday) {
@@ -84,7 +87,6 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
         router.visit('/dashboard');
     };
 
-
     const handleSubmitEndQuestion = async () => {
         // Sla het antwoord lokaal op
         if (selectedAnswer.index !== null) {
@@ -97,8 +99,10 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
                 user_id: user.id, // Zorg dat dit beschikbaar is
                 exercise_id: exercise.id,
                 feeling_before: localStorage.getItem('feeling_before'),
-                feeling_after: localStorage.getItem('feeling_after'),
-                date_time: new Date().toISOString(), // Stuur het huidige tijdstip mee
+                feeling_after:  localStorage.getItem('feeling_after'),
+                // Meesturen hoeveel opties er waren zodat de backend kan normaliseren
+                feeling_scale:  feelingScale,
+                date_time:      new Date().toISOString(),
             };
 
             try {
@@ -139,39 +143,65 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
 
                     {/* Content */}
                     <div className="p-8 space-y-6">
-                        {/* START VRAAG - Alleen tonen als niet geskipt */}
+                        {/* START VRAAG */}
                         {!skipQuestions && hasQuestions && showStartQuestion && (
                             <div className="space-y-4">
                                 <h2 className="text-lg font-semibold text-gray-700">
                                     {currentQuestion}
                                 </h2>
-                                <div className="space-y-2">
-                                    {currentAnswers.map((answerOption, index) => (
-                                        <div key={index} className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                id={`start-answer-${index}`}
-                                                name="start-answer"
-                                                value={answerOption}
-                                                onChange={(e) => handleAnswerChange(e, index)}
-                                                className="mr-2 w-4 h-4 accent-[#7B5EA7]"
-                                            />
-                                            <label htmlFor={`start-answer-${index}`} className="text-sm text-gray-700">
-                                                {answerOption}
+                                <div className="space-y-3">
+                                    {currentAnswers.map((answerOption, index) => {
+                                        const isSelected = selectedAnswer.index === index + 1;
+                                        const text = answerOption.text || answerOption;
+                                        const icon = answerOption.icon;
+                                        return (
+                                            <label
+                                                key={index}
+                                                htmlFor={`start-answer-${index}`}
+                                                className="flex items-center gap-4 w-full px-4 py-3 rounded-2xl border-2 cursor-pointer transition-all"
+                                                style={{
+                                                    borderColor: isSelected ? '#7B5EA7' : '#D1C4E9',
+                                                    backgroundColor: isSelected ? '#F5F0FF' : '#FFFFFF',
+                                                }}
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    id={`start-answer-${index}`}
+                                                    name="start-answer"
+                                                    value={text}
+                                                    onChange={(e) => handleAnswerChange(e, index)}
+                                                    className="sr-only"
+                                                />
+                                                {icon?.src && (
+                                                    <div
+                                                        className="flex-shrink-0 flex items-center justify-center rounded-xl"
+                                                        style={{ width: '70px', height: '70px', backgroundColor: '#F0E8FF' }}
+                                                    >
+                                                        <img
+                                                            src={icon.src}
+                                                            alt={icon.label}
+                                                            className="object-contain"
+                                                            style={{ width: '50px', height: '50px' }}
+                                                        />
+                                                    </div>
+                                                )}
+                                                <span className="text-base font-semibold text-gray-800">
+                                                    {text}
+                                                </span>
                                             </label>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                                 <button
                                     onClick={handleSubmitStartQuestion}
                                     className="w-full py-2 px-4 bg-[#7B5EA7] text-white rounded-md shadow hover:bg-[#6a4e8e] focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2 transition-colors"
                                 >
-                                    Bevestig en begin met oefening
+                                    Verder
                                 </button>
                             </div>
                         )}
 
-                        {/* GEEN VRAAG MODUS - Alleen als niet geskipt */}
+                        {/* GEEN VRAAG MODUS */}
                         {!skipQuestions && !hasQuestions && showStartQuestion && (
                             <div className="text-center text-gray-500">
                                 <p>Geen vraag voor deze oefening. Je kunt direct beginnen.</p>
@@ -184,7 +214,7 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
                             </div>
                         )}
 
-                        {/* Bericht voor herhaalde oefening */}
+                        {/* Herhaalde oefening melding */}
                         {skipQuestions && (
                             <div className="text-center text-blue-600 bg-blue-50 p-4 rounded-lg">
                                 <p>Je hebt deze oefening vandaag al gedaan.</p>
@@ -198,10 +228,7 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
                                 {/* Uitleg tekst */}
                                 <div
                                     className="p-5 rounded-xl border-2"
-                                    style={{
-                                        backgroundColor: '#F0E8FF',
-                                        borderColor: '#5F5F5F'
-                                    }}
+                                    style={{ backgroundColor: '#F0E8FF', borderColor: '#5F5F5F' }}
                                 >
                                     <p className="text-gray-700 text-sm leading-relaxed">
                                         Zoek een rustige plek om te zitten. Druk op de afspeelknop om de mindfulness audio te starten.
@@ -209,23 +236,17 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
                                     </p>
                                 </div>
 
-                                {/* Titel voor toegankelijkheid */}
                                 <h3 className="text-xl font-semibold text-gray-700 mb-3">
                                     Mindfulness audio
                                 </h3>
 
-                                {/* Audio player - WIT met PAARSE border */}
                                 <div
                                     className="p-6 rounded-xl border-4"
-                                    style={{
-                                        backgroundColor: '#FFFFFF',
-                                        borderColor: '#7B5EA7'
-                                    }}
+                                    style={{ backgroundColor: '#FFFFFF', borderColor: '#7B5EA7' }}
                                 >
                                     <AudioControl AudioName={exercise.audio_file_path} />
                                 </div>
 
-                                {/* Klaar? tekst en knop */}
                                 <div className="text-center space-y-4 pt-2">
                                     <p className="text-gray-600 text-sm">
                                         Klaar? Klik dan op de knop hier onder
@@ -240,28 +261,54 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
                             </div>
                         )}
 
-                        {/* EINDE VRAAG - Alleen tonen als niet geskipt */}
+                        {/* EINDE VRAAG */}
                         {!skipQuestions && hasQuestions && showEndQuestion && !hasAnsweredEnd && (
                             <div className="space-y-4 border-t pt-4">
                                 <h2 className="text-lg font-semibold text-gray-700">
                                     {currentQuestion}
                                 </h2>
-                                <div className="space-y-2">
-                                    {currentAnswers.map((answerOption, index) => (
-                                        <div key={index} className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                id={`end-answer-${index}`}
-                                                name="end-answer"
-                                                value={answerOption}
-                                                onChange={(e) => handleAnswerChange(e, index)}
-                                                className="mr-2 w-4 h-4 accent-[#7B5EA7]"
-                                            />
-                                            <label htmlFor={`end-answer-${index}`} className="text-sm text-gray-700">
-                                                {answerOption}
+                                <div className="space-y-3">
+                                    {currentAnswers.map((answerOption, index) => {
+                                        const isSelected = selectedAnswer.index === index + 1;
+                                        const text = answerOption.text || answerOption;
+                                        const icon = answerOption.icon;
+                                        return (
+                                            <label
+                                                key={index}
+                                                htmlFor={`end-answer-${index}`}
+                                                className="flex items-center gap-4 w-full px-4 py-3 rounded-2xl border-2 cursor-pointer transition-all"
+                                                style={{
+                                                    borderColor: isSelected ? '#7B5EA7' : '#D1C4E9',
+                                                    backgroundColor: isSelected ? '#F5F0FF' : '#FFFFFF',
+                                                }}
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    id={`end-answer-${index}`}
+                                                    name="end-answer"
+                                                    value={text}
+                                                    onChange={(e) => handleAnswerChange(e, index)}
+                                                    className="sr-only"
+                                                />
+                                                {icon?.src && (
+                                                    <div
+                                                        className="flex-shrink-0 flex items-center justify-center rounded-xl"
+                                                        style={{ width: '70px', height: '70px', backgroundColor: '#F0E8FF' }}
+                                                    >
+                                                        <img
+                                                            src={icon.src}
+                                                            alt={icon.label}
+                                                            className="object-contain"
+                                                            style={{ width: '50px', height: '50px' }}
+                                                        />
+                                                    </div>
+                                                )}
+                                                <span className="text-base font-semibold text-gray-800">
+                                                    {text}
+                                                </span>
                                             </label>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                                 <button
                                     onClick={handleSubmitEndQuestion}
@@ -282,7 +329,7 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
                             </div>
                         )}
 
-                        {/* TERUG KNAP */}
+                        {/* TERUG KNOP */}
                         <div className="pt-4">
                             <button
                                 onClick={handleBack}

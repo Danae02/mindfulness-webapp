@@ -14,7 +14,7 @@ const iconOptions = [
 export default function EmoticonPicker({ value, onChange, label = "Kies icoon (optioneel)" }) {
     const [isOpen, setIsOpen] = useState(false);
     const pickerRef = useRef(null);
-    
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (pickerRef.current && !pickerRef.current.contains(event.target)) {

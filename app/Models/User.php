@@ -23,7 +23,8 @@ class User extends Authenticatable
         'password',
         'role_id',
         'team_id',
-        'is_reviewed'
+        'is_reviewed',
+        'research_group_id',
     ];
 
     /**
@@ -86,6 +87,14 @@ class User extends Authenticatable
     public function favoriteExercises()
     {
         return $this->belongsToMany(Exercise::class, 'favorites');
+    }
+
+    /**
+     * De onderzoeksgroep van deze gebruiker (nullable)
+     */
+    public function researchGroup()
+    {
+        return $this->belongsTo(ResearchGroup::class, 'research_group_id');
     }
 
 }
