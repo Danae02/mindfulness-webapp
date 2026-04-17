@@ -1,6 +1,5 @@
 <?php
 
-// UserExerciseLog Model
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,15 +19,20 @@ class UserExerciseLog extends Model
         'completed',
         'feeling_before',
         'feeling_after',
-        'feeling_scale', // Aantal antwoordopties (3, 4, of 5) — voor normalisatie
+        'feeling_scale',
+        'feeling_before_pct',  // ← TOEVOEGEN
+        'feeling_after_pct',   // ← TOEVOEGEN
     ];
 
     protected $casts = [
         'date_time'     => 'datetime',
         'completed'     => 'boolean',
-        'feeling_scale' => 'integer', // nog mee bezig
+        'feeling_scale' => 'integer',
+        'feeling_before_pct' => 'integer',
+        'feeling_after_pct' => 'integer',
     ];
 
+    // Relaties
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -39,16 +43,7 @@ class UserExerciseLog extends Model
         return $this->belongsTo(Exercise::class, 'exercise_id');
     }
 
-    /**
-     * nog mee bezig
-     *
-     * Normaliseer een feeling-waarde naar een percentage (0–100).
-     * Hiermee zijn waarden van 3-schaal en 5-schaal vergelijkbaar.
-     *
-     * Formule: (waarde - 1) / (schaal - 1) * 100
-     * Voorbeeld: waarde 3 op 5-schaal → (3-1)/(5-1)*100 = 50%
-     * Voorbeeld: waarde 2 op 3-schaal → (2-1)/(3-1)*100 = 50%
-     */
+    // Accessors voor genormaliseerde waarden (berekend, niet uit database)
     public function getNormalizedFeelingBeforeAttribute(): ?float
     {
         if ($this->feeling_before === null || $this->feeling_scale <= 1) {
@@ -64,7 +59,6 @@ class UserExerciseLog extends Model
         }
         return round(($this->feeling_after - 1) / ($this->feeling_scale - 1) * 100, 1);
     }
-
 
     public function getNormalizedDifferenceAttribute(): ?float
     {

@@ -99,32 +99,43 @@ class ExerciseController extends Controller
         return response()->json(['success' => false, 'message' => 'Failed to update exercise'], 500);
     }
 
+
     public function submitCompletedLog(Request $request)
     {
-
         $request->validate([
             'user_id'       => 'required|exists:users,id',
             'exercise_id'   => 'required|exists:exercises,id',
-            'feeling_before' => 'nullable|integer|min:1|max:5',
-            'feeling_after'  => 'nullable|integer|min:1|max:5',
-            'feeling_scale'  => 'nullable|integer|min:3|max:5', // Aantal opties dat getoond werd
+            'feeling_before' => 'nullable|integer|min:1|max:10',
+            'feeling_after'  => 'nullable|integer|min:1|max:10',
+            'feeling_scale'  => 'required|integer|min:3|max:10',
+            'date_time'      => 'nullable|date',
         ]);
 
-        $log = UserExerciseLog::create([
-            'user_id'        => $request->user_id,
-            'exercise_id'    => $request->exercise_id,
-            'date_time'      => now(),
-            //'duration_listened' => 0, // Of de juiste waarde als beschikbaar
-            'completed'      => true,
-            'feeling_before' => $request->feeling_before,
-            'feeling_after'  => $request->feeling_after,
+        // Normaliseer naar 0-100 (percentage)
+        $normalize = function($value, $scale) {
+            if ($value === null) return null;
+            // Zet om van 1..scale naar 0..100
+            return round((($value - 1) / ($scale - 1)) * 100);
+        };
 
-            'feeling_scale'  => $request->feeling_scale ?? 5,// Gebruik meegestuurde schaal, of val terug op 5 voor oude logs
+        $normalizedBefore = $normalize($request->feeling_before, $request->feeling_scale);
+        $normalizedAfter = $normalize($request->feeling_after, $request->feeling_scale);
+
+        $log = UserExerciseLog::create([
+            'user_id'           => $request->user_id,
+            'exercise_id'       => $request->exercise_id,
+            'date_time'         => $request->date_time ?? now(),
+            'completed'         => true,
+            'feeling_before'    => $request->feeling_before,      // Originele waarde
+            'feeling_after'     => $request->feeling_after,       // Originele waarde
+            'feeling_scale'     => $request->feeling_scale,       // Aantal opties
+            'feeling_before_pct' => $normalizedBefore,            // Genormaliseerd (0-100)
+            'feeling_after_pct'  => $normalizedAfter,             // Genormaliseerd (0-100)
         ]);
 
         return response()->json([
             'message' => 'Answer submitted successfully.',
-            'log' => $log,
+            'log'     => $log,
         ]);
     }
 }
