@@ -25,13 +25,27 @@ class UserExerciseLogController extends Controller
 //        return response()->json($userExerciseLogs);
 //    }
 
+
     public function index(Request $request)
     {
-        // Pagineren van logs met bijbehorende oefeningen
-        $userExerciseLogs = UserExerciseLog::with('exercise')
-            ->paginate(10); // Geeft 10 resultaten per pagina
+        $query = UserExerciseLog::with(['exercise', 'user'])
+            ->when($request->filled('exercise_id'), function($q) use ($request) {
+                $q->where('exercise_id', $request->exercise_id);
+            })
+            ->when($request->filled('research_group_id'), function($q) use ($request) {
+                $q->whereHas('user', function($u) use ($request) {
+                    $u->where('research_group_id', $request->research_group_id);
+                });
+            })
+            ->when($request->filled('date_from'), function($q) use ($request) {
+                $q->whereDate('date_time', '>=', $request->date_from);
+            })
+            ->when($request->filled('date_to'), function($q) use ($request) {
+                $q->whereDate('date_time', '<=', $request->date_to);
+            })
+            ->orderBy('date_time', 'desc');
 
-        return response()->json($userExerciseLogs);
+        return response()->json($query->paginate(20));
     }
 
 //    public function index()
@@ -77,5 +91,28 @@ class UserExerciseLogController extends Controller
             ->get();
 
         return response()->json($userLogs);
+    }
+
+    public function export(Request $request)
+    {
+        $query = UserExerciseLog::with(['exercise', 'user'])
+            ->when($request->filled('exercise_id'), function ($q) use ($request) {
+                $q->where('exercise_id', $request->exercise_id);
+            })
+            ->when($request->filled('research_group_id'), function ($q) use ($request) {
+                // Filter via de user relatie op research_group_id
+                $q->whereHas('user', function ($u) use ($request) {
+                    $u->where('research_group_id', $request->research_group_id);
+                });
+            })
+            ->when($request->filled('date_from'), function ($q) use ($request) {
+                $q->whereDate('date_time', '>=', $request->date_from);
+            })
+            ->when($request->filled('date_to'), function ($q) use ($request) {
+                $q->whereDate('date_time', '<=', $request->date_to);
+            })
+            ->orderBy('date_time', 'desc');
+
+        return response()->json($query->get());
     }
 }
