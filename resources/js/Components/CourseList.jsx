@@ -2,25 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { Link } from "@inertiajs/react";
 import { usePage } from "@inertiajs/react";
-
-function LockIcon({ className = "w-6 h-6" }) {
-    return (
-        <svg
-            className={className}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-        >
-            <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
-            />
-        </svg>
-    );
-}
+import LockIcon from "@/Icons/LockIcon";
+import HeartIcon from "@/Icons/HeartIcon";
+import { isToday } from "@/Utils/dateUtils";
 
 
 function CourseModal({ course, onClose }) {
@@ -172,7 +156,7 @@ function CourseModal({ course, onClose }) {
                         const exerciseIsFav  = isFavorite(exercise.id);
 
                         if (!isAvailable) {
-                            // niet beschikbare oefening
+                            // Niet beschikbare oefening
                             return (
                                 <div
                                     key={exercise.id}
@@ -213,7 +197,7 @@ function CourseModal({ course, onClose }) {
                             );
                         }
 
-                        //  beschikbare oefening
+                        // Beschikbare oefening
                         return (
                             <div
                                 key={exercise.id}
@@ -274,15 +258,7 @@ function CourseModal({ course, onClose }) {
                                                 : `Voeg ${exercise.exercise_name} toe aan favorieten`
                                         }
                                     >
-                                        <svg
-                                            className="w-4 h-4"
-                                            fill={exerciseIsFav ? "currentColor" : "none"}
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                            aria-hidden="true"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                        </svg>
+                                        <HeartIcon filled={exerciseIsFav} className="w-4 h-4" />
                                         {exerciseIsFav ? "Favoriet ✓" : "Favoriet"}
                                     </button>
                                 </div>
@@ -295,17 +271,6 @@ function CourseModal({ course, onClose }) {
     );
 }
 
-// is YYYY-MM-DD string gelijk aan vandaag?
-function isToday(dateString) {
-    if (!dateString) return false;
-    const today = new Date();
-    const d     = new Date(dateString + "T00:00:00");
-    return (
-        d.getFullYear() === today.getFullYear() &&
-        d.getMonth()    === today.getMonth() &&
-        d.getDate()     === today.getDate()
-    );
-}
 
 export default function CourseList() {
     const [courses,        setCourses]        = useState([]);
@@ -321,9 +286,7 @@ export default function CourseList() {
     }, []);
 
     const handleCardClick = async (course) => {
-        // niet beschikbare cursussen zijn niet klikbaar
         if (!course.available) return;
-
         try {
             const response = await axios.get(route("courses.details", { id: course.id }));
             setSelectedCourse(response.data);
@@ -369,10 +332,9 @@ export default function CourseList() {
 
             <div className="flex flex-col gap-3" role="list" aria-labelledby="courses-heading">
                 {courses.map((course) => {
-                    const isAvailable = course.available !== false; // true als niet opgegeven of expliciet true
+                    const isAvailable = course.available !== false;
 
                     if (!isAvailable) {
-                        // niet beschikbare cursus
                         return (
                             <div
                                 key={course.id}
@@ -407,7 +369,6 @@ export default function CourseList() {
                         );
                     }
 
-                    // Beschikbare cursus
                     return (
                         <div
                             key={course.id}
