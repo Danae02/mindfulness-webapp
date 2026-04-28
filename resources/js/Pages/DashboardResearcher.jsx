@@ -1,7 +1,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import LogDurationToDifference from "@/Components/LogDurationToDifference.jsx";
 import DataExport from "@/Components/DataExport.jsx";
-import GevoelsmetingenDashboard from "@/Components/GevoelsmetingenDashboard.jsx";
+import Feelingsdashboard from "@/Components/Feelingsdashboard.jsx";
 import { useState, useEffect } from "react";
 import ListOfAllDataPoints from "@/Components/ListOfAllDataPoints.jsx";
 
@@ -64,7 +64,7 @@ export default function DashboardResearcher({
                 {/* Main content */}
                 <main className="flex-1 p-4 md:p-6 overflow-x-auto">
                     {view === "gevoelsmetingen" && (
-                        <GevoelsmetingenDashboard
+                        <Feelingsdashboard
                             researchGroups={researchGroups}
                             exercises={exercises}
                         />

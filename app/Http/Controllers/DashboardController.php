@@ -1,9 +1,9 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
 use App\Models\Exercise;
+use App\Models\ResearchGroup;
 use App\Models\ResearchSettings;
 use App\Models\UserExerciseLog;
 use Illuminate\Support\Facades\Auth;
@@ -49,7 +49,6 @@ class DashboardController extends Controller
         $researchSetting = ResearchSettings::where('key_name', 'mode')->first();
         $showSurvey = $researchSetting && $researchSetting->value === 'per_session';
 
-
         // Overige logica
         $exercises = Exercise::all();
         $exerciseCountLastWeek = UserExerciseLog::where('user_id', $userId)
@@ -57,7 +56,10 @@ class DashboardController extends Controller
             ->count();
 
         if ($role === 1) {
-            return Inertia::render('DashboardAdmin', []);
+            return Inertia::render('DashboardAdmin', [
+                'researchGroups' => ResearchGroup::select('id', 'name')->orderBy('name')->get(),
+                'exercises'      => $exercises->map(fn($e) => ['id' => $e->id, 'exercise_name' => $e->exercise_name])->values(),
+            ]);
         } elseif ($role === 2) {
             return Inertia::render('DashboardViewer', [
                 'exerciseCountLastWeek' => $exerciseCountLastWeek,
@@ -68,7 +70,9 @@ class DashboardController extends Controller
             return Inertia::render('DashboardSupervisor', []);
         } elseif ($role === 4) {
             return Inertia::render('DashboardResearcher', [
-                'exerciseNames' => $exercises->pluck('exercise_name')->toArray(),
+                'exerciseNames'  => $exercises->pluck('exercise_name')->toArray(),
+                'exercises'      => $exercises->map(fn($e) => ['id' => $e->id, 'exercise_name' => $e->exercise_name])->values(),
+                'researchGroups' => ResearchGroup::select('id', 'name')->orderBy('name')->get(),
             ]);
         }
         return Inertia::render('Dashboard', []);
@@ -83,4 +87,3 @@ class DashboardController extends Controller
     }
 
 };
-

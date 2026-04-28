@@ -103,15 +103,16 @@ class ExerciseController extends Controller
     public function submitCompletedLog(Request $request)
     {
         $request->validate([
-            'user_id'       => 'required|exists:users,id',
-            'exercise_id'   => 'required|exists:exercises,id',
-            'feeling_before' => 'nullable|integer|min:1|max:10',
-            'feeling_after'  => 'nullable|integer|min:1|max:10',
-            'feeling_scale'  => 'required|integer|min:3|max:10',
-            'date_time'      => 'nullable|date',
+            'user_id'          => 'required|exists:users,id',
+            'exercise_id'      => 'required|exists:exercises,id',
+            'feeling_before'   => 'nullable|integer|min:1|max:10',
+            'feeling_after'    => 'nullable|integer|min:1|max:10',
+            'feeling_scale'    => 'required|integer|min:3|max:10',
+            'session_duration' => 'nullable|integer|min:0',
+            'date_time'        => 'nullable|date',
         ]);
 
-        // Normaliseer naar 0-100 (percentage)
+        // Nieuw idee: normaliseer naar 0-100 (percentage)
         $normalize = function($value, $scale) {
             if ($value === null) return null;
             // Zet om van 1..scale naar 0..100
@@ -131,6 +132,7 @@ class ExerciseController extends Controller
             'feeling_scale'     => $request->feeling_scale,       // Aantal opties
             'feeling_before_pct' => $normalizedBefore,            // Genormaliseerd (0-100)
             'feeling_after_pct'  => $normalizedAfter,             // Genormaliseerd (0-100)
+            'session_duration'   => $request->session_duration ?? 0,   // ← NIEUW
         ]);
 
         return response()->json([

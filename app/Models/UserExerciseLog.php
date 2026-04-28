@@ -20,8 +20,9 @@ class UserExerciseLog extends Model
         'feeling_before',
         'feeling_after',
         'feeling_scale',
-        'feeling_before_pct',  // ← TOEVOEGEN
-        'feeling_after_pct',   // ← TOEVOEGEN
+        'feeling_before_pct',
+        'feeling_after_pct',
+        'session_duration',
     ];
 
     protected $casts = [
@@ -30,6 +31,7 @@ class UserExerciseLog extends Model
         'feeling_scale' => 'integer',
         'feeling_before_pct' => 'integer',
         'feeling_after_pct' => 'integer',
+        'session_duration' => 'integer',
     ];
 
     // Relaties

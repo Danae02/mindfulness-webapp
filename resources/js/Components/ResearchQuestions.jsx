@@ -73,7 +73,126 @@ function StatusMessage({ message, type }) {
     );
 }
 
-// Standaardvraag sectie met emoticons
+function AnswerRow({ index, answer, onChange, showNumber = true }) {
+    return (
+        <div className="flex gap-2 items-center">
+            {showNumber && (
+                <span className="text-sm font-bold text-purple-700 w-5 text-right flex-shrink-0">
+                    {index + 1}
+                </span>
+            )}
+            <div className="flex-1">
+                <input
+                    type="text"
+                    value={answer?.text || ""}
+                    onChange={(e) => onChange(index, "text", e.target.value)}
+                    placeholder={`Antwoord ${index + 1}`}
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                               focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+                />
+            </div>
+            <EmoticonPicker
+                value={answer?.icon || null}
+                onChange={(icon) => onChange(index, "icon", icon)}
+                label={`Kies icoon voor antwoord ${index + 1}`}
+            />
+        </div>
+    );
+}
+
+function AnswersEditor({ answerCount, answers, onAnswerChange }) {
+    if (answerCount !== 5) {
+        // weergave voor 3 of 4 antwoorden
+        return (
+            <div className="space-y-2">
+                {Array.from({ length: answerCount }).map((_, i) => (
+                    <div key={i} className="p-3 border border-gray-100 rounded-lg bg-gray-50">
+                        <AnswerRow index={i} answer={answers[i]} onChange={onAnswerChange} />
+                        {answers[i]?.icon?.src && (
+                            <p className="text-xs text-gray-400 mt-1 ml-7">
+                                Emoticon: {answers[i].icon.label}
+                            </p>
+                        )}
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    // Twee-stappen weergave voor 5 antwoorden
+    //   [0] = Heel slecht  ┐ vervolgscherm "Slecht"
+    //   [1] = Slecht       ┘
+    //   [2] = Neutraal         → direct door
+    //   [3] = Goed         ┐ vervolgscherm "Goed"
+    //   [4] = Heel goed    ┘
+
+    const SubScreen = ({ indices, label, color }) => (
+        <div
+            className="mt-2 rounded-xl p-3 space-y-2 border-2"
+            style={{ backgroundColor: `${color}18`, borderColor: color }}
+        >
+            <div className="flex items-center gap-1.5 mb-1">
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 10 10">
+                    <path d="M2 0 L2 5 Q2 8 5 8" stroke={color} strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                </svg>
+                <span className="text-xs font-semibold" style={{ color }}>Vervolgscherm</span>
+            </div>
+            {indices.map((i) => (
+                <div key={i} className="bg-white rounded-lg p-2.5 border" style={{ borderColor: `${color}40` }}>
+                    <AnswerRow index={i} answer={answers[i]} onChange={onAnswerChange} />
+                    {answers[i]?.icon?.src && (
+                        <p className="text-xs text-gray-400 mt-1 ml-7">Emoticon: {answers[i].icon.label}</p>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+
+    return (
+        <div className="space-y-3">
+            {/* Antwoord 1 globaal slecht */}
+            <div className="p-3 border border-gray-100 rounded-lg bg-gray-50">
+                <AnswerRow index={0} answer={answers[0]} onChange={onAnswerChange} />
+                {answers[0]?.icon?.src && (
+                    <p className="text-xs text-gray-400 mt-1 ml-7">Emoticon: {answers[0].icon.label}</p>
+                )}
+                {/* tweede-scherm: verfijning slecht */}
+                <SubScreen indices={[0, 1]} label="Vervolgscherm" color="#7B5EA7" />
+            </div>
+
+            {/* Antwoord 3; neutraal / middenpunt */}
+            <div className="p-3 border-2 border-dashed rounded-lg" style={{ borderColor: "#6C4092", backgroundColor: "#faf8ff" }}>
+                <AnswerRow index={2} answer={answers[2]} onChange={onAnswerChange} />
+                {answers[2]?.icon?.src && (
+                    <p className="text-xs text-gray-400 mt-1 ml-7">Emoticon: {answers[2].icon.label}</p>
+                )}
+                <div className="flex items-center gap-1.5 mt-2">
+                    <span className="text-lg">🚫</span>
+                    <p className="text-xs text-purple-700 font-medium">
+                        Geen vervolgscherm, middelste optie gaat direct door
+                    </p>
+                </div>
+            </div>
+
+            {/* Antwoord 5: globale goede kant */}
+            <div className="p-3 border border-gray-100 rounded-lg bg-gray-50">
+                <AnswerRow index={4} answer={answers[4]} onChange={onAnswerChange} />
+                {answers[4]?.icon?.src && (
+                    <p className="text-xs text-gray-400 mt-1 ml-7">Emoticon: {answers[4].icon.label}</p>
+                )}
+                {/* tweede-scherm: verfijning goed */}
+                <SubScreen indices={[3, 4]} label="Vervolgscherm" color="#7B5EA7" />
+            </div>
+
+            <p className="text-xs text-gray-400 mt-1 px-1">
+                Bij 5 antwoorden ziet de gebruiker eerst 3 globale opties. Kiest hij de eerste of laatste, dan volgt een tweede verfijningsstap.
+            </p>
+        </div>
+    );
+}
+
+
+//standaard vraag sectie
 function DefaultQuestion() {
     const [question, setQuestion] = useState("");
     const [answers, setAnswers] = useState([]);
@@ -90,7 +209,7 @@ function DefaultQuestion() {
             const count = parsed.length >= 3 ? parsed.length : 3;
             setAnswerCount(count);
 
-            const formattedAnswers = parsed.length ? parsed : Array(count).fill({ text: "", icon: null });
+            const formattedAnswers = parsed.length ? parsed : Array(5).fill({ text: "", icon: null });
             setAnswers(formattedAnswers);
         }).catch(() => {
             setStatus({ message: "Kon instellingen niet laden.", type: "error" });
@@ -100,11 +219,20 @@ function DefaultQuestion() {
     const handleAnswerChange = (index, field, value) => {
         setAnswers((prev) => {
             const updated = [...prev];
-            if (!updated[index]) {
-                updated[index] = { text: "", icon: null };
-            }
-            updated[index][field] = value;
+            if (!updated[index]) updated[index] = { text: "", icon: null };
+
+            updated[index] = { ...updated[index], [field]: value };
             return updated;
+        });
+    };
+
+    const handleAnswerCountChange = (n) => {
+        setAnswerCount(n);
+
+        setAnswers((prev) => {
+            const copy = [...prev];
+            while (copy.length < n) copy.push({ text: "", icon: null });
+            return copy;
         });
     };
 
@@ -120,7 +248,7 @@ function DefaultQuestion() {
         const withIcon = answersToSave.filter(a => a?.icon?.src).length;
         if (withIcon > 0 && withIcon < answerCount) {
             setStatus({
-                message: `Voeg bij alle antwoorden een emoticon toe, of bij geen enkel. Nu ${withIcon} van de ${answerCount} antwoorden heeft een emoticon.`,
+                message: `Voeg bij alle antwoorden een emoticon toe, of bij geen enkel. Nu heeft ${withIcon} van de ${answerCount} antwoorden een emoticon.`,
                 type: "error"
             });
             return;
@@ -147,7 +275,6 @@ function DefaultQuestion() {
 
             {!isEditing ? (
                 <div className="relative border-2 rounded-xl p-6 pt-8 mt-4" style={{ borderColor: "#6C4092" }}>
-                    {/* Pilvormige badge in de border */}
                     <div className="absolute -top-3 left-4">
                         <div className="text-white text-sm font-semibold px-4 py-1 rounded-full" style={{ backgroundColor: "#6C4092" }}>
                             Standaardvraag
@@ -164,11 +291,7 @@ function DefaultQuestion() {
                         {answers.slice(0, answerCount).map((a, i) => (
                             <div key={i} className="flex flex-col items-center gap-1">
                                 {a?.icon?.src ? (
-                                    <img
-                                        src={a.icon.src}
-                                        alt={a.icon.label}
-                                        className="w-8 h-8 object-contain"
-                                    />
+                                    <img src={a.icon.src} alt={a.icon.label} className="w-8 h-8 object-contain" />
                                 ) : (
                                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium" style={{ backgroundColor: "#6C4092" }}>
                                         {String.fromCharCode(65 + i)}
@@ -202,7 +325,8 @@ function DefaultQuestion() {
                         required
                     />
 
-                    <div className="mb-3">
+                    {/* Aantal antwoorden selector */}
+                    <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Aantal antwoorden
                         </label>
@@ -211,7 +335,7 @@ function DefaultQuestion() {
                                 <button
                                     key={n}
                                     type="button"
-                                    onClick={() => setAnswerCount(n)}
+                                    onClick={() => handleAnswerCountChange(n)}
                                     className={`px-3 py-1 rounded-lg text-sm font-medium border transition-colors
                                         ${answerCount === n
                                         ? "text-white border-transparent"
@@ -223,45 +347,26 @@ function DefaultQuestion() {
                                 </button>
                             ))}
                         </div>
-                        <p className="text-xs text-gray-400 mt-1">
-                            Kies het aantal antwoordopties (3-5)
-                        </p>
+                        {answerCount === 5 && (
+                            <p className="text-xs text-purple-600 mt-1 font-medium">
+                                Bij 5 opties ziet de gebruiker een twee-stappen vraag.
+                            </p>
+                        )}
                     </div>
 
-                    <p className="text-sm font-medium text-gray-700 mb-2">Antwoorden</p>
-                    {Array.from({ length: answerCount }).map((_, i) => (
-                        <div key={i} className="mb-3 p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <div className="flex gap-2 items-center">
-                                <div className="flex-1">
-                                    <input
-                                        type="text"
-                                        value={answers[i]?.text || ""}
-                                        onChange={(e) => handleAnswerChange(i, "text", e.target.value)}
-                                        placeholder={`Antwoord ${i + 1}`}
-                                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
-                                                   focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
-                                    />
-                                </div>
-                                <EmoticonPicker
-                                    value={answers[i]?.icon || null}
-                                    onChange={(icon) => handleAnswerChange(i, "icon", icon)}
-                                    label={`Kies icoon voor antwoord ${i + 1}`}
-                                />
-                            </div>
-                            {answers[i]?.icon?.src && (
-                                <p className="text-xs text-gray-400 mt-1">
-                                    Geselecteerde emoticon: {answers[i].icon.label}
-                                </p>
-                            )}
-                        </div>
-                    ))}
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                        Antwoordopties instellen
+                        <span className="text-red-500 ml-1">*</span>
+                    </p>
+                    <AnswersEditor
+                        answerCount={answerCount}
+                        answers={answers}
+                        onAnswerChange={handleAnswerChange}
+                    />
 
-                    <div className="flex gap-2 mt-2">
-                        <div className="flex gap-2 mt-2">
-                            <PurpleButton onClick={handleSave}>Opslaan</PurpleButton>
-                            <PurpleButton variant="secondary"
-                                          onClick={() => setIsEditing(false)}>Annuleren</PurpleButton>
-                        </div>
+                    <div className="flex gap-2 mt-4">
+                        <PurpleButton onClick={handleSave}>Opslaan</PurpleButton>
+                        <PurpleButton variant="secondary" onClick={() => setIsEditing(false)}>Annuleren</PurpleButton>
                     </div>
                 </div>
             )}
@@ -269,8 +374,9 @@ function DefaultQuestion() {
     );
 }
 
-// Formulier voor één groep (aanmaken of bewerken)
-function GroupForm({initial, onSave, onCancel}) {
+
+// formulier voor aanmaken/bewerken van een onderzoeksgroep
+function GroupForm({ initial, onSave, onCancel }) {
     const [name, setName] = useState(initial?.name ?? "");
     const [question, setQuestion] = useState(initial?.question ?? "");
     const [answerCount, setAnswerCount] = useState(
@@ -278,11 +384,9 @@ function GroupForm({initial, onSave, onCancel}) {
     );
     const [answers, setAnswers] = useState(() => {
         const base = initial?.answers ?? [];
-        return Array(5).fill("").map((_, i) => {
+        return Array(5).fill(null).map((_, i) => {
             const val = base[i];
-            if (typeof val === 'string') {
-                return { text: val, icon: null };
-            }
+            if (typeof val === 'string') return { text: val, icon: null };
             return val ?? { text: "", icon: null };
         });
     });
@@ -292,11 +396,18 @@ function GroupForm({initial, onSave, onCancel}) {
     const handleAnswerChange = (i, field, value) => {
         setAnswers((prev) => {
             const updated = [...prev];
-            if (!updated[i]) {
-                updated[i] = { text: "", icon: null };
-            }
-            updated[i][field] = value;
+            if (!updated[i]) updated[i] = { text: "", icon: null };
+            updated[i] = { ...updated[i], [field]: value };
             return updated;
+        });
+    };
+
+    const handleAnswerCountChange = (n) => {
+        setAnswerCount(n);
+        setAnswers((prev) => {
+            const copy = [...prev];
+            while (copy.length < n) copy.push({ text: "", icon: null });
+            return copy;
         });
     };
 
@@ -304,7 +415,6 @@ function GroupForm({initial, onSave, onCancel}) {
         if (!name.trim()) { setError("Geef de groep een naam."); return; }
 
         const answersToSave = answers.slice(0, answerCount);
-
         const emptyCount = answersToSave.filter(a => !a?.text?.trim()).length;
         if (emptyCount > 0) {
             setError(`Vul alle ${answerCount} antwoorden in voordat je opslaat.`);
@@ -348,7 +458,7 @@ function GroupForm({initial, onSave, onCancel}) {
                 placeholder="Bijv. Hoe voelde je je tijdens de oefening?"
             />
 
-            <div className="mb-3">
+            <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                     Aantal antwoorden
                 </label>
@@ -356,48 +466,37 @@ function GroupForm({initial, onSave, onCancel}) {
                     {[3, 4, 5].map((n) => (
                         <button
                             key={n}
-                            onClick={() => setAnswerCount(n)}
+                            type="button"
+                            onClick={() => handleAnswerCountChange(n)}
                             className={`px-3 py-1 rounded-lg text-sm font-medium border transition-colors
                                 ${answerCount === n
-                                ? "bg-purple-700 text-white border-purple-700"
+                                ? "text-white border-transparent"
                                 : "bg-white text-gray-700 border-gray-300 hover:border-purple-400"
                             }`}
+                            style={answerCount === n ? { backgroundColor: "#6C4092" } : {}}
                         >
                             {n}
                         </button>
                     ))}
                 </div>
+                {answerCount === 5 && (
+                    <p className="text-xs text-purple-600 mt-1 font-medium">
+                        Bij 5 opties ziet de gebruiker een twee-stappen vraag.
+                    </p>
+                )}
             </div>
 
-            <p className="text-sm font-medium text-gray-700 mb-2">Antwoorden</p>
-            {Array.from({ length: answerCount }).map((_, i) => (
-                <div key={i} className="mb-3 p-3 border border-gray-100 rounded-lg bg-gray-50">
-                    <div className="flex gap-2 items-center">
-                        <div className="flex-1">
-                            <input
-                                type="text"
-                                value={answers[i]?.text || ""}
-                                onChange={(e) => handleAnswerChange(i, "text", e.target.value)}
-                                placeholder={`Antwoord ${i + 1}`}
-                                className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
-                                           focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
-                            />
-                        </div>
-                        <EmoticonPicker
-                            value={answers[i]?.icon || null}
-                            onChange={(icon) => handleAnswerChange(i, "icon", icon)}
-                            label={`Kies icoon voor antwoord ${i + 1}`}
-                        />
-                    </div>
-                    {answers[i]?.icon?.src && (
-                        <p className="text-xs text-gray-400 mt-1">
-                            Geselecteerde emoticon: {answers[i].icon.label}
-                        </p>
-                    )}
-                </div>
-            ))}
+            <p className="text-sm font-medium text-gray-700 mb-2">
+                Antwoordopties instellen
+                <span className="text-red-500 ml-1">*</span>
+            </p>
+            <AnswersEditor
+                answerCount={answerCount}
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+            />
 
-            <div className="flex gap-2 mt-3">
+            <div className="flex gap-2 mt-4">
                 <PurpleButton onClick={handleSubmit} disabled={saving}>
                     {saving ? "Opslaan…" : "Opslaan"}
                 </PurpleButton>
@@ -408,12 +507,12 @@ function GroupForm({initial, onSave, onCancel}) {
 }
 
 
-// Gebruikersbeheer binnen een groep
+// gebruikersbeheer binnen een groep (ongewijzigd)
 function GroupMembers({ group, allUsers, onAddUser, onRemoveUser }) {
     const [selectedUserId, setSelectedUserId] = useState("");
 
     const available = allUsers.filter(
-        (u) => u.research_group_id !== group.id && u.role_id !== 1 // geen admins
+        (u) => u.research_group_id !== group.id && u.role_id !== 1
     );
 
     const handleAdd = () => {
@@ -425,7 +524,6 @@ function GroupMembers({ group, allUsers, onAddUser, onRemoveUser }) {
     return (
         <div className="mt-3 pt-3 border-t border-purple-100">
             <p className="text-sm font-medium text-gray-700 mb-2">Leden</p>
-
             {group.users?.length > 0 ? (
                 <ul className="space-y-1 mb-3">
                     {group.users.map((u) => (
@@ -458,16 +556,14 @@ function GroupMembers({ group, allUsers, onAddUser, onRemoveUser }) {
                             <option key={u.id} value={u.id}>{u.name}</option>
                         ))}
                     </select>
-                    <PurpleButton onClick={handleAdd} disabled={!selectedUserId}>
-                        Toevoegen
-                    </PurpleButton>
+                    <PurpleButton onClick={handleAdd} disabled={!selectedUserId}>Toevoegen</PurpleButton>
                 </div>
             )}
         </div>
     );
 }
 
-// Één groep
+
 function GroupCard({ group, allUsers, onUpdated, onDeleted, onAddUser, onRemoveUser }) {
     const [isEditing, setIsEditing] = useState(false);
     const [showMembers, setShowMembers] = useState(false);
@@ -502,17 +598,11 @@ function GroupCard({ group, allUsers, onUpdated, onDeleted, onAddUser, onRemoveU
                             ) : (
                                 <p className="text-sm text-gray-400 italic">Geen vraag ingesteld</p>
                             )}
-                            <p className="text-xs text-gray-400 mt-2">
-                                {group.users?.length ?? 0} leden
-                            </p>
+                            <p className="text-xs text-gray-400 mt-2">{group.users?.length ?? 0} leden</p>
                         </div>
                         <div className="flex gap-2 flex-shrink-0">
-                            <PurpleButton variant="secondary" onClick={() => setIsEditing(true)}>
-                                Bewerken
-                            </PurpleButton>
-                            <PurpleButton variant="danger" onClick={handleDelete}>
-                                Verwijderen
-                            </PurpleButton>
+                            <PurpleButton variant="secondary" onClick={() => setIsEditing(true)}>Bewerken</PurpleButton>
+                            <PurpleButton variant="danger" onClick={handleDelete}>Verwijderen</PurpleButton>
                         </div>
                     </div>
 
@@ -538,7 +628,7 @@ function GroupCard({ group, allUsers, onUpdated, onDeleted, onAddUser, onRemoveU
         </div>
     );
 }
-// Hoofdcomponent
+
 export default function ResearchQuestions() {
     const [groups, setGroups] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
@@ -568,7 +658,6 @@ export default function ResearchQuestions() {
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
-    // Groep aanmaken
     const handleCreateGroup = async (data) => {
         const res = await axios.post(route("researchgroups.store"), data);
         setGroups((prev) => [...prev, res.data]);
@@ -576,26 +665,21 @@ export default function ResearchQuestions() {
         flash("Groep aangemaakt.");
     };
 
-    // Groep bijwerken
     const handleGroupUpdated = (updated) => {
         setGroups((prev) => prev.map((g) => (g.id === updated.id ? updated : g)));
         flash("Groep opgeslagen.");
     };
 
-    // Groep verwijderen
     const handleGroupDeleted = (id) => {
         setGroups((prev) => prev.filter((g) => g.id !== id));
-        // Ontkoppel ook in de lokale gebruikerslijst
         setAllUsers((prev) =>
             prev.map((u) => u.research_group_id === id ? { ...u, research_group_id: null } : u)
         );
         flash("Groep verwijderd.");
     };
 
-    // Gebruiker toevoegen aan groep
     const handleAddUser = async (groupId, userId) => {
         await axios.post(route("researchgroups.addUser", groupId), { user_id: userId });
-        // Update lokale state: koppel gebruiker aan groep
         setAllUsers((prev) =>
             prev.map((u) => u.id === userId ? { ...u, research_group_id: groupId } : u)
         );
@@ -609,7 +693,6 @@ export default function ResearchQuestions() {
         flash("Gebruiker toegevoegd.");
     };
 
-    // Gebruiker verwijderen uit groep
     const handleRemoveUser = async (groupId, userId) => {
         await axios.delete(route("researchgroups.removeUser", { groupId, userId }));
         setAllUsers((prev) =>
@@ -624,8 +707,6 @@ export default function ResearchQuestions() {
         flash("Gebruiker losgekoppeld.");
     };
 
-    // pagina
-
     return (
         <div className="max-w-2xl mx-auto px-4 py-6">
             <h1 className="text-3xl font-bold text-purple-900 mb-2">Onderzoeksvragen</h1>
@@ -637,7 +718,6 @@ export default function ResearchQuestions() {
             <SectionCard title="Standaardvraag">
                 <DefaultQuestion />
             </SectionCard>
-
 
             <SectionCard title="Onderzoeksgroepen">
                 <p className="text-sm text-gray-500 mb-4">
@@ -651,7 +731,6 @@ export default function ResearchQuestions() {
                         {groups.length === 0 && (
                             <p className="text-sm text-gray-400 italic mb-4">Nog geen groepen aangemaakt.</p>
                         )}
-
                         {groups.map((group) => (
                             <GroupCard
                                 key={group.id}
@@ -663,7 +742,6 @@ export default function ResearchQuestions() {
                                 onRemoveUser={handleRemoveUser}
                             />
                         ))}
-
                         {showNewGroupForm ? (
                             <GroupForm
                                 onSave={handleCreateGroup}

@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
 import PaginatedDataTable from "@/Components/PaginatedDataTable.jsx";
 
-export default function ListOfAllDataPoints() {
-    return(
-        <>
-            <PaginatedDataTable linkForPagination="/logs"/>
-        </>
-    )
+export default function ListOfAllDataPoints({ researchGroups = [], exercises = [] }) {
+    return (
+        <PaginatedDataTable
+            linkForPagination="/logs"
+            researchGroups={researchGroups}
+            exercises={exercises}
+        />
+    );
 }
-
