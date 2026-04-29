@@ -4,9 +4,10 @@ import { Head } from "@inertiajs/react";
 import ProfileOverview from "@/Components/ProfileOverview.jsx";
 import CourseList from "@/Components/CourseList.jsx";
 import AccessibilityButton from "@/Components/AccessibilityButton";
-// import axios from "axios"; // Uitgecommentarieerd - niet meer nodig voor survey
+import NextExerciseBanner from "@/Components/Nextexercisebanner.jsx";
 
-export default function DashboardViewer({ exerciseCountLastWeek, showSurvey }) {
+export default function DashboardViewer({ exerciseCountLastWeek, showSurvey, nextExercise, completedTodayIds }) {
+// export default function DashboardViewer({ exerciseCountLastWeek, showSurvey }) {
     // geen sessie vragen meer
     // const [question, setQuestion] = useState("");
     // const [answers, setAnswers] = useState([]);
@@ -133,6 +134,7 @@ export default function DashboardViewer({ exerciseCountLastWeek, showSurvey }) {
                             border: '1px solid #5F5F5F'
                         }}
                     >
+                        <NextExerciseBanner nextExercise={nextExercise} completedTodayIds={completedTodayIds} />
                         <CourseList />
                     </div>
                 </div>

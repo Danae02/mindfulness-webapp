@@ -17,7 +17,7 @@ class CourseController extends Controller
     {
         $allCourses = Course::with('exercises')->orderBy('id')->get();
 
-        // Haal in één query alle exercise_ids op die deze user ooit voltooid heeft
+        // haal in één query alle exercise_ids op die deze user ooit voltooid heeft
         $allExerciseIds = $allCourses->flatMap(fn($c) => $c->exercises->pluck('id'));
 
         $completedExerciseIds = UserExerciseLog::where('user_id', $userId)
@@ -39,7 +39,7 @@ class CourseController extends Controller
                 $availabilityMap[$course->id] = $previousIsAvailableAndComplete;
             }
 
-            // Bepaal of de cursus volledig afgerond is
+            // Bepaal of de cursus afgerond is
             if ($availabilityMap[$course->id]) {
                 $exerciseIds = $course->exercises->pluck('id');
 
@@ -143,10 +143,33 @@ class CourseController extends Controller
         return response()->json(['message' => 'Course deleted successfully!']);
     }
 
-    //regels:
-    //   - Als de cursus niet beschikbaar is alles op slot
-    //   - Oefening 1 (index 0) van een beschikbare cursus: altijd open
-    //   - Oefening N: beschikbaar als oefening N-1 voltooid is
+    // Helper om een leesbaar label te maken op basis van het aantal dagen verschil
+    private function buildAvailableLabel(string $availableFrom, string $today): string
+    {
+        $availableFromCarbon = \Carbon\Carbon::parse($availableFrom);
+        $todayCarbon         = \Carbon\Carbon::parse($today);
+        $diffDays            = $todayCarbon->diffInDays($availableFromCarbon);
+
+        if ($diffDays === 1) {
+            return 'Morgen beschikbaar';
+        } elseif ($diffDays <= 6) {
+            $days = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
+            return 'Beschikbaar op ' . $days[$availableFromCarbon->dayOfWeek];
+        } else {
+            $months = [
+                1 => 'januari', 2 => 'februari',  3 => 'maart',    4 => 'april',
+                5 => 'mei',     6 => 'juni',       7 => 'juli',     8 => 'augustus',
+                9 => 'september', 10 => 'oktober', 11 => 'november', 12 => 'december',
+            ];
+            return 'Beschikbaar op ' . $availableFromCarbon->day . ' ' . $months[$availableFromCarbon->month];
+        }
+    }
+
+    // regels:
+    //   - Als cursus niet beschikbaar is: alles op slot
+    //   - Oefening 1 (0) van cursus 1 (index 0): altijd direct beschikbaar
+    //   - Oefening 1 (0) van cursus N (N > 0): beschikbaar de dag na afronden van de laatste oefening van de vorige cursus (zodat er altijd maar 1 oefening per dag vrijkomt, ook over cursusgrenzen heen)
+    //   - Oefening N binnen een cursus: beschikbaar de dag na afronden van oefening N-1
     //   - Eerder vrijgekomen oefeningen blijven altijd beschikbaar
     public function getCourseAvailability($id)
     {
@@ -158,6 +181,7 @@ class CourseController extends Controller
         $userId = auth()->id();
 
         // Stap 1: is de cursus beschikbaar?
+        $allCourses        = Course::with('exercises')->orderBy('id')->get();
         $availabilityMap   = $this->buildCourseAvailabilityMap($userId);
         $courseIsAvailable = $availabilityMap[$course->id] ?? false;
 
@@ -173,7 +197,7 @@ class CourseController extends Controller
             return response()->json($result);
         }
 
-        // Stap 2: cursus beschikbaar
+        // Stap 2: cursus beschikbaar en haal completion dates op voor oefeningen in deze cursus
         $exerciseIds = $course->exercises->pluck('id');
 
         $completionDates = UserExerciseLog::where('user_id', $userId)
@@ -183,20 +207,81 @@ class CourseController extends Controller
             ->groupBy('exercise_id')
             ->pluck('first_completed_date', 'exercise_id');
 
-        $today  = now()->toDateString();
-        $result = [];
+        $today        = now()->toDateString();
+        $courseIndex  = $allCourses->search(fn($c) => $c->id === $course->id);
+        $result       = [];
 
         foreach ($course->exercises as $index => $exercise) {
+
+            // Eerste oefening van de cursus
             if ($index === 0) {
-                $result[] = [
-                    'exercise_id'     => $exercise->id,
-                    'available'       => true,
-                    'available_from'  => null,
-                    'available_label' => null,
-                ];
+
+                // Eerste oefening van de eerste cursus: altijd direct beschikbaar
+                if ($courseIndex === 0) {
+                    $result[] = [
+                        'exercise_id'     => $exercise->id,
+                        'available'       => true,
+                        'available_from'  => null,
+                        'available_label' => null,
+                    ];
+                    continue;
+                }
+
+                // Eerste oefening van een latere cursus: beschikbaar de dag n de laatst oefening van de vorige cursus (OOK +1 dag regel)
+                $previousCourse       = $allCourses[$courseIndex - 1];
+                $lastExerciseOfPrev   = $previousCourse->exercises->last();
+
+                if (!$lastExerciseOfPrev) {
+                    // Vorige cursus heeft geen oefeningen: meteen beschikbaar
+                    $result[] = [
+                        'exercise_id'     => $exercise->id,
+                        'available'       => true,
+                        'available_from'  => null,
+                        'available_label' => null,
+                    ];
+                    continue;
+                }
+
+                // Haal de completion date van de laatste oefening van de vorige cursus op
+                $prevLastCompletedDate = UserExerciseLog::where('user_id', $userId)
+                    ->where('exercise_id', $lastExerciseOfPrev->id)
+                    ->where('completed', true)
+                    ->selectRaw('MIN(DATE(date_time)) as first_completed_date')
+                    ->value('first_completed_date');
+
+                if ($prevLastCompletedDate === null) {
+                    // Vorige cursus nog niet afgerond (zou eigenlijk niet kunnenn want buildCourseAvailabilityMap checkt dit al, maar voor zekerheid)
+                    $result[] = [
+                        'exercise_id'     => $exercise->id,
+                        'available'       => false,
+                        'available_from'  => null,
+                        'available_label' => 'Voltooi eerst de vorige cursus',
+                    ];
+                    continue;
+                }
+
+                $availableFrom = \Carbon\Carbon::parse($prevLastCompletedDate)->addDay()->toDateString();
+
+                if ($availableFrom <= $today) {
+                    $result[] = [
+                        'exercise_id'     => $exercise->id,
+                        'available'       => true,
+                        'available_from'  => $availableFrom,
+                        'available_label' => null,
+                    ];
+                } else {
+                    $result[] = [
+                        'exercise_id'     => $exercise->id,
+                        'available'       => false,
+                        'available_from'  => $availableFrom,
+                        'available_label' => $this->buildAvailableLabel($availableFrom, $today),
+                    ];
+                }
+
                 continue;
             }
 
+            //Overige oefeningen binnen de cursus
             $previousExerciseId = $course->exercises[$index - 1]->id;
             $prevCompletedDate  = $completionDates[$previousExerciseId] ?? null;
 
@@ -210,7 +295,6 @@ class CourseController extends Controller
                 continue;
             }
 
-            // Beschikbaar de dag na afronden van oefening
             $availableFrom = \Carbon\Carbon::parse($prevCompletedDate)->addDay()->toDateString();
 
             if ($availableFrom <= $today) {
@@ -221,29 +305,11 @@ class CourseController extends Controller
                     'available_label' => null,
                 ];
             } else {
-                $availableFromCarbon = \Carbon\Carbon::parse($availableFrom);
-                $todayCarbon         = \Carbon\Carbon::parse($today);
-                $diffDays            = $todayCarbon->diffInDays($availableFromCarbon);
-
-                if ($diffDays === 1) {
-                    $label = 'Morgen beschikbaar';
-                } elseif ($diffDays <= 6) {
-                    $days  = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
-                    $label = 'Beschikbaar op ' . $days[$availableFromCarbon->dayOfWeek];
-                } else {
-                    $months = [
-                        1 => 'januari', 2 => 'februari',  3 => 'maart',    4 => 'april',
-                        5 => 'mei',     6 => 'juni',       7 => 'juli',     8 => 'augustus',
-                        9 => 'september', 10 => 'oktober', 11 => 'november', 12 => 'december',
-                    ];
-                    $label = 'Beschikbaar op ' . $availableFromCarbon->day . ' ' . $months[$availableFromCarbon->month];
-                }
-
                 $result[] = [
                     'exercise_id'     => $exercise->id,
                     'available'       => false,
                     'available_from'  => $availableFrom,
-                    'available_label' => $label,
+                    'available_label' => $this->buildAvailableLabel($availableFrom, $today),
                 ];
             }
         }

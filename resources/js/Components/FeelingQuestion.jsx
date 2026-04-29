@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import AnswerOption from './AnswerOption';
+import AnswerOption from "@/Components/AnswerOption.jsx";
 
 export default function FeelingQuestion({ question, answers, namePrefix, onConfirm }) {
     const isTwoStep = answers.length === 5;
 
-    // Stap 1: "Slecht" | "Neutraal" | "Goed"
+    // Stap 1: "Slecht", "Neutraal",  "Goed"
     const [globalChoice, setGlobalChoice] = useState(null);
     // Stap 2: verfijning
     const [refinedIndex, setRefinedIndex] = useState(null);
@@ -15,7 +15,7 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
     // Stap 1: kies globaal
     const handleGlobalChoice = (choice, directIndex) => {
         if (choice === 'neutral') {
-            // Neutraal = index 2 (1-based: 3) → direct bevestigen
+            // Neutraal = index 2 (1-based: 3) dus direct bevestigen
             onConfirm(directIndex + 1);
         } else {
             setGlobalChoice(choice);
@@ -32,7 +32,7 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
             alert('Selecteer een antwoord voordat je verdergaat.');
             return;
         }
-        onConfirm(refinedIndex + 1); // 1-based waarde
+        onConfirm(refinedIndex + 1);
     };
 
     // enkelvoudig bevestigen

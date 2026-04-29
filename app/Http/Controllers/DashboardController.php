@@ -6,6 +6,7 @@ use App\Models\Exercise;
 use App\Models\ResearchGroup;
 use App\Models\ResearchSettings;
 use App\Models\UserExerciseLog;
+use App\Services\ExerciseAvailabilityService;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -43,14 +44,13 @@ class DashboardController extends Controller
 
     public function index()
     {
-        $role = Auth::user()->role_id;
+        $role   = Auth::user()->role_id;
         $userId = Auth::id();
 
         $researchSetting = ResearchSettings::where('key_name', 'mode')->first();
-        $showSurvey = $researchSetting && $researchSetting->value === 'per_session';
+        $showSurvey      = $researchSetting && $researchSetting->value === 'per_session';
 
-        // Overige logica
-        $exercises = Exercise::all();
+        $exercises             = Exercise::all();
         $exerciseCountLastWeek = UserExerciseLog::where('user_id', $userId)
             ->where('date_time', '>=', now()->subWeek())
             ->count();
@@ -61,10 +61,25 @@ class DashboardController extends Controller
                 'exercises'      => $exercises->map(fn($e) => ['id' => $e->id, 'exercise_name' => $e->exercise_name])->values(),
             ]);
         } elseif ($role === 2) {
+            // Gebruik de service om de juiste volgende oefening te bepalen, rekening houdend met beschikbaarheid en de +1 dag regel
+            $availabilityService = new ExerciseAvailabilityService();
+            $nextExercise        = $availabilityService->getNextExerciseForUser($userId);
+
+            // Haal op welke oefeningen de gebruiker vandaag al heeft afgerond
+            $completedTodayIds = UserExerciseLog::where('user_id', $userId)
+                ->whereDate('date_time', today())
+                ->where('completed', true)
+                ->pluck('exercise_id')
+                ->values();
+
             return Inertia::render('DashboardViewer', [
                 'exerciseCountLastWeek' => $exerciseCountLastWeek,
-                'exercises' => $exercises,
-                'showSurvey' => $showSurvey,
+                'exercises'             => $exercises,
+                'showSurvey'            => $showSurvey,
+                'nextExercise'          => $nextExercise ?
+                    ['id'            => $nextExercise->id,
+                    'exercise_name' => $nextExercise->exercise_name, ] : null,
+                'completedTodayIds'     => $completedTodayIds,
             ]);
         } elseif ($role === 3) {
             return Inertia::render('DashboardSupervisor', []);
@@ -75,15 +90,16 @@ class DashboardController extends Controller
                 'researchGroups' => ResearchGroup::select('id', 'name')->orderBy('name')->get(),
             ]);
         }
+
         return Inertia::render('Dashboard', []);
     }
 
-    public function medianDataForResearchers() {
+    public function medianDataForResearchers()
+    {
         $exerciseLogs = UserExerciseLog::all();
 
         dd($exerciseLogs->where('exercise_id', 1)->where("completed", 1)->count());
 
 //        return $timesOneExerciseCompleted;
     }
-
-};
+}
