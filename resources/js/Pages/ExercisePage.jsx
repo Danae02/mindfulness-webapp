@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import AudioControl from "@/Components/AudioControl.jsx";
+import AudioButton from "@/Components/AudioButton.jsx";
 import FeelingQuestion from "@/Components/FeelingQuestion.jsx";
 import CompletionScreen from "@/Components/CompletionScreen.jsx";
 import axios from 'axios';
@@ -189,6 +190,15 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
                         {/* AUDIO SECTIE */}
                         {((!skipQuestions && !showStartQuestion) || skipQuestions) && !isCompleted && (
                             <div className="space-y-6">
+                                {/* instructie audio */}
+                                <div className="flex items-center gap-3 p-4 rounded-xl bg-purple-50 border border-purple-200">
+                                    <span className="text-sm text-gray-600">Beluister de instructie:</span>
+                                    <AudioButton
+                                        audioFile="/audio/ElevenLabs_instructie_ oefening.mp3"
+                                        label="Lees voor"
+                                    />
+                                </div>
+
                                 <div
                                     className="p-5 rounded-xl border-2"
                                     style={{ backgroundColor: '#F0E8FF', borderColor: '#5F5F5F' }}
@@ -226,6 +236,19 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
                                     namePrefix="end-answer"
                                     onConfirm={handleConfirmEnd}
                                 />
+                            </div>
+                        )}
+
+                        {/* toon terugknop na voltooiing */}
+                        {isCompleted && !showEndQuestion && !showCompletion && (
+                            <div className="text-center space-y-4 border-t pt-6">
+                                <p className="text-green-600 font-semibold">✓ Oefening voltooid!</p>
+                                <button
+                                    onClick={handleBack}
+                                    className="w-full py-3 px-4 bg-[#7B5EA7] text-white font-semibold rounded-xl shadow hover:bg-[#6a4e8e] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200"
+                                >
+                                    Terug naar dashboard
+                                </button>
                             </div>
                         )}
                     </div>
