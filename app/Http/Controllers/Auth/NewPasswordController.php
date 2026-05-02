@@ -35,9 +35,18 @@ class NewPasswordController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'token'    => 'required',
+            'email'    => 'required|email',
+            'password' => ['required', 'confirmed',
+                \Illuminate\Validation\Rules\Password::min(8)
+                    ->mixedCase()->numbers()->symbols()
+            ],
+        ], [
+            'password.min'       => 'Wachtwoord moet minimaal 8 tekens bevatten.',
+            'password.mixed'     => 'Wachtwoord moet minimaal 1 hoofdletter en 1 kleine letter bevatten.',
+            'password.numbers'   => 'Wachtwoord moet minimaal 1 cijfer bevatten.',
+            'password.symbols'   => 'Wachtwoord moet minimaal 1 speciaal teken bevatten (bijv. !@#$%).',
+            'password.confirmed' => 'De wachtwoorden komen niet overeen.',
         ]);
 
         // Here we will attempt to reset the user's password. If it is successful we

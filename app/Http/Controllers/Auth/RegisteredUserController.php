@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\EmailEncryptionService;
@@ -35,9 +36,24 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|lowercase|email|max:255',
+            'password' => ['required', 'confirmed',
+                \Illuminate\Validation\Rules\Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+            ],
+        ], [
+            // Nederlandse berichten
+            'name.required'          => 'Naam is verplicht.',
+            'email.required'         => 'E-mailadres is verplicht.',
+            'email.email'            => 'Voer een geldig e-mailadres in.',
+            'password.min'           => 'Wachtwoord moet minimaal 8 tekens bevatten.',
+            'password.mixed'         => 'Wachtwoord moet minimaal 1 hoofdletter en 1 kleine letter bevatten.',
+            'password.numbers'       => 'Wachtwoord moet minimaal 1 cijfer bevatten.',
+            'password.symbols'       => 'Wachtwoord moet minimaal 1 speciaal teken bevatten (bijv. !@#$%).',
+            'password.confirmed'     => 'De wachtwoorden komen niet overeen.',
         ]);
 
         // Unieke check via blind index

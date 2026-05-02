@@ -28,7 +28,7 @@ class ConfirmablePasswordController extends Controller
     {
         if (!Hash::check($request->password, $request->user()->password)) {
             throw ValidationException::withMessages([
-                'password' => __('auth.password'),
+                'password' => 'Het ingevoerde wachtwoord is onjuist.',
             ]);
         }
 
