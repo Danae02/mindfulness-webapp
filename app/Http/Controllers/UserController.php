@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\UserExerciseLog;
+use App\Services\EmailEncryptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,8 +33,18 @@ class   UserController extends Controller
             'role_id' => 'nullable|integer|exists:roles,id', // Controleer of de rol bestaat
             'is_reviewed' => 'nullable|boolean', // Boolean validatie voor "is_reviewed"
             'name' => 'nullable|string|max:255', // Optioneel: Naam kan worden bijgewerkt
-            'email' => 'nullable|email|unique:users,email,' . $id, // Controleer unieke e-mail, behalve voor de huidige gebruiker
+            'email' => 'nullable|email', // Controleer unieke e-mail, behalve voor de huidige gebruiker
         ]);
+
+        // Uniek check email via blind index
+        if ($request->filled('email')) {
+            $svc = app(EmailEncryptionService::class);
+            $emailIndex = $svc->blindIndex($request->email);
+
+            if (User::where('email_index', $emailIndex)->where('id', '!=', $id)->exists()) {
+                return response()->json(['error' => 'E-mailadres is al in gebruik.'], 422);
+            }
+        }
 
         // Alleen de verzonden velden bijwerken
         $user->fill($validatedData);

@@ -17,7 +17,7 @@ export default function ForgotPassword({ status }) {
         post(route('password.email'));
     };
 
-    const audioFilePath = '/storage/audio/wachtwoord-vergeten-uitleg.mp3';
+    const audioFilePath = '/audio/ElevenLabs_wachtwoord-vergeten-uitleg.mp3';
 
     return (
         <GuestLayout>
@@ -29,7 +29,8 @@ export default function ForgotPassword({ status }) {
                         href={route('login')}
                         className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-primary hover:text-primary-dark border border-primary rounded-full hover:bg-primary hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="
+                       w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                         Terug naar inloggen

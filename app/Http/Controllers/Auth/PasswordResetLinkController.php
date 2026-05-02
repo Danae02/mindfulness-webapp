@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Services\EmailEncryptionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PasswordResetLinkController extends Controller
 {
+    public function __construct(private EmailEncryptionService $emailEncryption) {}
+
     /**
      * Display the password reset link request view.
      */
@@ -29,23 +32,20 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'email' => 'required|email',
-        ]);
+        $request->validate(['email' => 'required|email']);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $emailIndex = $this->emailEncryption->blindIndex($request->email);
+        $user = User::where('email_index', $emailIndex)->first();
 
-        if ($status == Password::RESET_LINK_SENT) {
-            return back()->with('status', __($status));
+        // Altijd zelfde response (security)
+        if (!$user) {
+            return back()->with('status', __('passwords.sent'));
         }
 
-        throw ValidationException::withMessages([
-            'email' => [trans($status)],
-        ]);
+        // Token aanmaken en email sturen zonder de user opnieuw te laten zoeken
+        $token = Password::broker()->createToken($user);
+        $user->sendPasswordResetNotification($token);
+
+        return back()->with('status', __('passwords.sent'));
     }
 }

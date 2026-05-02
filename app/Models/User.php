@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Services\EmailEncryptionService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -20,6 +20,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'email_index',
         'password',
         'role_id',
         'team_id',
@@ -35,6 +36,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'email_index'
     ];
 
     /**
@@ -51,6 +53,32 @@ class User extends Authenticatable
         ];
     }
 
+    // automatisch encrypten bij opslaan
+    public function setEmailAttribute(string $email): void
+    {
+        $svc = app(EmailEncryptionService::class);
+        $this->attributes['email'] = $svc->encrypt($email);
+        $this->attributes['email_index'] = $svc->blindIndex($email);
+    }
+
+    // Automatisch decrypten bij ophalen
+    public function getEmailAttribute(string $value): string
+    {
+        return app(EmailEncryptionService::class)->decrypt($value);
+    }
+
+
+//    public function sendPasswordResetNotification($token)
+//    {
+//        $this->notify(new ResetPassword($token));
+//    }
+//
+//    public function sendEmailVerificationNotification()
+//    {
+//        $this->notify(new VerifyEmail);
+//    }
+
+
     public function role()
     {
         return $this->belongsTo(Role::class);
@@ -61,7 +89,7 @@ class User extends Authenticatable
         static::creating(function ($user) {
             // Als role_id niet is ingesteld, standaard instellen op 'viewer' (role_id = 2)
             if (is_null($user->role_id)) {
-                $user->role_id = 2; // Default to 'viewer'
+                $user->role_id = 2; // Default to 'viewer' aka client
             }
         });
     }

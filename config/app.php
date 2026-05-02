@@ -123,4 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'sodium_key'   => env('SODIUM_ENCRYPTION_KEY'),
+    'email_pepper' => env('EMAIL_PEPPER'),
 ];

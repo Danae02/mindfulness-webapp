@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\EmailEncryptionService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -15,7 +16,9 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 class RegisteredUserController extends Controller
-{
+
+{public function __construct(private EmailEncryptionService $emailEncryption){}
+
     /**
      * Display the registration view.
      */
@@ -33,14 +36,23 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => 'required|string|lowercase|email|max:255',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Unieke check via blind index
+        $emailIndex = $this->emailEncryption->blindIndex($request->email);
+        if (User::where('email_index', $emailIndex)->exists()) {
+            throw ValidationException::withMessages([
+                'email' => 'Dit e-mailadres is al in gebruik.',
+            ]);
+        }
+
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name'        => $request->name,
+            'email'       => $request->email,
+            'email_index' => $emailIndex,
+            'password'    => Hash::make($request->password),
         ]);
 
         event(new Registered($user));
@@ -68,9 +80,6 @@ class RegisteredUserController extends Controller
             ]);
 
             $team_id = Auth::user()->team_id;
-
-//            dd($team_id);
-
             $email = $request->email ?? 'no-email@example.com'; // Voeg een placeholder toe
 
             // Gebruiker aanmaken
