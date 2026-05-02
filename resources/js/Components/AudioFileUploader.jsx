@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 
 export default function AudioFileUploader({
@@ -6,50 +6,46 @@ export default function AudioFileUploader({
                                               courseId,
                                               chapter,
                                               onChapterUpdate,
+                                              onUploaded,
                                           }) {
-    const [uploading, setUploading] = useState(false);
-    const [question, setQuestion] = useState(""); // Vraag
-    const [answers, setAnswers] = useState(["", "", "", "", ""]); // Antwoorden
-    const [mode, setMode] = useState();
+    const [uploading, setUploading]   = useState(false);
+    const [uploaded, setUploaded]     = useState(false);
+    const [question, setQuestion]     = useState("");
+    const [answers, setAnswers]       = useState(["", "", "", "", ""]);
+    const [mode, setMode]             = useState(null);
+    const [dragOver, setDragOver]     = useState(false);
+    const fileInputRef                = useRef(null);
 
     useEffect(() => {
         const fetchMode = async () => {
             try {
-                const response = await axios.get(route("researchsettings.getmode")) ;
-                setMode(response.data.mode); // Stel de modus in
-            } catch (error) {
-                console.error("Fout bij ophalen van modus:", error);
+                const response = await axios.get(route("researchsettings.getmode"));
+                setMode(response.data.mode);
+            } catch {
+                setMode(null);
             }
         };
-
         fetchMode();
     }, []);
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        onChapterUpdate({ ...chapter, file });
+    const handleFileChange = (file) => {
+        if (file) {
+            onChapterUpdate({ ...chapter, file });
+        }
     };
 
-    const handleNameChange = (e) => {
-        const chapterName = e.target.value;
-        onChapterUpdate({ ...chapter, chapterName });
-    };
-
-    const handleQuestionChange = (e) => {
-        setQuestion(e.target.value);
-    };
-
-    const handleAnswerChange = (index, value) => {
-        const updatedAnswers = [...answers];
-        updatedAnswers[index] = value;
-        setAnswers(updatedAnswers);
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setDragOver(false);
+        const file = e.dataTransfer.files[0];
+        if (file) handleFileChange(file);
     };
 
     const handleUpload = async (e) => {
         e.preventDefault();
 
         if (!chapter.file || !chapter.chapterName) {
-            alert(`Voer alle velden in voor hoofdstuk ${chapterNumber}.`);
+            alert(`Vul alle velden in voor oefening ${chapterNumber}.`);
             return;
         }
 
@@ -62,98 +58,188 @@ export default function AudioFileUploader({
             formData.append("exercise_name", chapter.chapterName);
 
             // Voeg alleen de vragenlijst toe als de modus niet 'per_session' is
-            if (mode !== "per_session") { // verandering if (chapter.mode !== "per_session") {
+            if (mode !== "per_session") { // verandering if (chapter.mode !== "per_session")
                 formData.append("form_question", question);
                 answers.forEach((answer) => {
-                    formData.append(`form_answers[]`, answer);
+                    formData.append("form_answers[]", answer);
                 });
             }
 
             await axios.post(route("exercises.create"), formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
+                headers: { "Content-Type": "multipart/form-data" },
             });
 
-            alert(`Hoofdstuk ${chapterNumber} succesvol geüpload!`);
+            setUploaded(true);
+            onUploaded?.();
         } catch (error) {
             console.error("Upload failed:", error);
-            console.error("Validation errors:", error.response?.data); // Add this
-            alert(`Fout bij uploaden van hoofdstuk ${chapterNumber}.`);
+            alert(`Fout bij uploaden van oefening ${chapterNumber}.`);
         } finally {
             setUploading(false);
         }
     };
 
     return (
-        <form onSubmit={handleUpload} className="mb-6 p-4 bg-gray-100 rounded-lg shadow">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">
-                Oefening {chapterNumber}
-            </h3>
-            <div className="mb-4">
-                <label htmlFor={`chapter-name-${chapterNumber}`} className="block text-sm font-medium text-gray-700">
-                    Naam van de oefening
-                </label>
-                <input
-                    type="text"
-                    id={`chapter-name-${chapterNumber}`}
-                    value={chapter.chapterName}
-                    onChange={handleNameChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Bijvoorbeeld: Inleiding tot mindfulness"
-                />
-            </div>
-            <div className="mb-4">
-                <label htmlFor={`audio-chapter-${chapterNumber}`} className="block text-sm font-medium text-gray-700">
-                    Upload audio
-                </label>
-                <input
-                    type="file"
-                    id={`audio-chapter-${chapterNumber}`}
-                    accept="audio/*"
-                    onChange={handleFileChange}
-                    className="mt-1 block w-full text-sm text-gray-500"
-                />
+        <div
+            className="rounded-xl border-2 p-5 transition-all"
+            style={{
+                borderColor: uploaded ? "#16A34A" : "#E5E7EB",
+                backgroundColor: uploaded ? "#F0FDF4" : "#FAFAFA",
+            }}>
+            <div className="flex items-center gap-3 mb-4">
+                <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                    style={{
+                        backgroundColor: uploaded ? "#16A34A" : "#6C4092",
+                        color: "#fff",
+                    }}
+                >
+                    {uploaded ? (
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                    ) : chapterNumber}
+                </div>
+                <h3 className="text-base font-semibold text-gray-800">
+                    Oefening {chapterNumber}
+                </h3>
+                {uploaded && (
+                    <span className="ml-auto text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+                        Geüpload!
+                    </span>
+                )}
             </div>
 
-            {/* Alleen renderen als de modus niet 'per_session' is */}
-            {mode !== "per_session" && (
-                <>
-                    <div className="mb-4">
-                        <label htmlFor={`form-question-${chapterNumber}`} className="block text-sm font-medium text-gray-700">
-                            Vraag
+            {uploaded ? (
+                <p className="text-sm text-green-700 font-medium">{chapter.chapterName}</p>
+            ) : (
+                <form onSubmit={handleUpload} className="space-y-4">
+                    <div>
+                        <label
+                            htmlFor={`chapter-name-${chapterNumber}`}
+                            className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                            Naam van de oefening <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
-                            id={`form-question-${chapterNumber}`}
-                            value={question}
-                            onChange={handleQuestionChange}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Bijvoorbeeld: Hoe moeilijk vond je deze oefening?"
+                            id={`chapter-name-${chapterNumber}`}
+                            value={chapter.chapterName}
+                            onChange={(e) => onChapterUpdate({ ...chapter, chapterName: e.target.value })}
+                            placeholder="Bijvoorbeeld: Ademhalingsoefening"
+                            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors bg-white"
                         />
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700">Antwoorden (1-5)</label>
-                        {answers.map((answer, index) => (
+
+                    {/* Audiobestand */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Audiobestand <span className="text-red-500">*</span>
+                        </label>
+                        <div
+                            className="relative rounded-lg border-2 border-dashed transition-all cursor-pointer"
+                            style={{
+                                borderColor: dragOver ? "#6C4092" : chapter.file ? "#16A34A" : "#C4B5E8",
+                                backgroundColor: dragOver ? "#F3EEFF" : chapter.file ? "#F0FDF4" : "#F8F5FF",
+                            }}
+                            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                            onDragLeave={() => setDragOver(false)}
+                            onDrop={handleDrop}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <div className="py-5 px-4 text-center">
+                                {chapter.file ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                        <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                        </svg>
+                                        <span className="text-sm font-medium text-green-700 truncate max-w-xs">
+                                            {chapter.file.name}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <p className="text-sm font-medium" style={{ color: "#6C4092" }}>
+                                            Klik om een bestand te kiezen
+                                        </p>
+                                        <p className="text-xs text-gray-400 mt-1">MP3, M4A, of WAV</p>
+                                    </>
+                                )}
+                            </div>
+
                             <input
-                                key={index}
-                                type="text"
-                                value={answer}
-                                onChange={(e) => handleAnswerChange(index, e.target.value)}
-                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                placeholder={`Antwoord ${index + 1}`}
+                                ref={fileInputRef}
+                                type="file"
+                                id={`audio-chapter-${chapterNumber}`}
+                                accept="audio/*"
+                                className="hidden"
+                                onChange={(e) => handleFileChange(e.target.files[0])}
                             />
-                        ))}
+                        </div>
                     </div>
-                </>
+
+                    {/* Vraag & antwoorden*/}
+                    {mode !== "per_session" && (
+                        <div className="pt-1 space-y-3 border-t border-gray-100">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide pt-1">Gevoelsvraag</p>
+                            <div>
+                                <label
+                                    htmlFor={`form-question-${chapterNumber}`}
+                                    className="block text-sm font-medium text-gray-700 mb-1"
+                                >
+                                    Vraag
+                                </label>
+                                <input
+                                    type="text"
+                                    id={`form-question-${chapterNumber}`}
+                                    value={question}
+                                    onChange={(e) => setQuestion(e.target.value)}
+                                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
+                                    placeholder="Bijvoorbeeld: Hoe moeilijk vond je deze oefening?"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Antwoorden (1–5)
+                                </label>
+                                <div className="space-y-2">
+                                    {answers.map((answer, index) => (
+                                        <input
+                                            key={index}
+                                            type="text"
+                                            value={answer}
+                                            onChange={(e) => {
+                                                const updated = [...answers];
+                                                updated[index] = e.target.value;
+                                                setAnswers(updated);
+                                            }}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
+                                            placeholder={`Antwoord ${index + 1}`}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={uploading}
+                        className="w-full py-2.5 text-sm font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 disabled:opacity-60"
+                        style={{ backgroundColor: uploading ? "#9CA3AF" : "#6C4092", color: "#fff" }}
+                    >
+                        {uploading ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                </svg>
+                                Uploaden...
+                            </span>
+                        ) : `Oefening ${chapterNumber} uploaden`}
+                    </button>
+                </form>
             )}
-            <button
-                type="submit"
-                disabled={uploading}
-                className="mt-4 w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md shadow hover:bg-blue-700 focus:outline-none"
-            >
-                {uploading ? "Uploading..." : `Upload Hoofdstuk ${chapterNumber}`}
-            </button>
-        </form>
+        </div>
     );
 }

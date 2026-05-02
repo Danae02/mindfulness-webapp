@@ -1,25 +1,411 @@
-import {useEffect, useState} from "react";
-import CourseListAdmin from "@/Components/CourseListAdmin.jsx";
-import CourseModal from "@/Components/CourseModal.jsx";
+import { useEffect, useRef, useState } from "react";
+import axios from "axios";
 
-export default function CourseEditor() {
-    const [courses, setCourses] = useState([]);
-    const [selectedCourse, setSelectedCourse] = useState(null);
 
-    // Ophalen van cursussen
+function ExerciseEditForm({ exercise, onSave, onCancel }) {
+    const [name, setName]       = useState(exercise.exercise_name);
+    const [question, setQuestion] = useState(exercise.form_question || "");
+    const [answers, setAnswers] = useState(
+        exercise.form_answers?.length ? exercise.form_answers : ["", "", "", "", ""]
+    );
+    const [newFile, setNewFile] = useState(null);
+    const [saving, setSaving]   = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        await onSave({ ...exercise, exercise_name: name, form_question: question, form_answers: answers, newFile });
+        setSaving(false);
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="mt-3 space-y-3 pt-3 border-t border-gray-100">
+            <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Naam oefening</label>
+                <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+                />
+            </div>
+            <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Nieuw audiobestand (optioneel)</label>
+                <input
+                    type="file"
+                    accept="audio/*"
+                    onChange={(e) => setNewFile(e.target.files[0])}
+                    className="w-full text-sm text-gray-500"
+                />
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-4 py-1.5 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                    Annuleren
+                </button>
+                <button
+                    type="submit"
+                    disabled={saving}
+                    className="px-4 py-1.5 text-sm font-semibold text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-60"
+                    style={{ backgroundColor: "#6C4092" }}
+                >
+                    {saving ? "Opslaan..." : "Opslaan"}
+                </button>
+            </div>
+        </form>
+    );
+}
+
+
+function CourseEditForm({ course, onSave, onCancel }) {
+    const [name, setName]             = useState(course.course_name);
+    const [description, setDescription] = useState(course.description || "");
+    const [saving, setSaving]         = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        await onSave({ course_name: name, description });
+        setSaving(false);
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4 pt-4 border-t border-gray-100">
+            <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Naam van de cursus</label>
+                <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Omschrijving</label>
+                <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                    placeholder="Korte beschrijving zichtbaar voor cliënten..."
+                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
+                />
+            </div>
+            <div className="flex justify-end gap-2">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                    Annuleren
+                </button>
+                <button
+                    type="submit"
+                    disabled={saving}
+                    className="px-5 py-2 text-sm font-semibold text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-60"
+                    style={{ backgroundColor: "#6C4092" }}
+                >
+                    {saving ? "Opslaan..." : "Wijzigingen opslaan"}
+                </button>
+            </div>
+        </form>
+    );
+}
+
+
+function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExerciseUpdated, onExerciseDeleted }) {
+    const modalRef      = useRef(null);
+    const closeRef      = useRef(null);
+    const [editingExerciseId, setEditingExerciseId] = useState(null);
+    const [editingCourse, setEditingCourse]         = useState(false);
+    const [confirmDelete, setConfirmDelete]         = useState(false);
+    const [localCourse, setLocalCourse]             = useState(course);
+
+    // Focus trap
     useEffect(() => {
-        const fetchCourses = async () => {
-            try {
-                const response = await axios.get(route("courses.get.all"));
-                setCourses(response.data);
-            } catch (error) {
-                console.error("Failed to fetch courses:", error);
+        const prev = document.activeElement;
+        closeRef.current?.focus();
+
+        const focusableSelectors =
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+        const handleKeyDown = (e) => {
+            if (e.key === "Escape") { onClose(); return; }
+            if (e.key !== "Tab") return;
+            const focusable = Array.from(modalRef.current?.querySelectorAll(focusableSelectors) || []);
+            const first = focusable[0];
+            const last  = focusable[focusable.length - 1];
+            if (e.shiftKey) {
+                if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+            } else {
+                if (document.activeElement === last) { e.preventDefault(); first.focus(); }
             }
         };
-        fetchCourses();
+
+        document.addEventListener("keydown", handleKeyDown);
+        return () => { document.removeEventListener("keydown", handleKeyDown); prev?.focus(); };
+    }, [onClose]);
+
+    const handleSaveCourse = async ({ course_name, description }) => {
+        try {
+            const response = await axios.put(route("courses.update", { id: localCourse.id }), {
+                course_name,
+                description,
+            });
+            const updated = { ...localCourse, course_name, description };
+            setLocalCourse(updated);
+            onCourseUpdated(updated);
+            setEditingCourse(false);
+        } catch (error) {
+            console.error("Fout bij bijwerken cursus:", error);
+            alert("Fout bij opslaan van cursus.");
+        }
+    };
+
+    const handleDeleteCourse = async () => {
+        try {
+            await axios.delete(route("courses.delete", { id: localCourse.id }));
+            onCourseDeleted(localCourse.id);
+            onClose();
+        } catch (error) {
+            console.error("Fout bij verwijderen cursus:", error);
+            alert("Fout bij verwijderen van cursus.");
+        }
+    };
+
+    const handleSaveExercise = async (updatedExercise) => {
+        try {
+            const formData = new FormData();
+            formData.append("exercise_name", updatedExercise.exercise_name);
+            formData.append("form_question", updatedExercise.form_question || "");
+            const answers = updatedExercise.form_answers || ["", "", "", "", ""];
+            answers.forEach((a, i) => formData.append(`form_answers[${i}]`, a || ""));
+            if (updatedExercise.newFile) formData.append("audio", updatedExercise.newFile);
+            formData.append("_method", "PUT");
+
+            const response = await axios.post(
+                route("exercises.update", { id: updatedExercise.id }),
+                formData,
+                { headers: { "Content-Type": "multipart/form-data" } }
+            );
+
+            const saved = response.data.exercise;
+            const updated = {
+                ...localCourse,
+                exercises: localCourse.exercises.map((ex) =>
+                    ex.id === saved.id ? saved : ex
+                ),
+            };
+            setLocalCourse(updated);
+            onExerciseUpdated(saved);
+            setEditingExerciseId(null);
+        } catch (error) {
+            console.error("Fout bij bijwerken oefening:", error);
+            alert("Fout bij opslaan van oefening.");
+        }
+    };
+
+    const handleDeleteExercise = async (exerciseId) => {
+        if (!confirm("Weet je zeker dat je deze oefening wilt verwijderen?")) return;
+        try {
+            await axios.delete(route("exercises.delete", { id: exerciseId }));
+            const updated = {
+                ...localCourse,
+                exercises: localCourse.exercises.filter((ex) => ex.id !== exerciseId),
+            };
+            setLocalCourse(updated);
+            onExerciseDeleted(exerciseId);
+        } catch (error) {
+            console.error("Fout bij verwijderen oefening:", error);
+            alert("Fout bij verwijderen van oefening.");
+        }
+    };
+
+    return (
+        <div
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-course-title"
+            onClick={onClose}
+        >
+            <div
+                ref={modalRef}
+                className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="flex items-start justify-between p-6 pb-0">
+                    <h2 id="modal-course-title" className="text-xl font-bold text-gray-900 pr-4">
+                        {localCourse.course_name}
+                    </h2>
+                    <button
+                        ref={closeRef}
+                        onClick={onClose}
+                        aria-label="Sluit venster"
+                        className="w-8 h-8 flex-shrink-0 flex items-center justify-center border border-gray-300 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <div className="px-6 pb-6">
+                    {/* Omschrijving */}
+                    {!editingCourse && (
+                        <div className="mt-4">
+                            <p className="text-sm font-semibold text-gray-500 mb-1">Omschrijving</p>
+                            <div
+                                className="w-full px-4 py-3 rounded-xl text-sm text-gray-700 leading-relaxed"
+                                style={{ backgroundColor: "#F0E8FF", border: "1px solid #D4C5F0" }}
+                            >
+                                {localCourse.description || (
+                                    <span className="italic text-gray-400">Geen omschrijving</span>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Cursus bewerkformulier */}
+                    {editingCourse && (
+                        <CourseEditForm
+                            course={localCourse}
+                            onSave={handleSaveCourse}
+                            onCancel={() => setEditingCourse(false)}
+                        />
+                    )}
+
+                    {/* Oefeningen */}
+                    {!editingCourse && (
+                        <>
+                            <h3 className="text-base font-semibold text-gray-500 mt-6 mb-3">
+                                Oefeningen in deze cursus
+                            </h3>
+
+                            {localCourse.exercises?.length === 0 && (
+                                <p className="text-sm text-gray-400 italic">Geen oefeningen in deze cursus.</p>
+                            )}
+
+                            <div className="space-y-3" role="list">
+                                {localCourse.exercises?.map((exercise) => (
+                                    <div
+                                        key={exercise.id}
+                                        role="listitem"
+                                        className="rounded-xl border border-gray-200 p-4"
+                                    >
+                                        <p className="font-bold text-gray-900 mb-1">{exercise.exercise_name}</p>
+
+                                        <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-0.5">
+                                            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h4l2 10h6l2-10h4M9 17v2m6-2v2" />
+                                            </svg>
+                                            <span className="truncate max-w-xs">
+                                                Bestand: {exercise.audio_file_path || "–"}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-3">
+                                            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                            <span>Keren gedaan: {exercise.times_done ?? 0}</span>
+                                        </div>
+
+                                        {editingExerciseId !== exercise.id ? (
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleDeleteExercise(exercise.id)}
+                                                    aria-label={`Verwijder oefening ${exercise.exercise_name}`}
+                                                    className="px-3 py-1.5 text-sm font-semibold rounded-lg border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+                                                >
+                                                    Verwijderen
+                                                </button>
+                                                <button
+                                                    onClick={() => setEditingExerciseId(exercise.id)}
+                                                    aria-label={`Bewerk oefening ${exercise.exercise_name}`}
+                                                    className="px-3 py-1.5 text-sm font-semibold rounded-lg border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                                    style={{ borderColor: "#6C4092", color: "#6C4092" }}
+                                                >
+                                                    Bewerken
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <ExerciseEditForm
+                                                exercise={exercise}
+                                                onSave={handleSaveExercise}
+                                                onCancel={() => setEditingExerciseId(null)}
+                                            />
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+                    {/* Onderste knoppen */}
+                    {!editingCourse && (
+                        <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100">
+                            {!confirmDelete ? (
+                                <button
+                                    onClick={() => setConfirmDelete(true)}
+                                    className="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    style={{ backgroundColor: "#DC2626" }}
+                                    aria-label={`Verwijder cursus ${localCourse.course_name}`}
+                                >
+                                    Cursus verwijderen
+                                </button>
+                            ) : (
+                                <div className="flex-1 flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                                    <p className="text-xs text-red-700 font-medium flex-1">Zeker weten?</p>
+                                    <button
+                                        onClick={() => setConfirmDelete(false)}
+                                        className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                                    >
+                                        Nee
+                                    </button>
+                                    <button
+                                        onClick={handleDeleteCourse}
+                                        className="px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    >
+                                        Ja, verwijderen
+                                    </button>
+                                </div>
+                            )}
+
+                            <button
+                                onClick={() => setEditingCourse(true)}
+                                className="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                style={{ backgroundColor: "#6C4092" }}
+                                aria-label={`Bewerk cursus ${localCourse.course_name}`}
+                            >
+                                Cursus bewerken
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─────────────────────────────────────────────
+// CourseEditor – hoofdcomponent
+// ─────────────────────────────────────────────
+export default function CourseEditor({ onAddCourse }) {
+    const [courses,        setCourses]        = useState([]);
+    const [selectedCourse, setSelectedCourse] = useState(null);
+    const [loading,        setLoading]        = useState(true);
+
+    useEffect(() => {
+        axios.get(route("courses.get.all"))
+            .then((res) => setCourses(res.data))
+            .catch((err) => console.error("Failed to fetch courses:", err))
+            .finally(() => setLoading(false));
     }, []);
 
-    // Event handlers
     const handleCourseClick = async (courseId) => {
         try {
             const response = await axios.get(route("courses.details", { id: courseId }));
@@ -29,442 +415,98 @@ export default function CourseEditor() {
         }
     };
 
-    const handleEditCourseName = async (newName) => {
-        try {
-            await axios.put(route("courses.update", { id: selectedCourse.id, course_name: newName }));
-            setCourses((prev) => prev.map((course) => (
-                course.id === selectedCourse.id ? { ...course, course_name: newName } : course
-            )));
-            setSelectedCourse({ ...selectedCourse, course_name: newName });
-        } catch (error) {
-            console.error("Failed to edit course name:", error);
-        }
+    const handleCourseUpdated = (updatedCourse) => {
+        setCourses((prev) =>
+            prev.map((c) => (c.id === updatedCourse.id ? { ...c, ...updatedCourse } : c))
+        );
+        setSelectedCourse((prev) => prev ? { ...prev, ...updatedCourse } : prev);
     };
 
-    const handleDeleteCourse = async (courseId) => {
-        try {
-            await axios.delete(route("courses.delete", { id: courseId }));
-            setCourses((prev) => prev.filter((course) => course.id !== courseId));
-            setSelectedCourse(null);
-        } catch (error) {
-            console.error("Failed to delete course:", error);
-        }
+    const handleCourseDeleted = (courseId) => {
+        setCourses((prev) => prev.filter((c) => c.id !== courseId));
+        setSelectedCourse(null);
     };
 
-    const handleEditExercise = async (updatedExercise) => {
-        try {
-            // FormData gebruiken om bestanden te versturen
-            const formData = new FormData();
-            formData.append("exercise_name", updatedExercise.exercise_name);
-            formData.append("form_question", updatedExercise.form_question);
-
-            // Zorg dat form_answers altijd een array is met 5 waarden
-            const answers = updatedExercise.form_answers || ["", "", "", "", ""];
-            answers.forEach((answer, index) => {
-                formData.append(`form_answers[${index}]`, answer || '');
-            });
-
-            if (updatedExercise.newFile) {
-                formData.append("audio", updatedExercise.newFile);
-            }
-
-            // _method  voor Laravel
-            formData.append("_method", "PUT");
-
-            console.log("Verstuurde data:", Object.fromEntries(formData));
-
-            // Gebruik POST i.p.v. PUT met _method
-            const response = await axios.post(route("exercises.update", { id: updatedExercise.id }), formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-
-            if (response.status === 200) {
-                alert("Oefening succesvol bijgewerkt!");
-                // Werk de lijst met oefeningen bij
-                setSelectedCourse((prevCourse) => ({
-                    ...prevCourse,
-                    exercises: prevCourse.exercises.map((exercise) =>
-                        exercise.id === updatedExercise.id ? response.data.exercise : exercise
-                    ),
-                }));
-            } else {
-                alert("Fout bij het bijwerken van de oefening.");
-            }
-        } catch (error) {
-            console.error("Fout bij het bijwerken van de oefening:", error);
-
-            if (error.response && error.response.data) {
-                console.log("Server response:", error.response.data);
-
-                if (error.response.data.errors) {
-                    const messages = Object.values(error.response.data.errors).flat().join('\n');
-                    alert('Validatiefouten:\n' + messages);
-                } else if (error.response.data.message) {
-                    alert('Fout: ' + error.response.data.message);
-                }
-            } else {
-                alert("Er ging iets mis bij het opslaan. Check de console voor details.");
-            }
-        }
+    const handleExerciseUpdated = (savedExercise) => {
+        setCourses((prev) =>
+            prev.map((c) => ({
+                ...c,
+                exercises: c.exercises?.map((ex) =>
+                    ex.id === savedExercise.id ? savedExercise : ex
+                ),
+            }))
+        );
     };
+
+    const handleExerciseDeleted = (exerciseId) => {
+        setCourses((prev) =>
+            prev.map((c) => ({
+                ...c,
+                exercises: c.exercises?.filter((ex) => ex.id !== exerciseId),
+            }))
+        );
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center gap-2 py-8 text-gray-400 text-sm" aria-live="polite">
+                <svg className="animate-spin h-4 w-4 text-purple-500" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+                Cursussen laden…
+            </div>
+        );
+    }
 
     return (
-        <div className="p-6 bg-gray-100 min-h-screen">
-            <h1 className="text-2xl font-bold mb-6">Cursussen</h1>
-            <CourseListAdmin courses={courses} onCourseClick={handleCourseClick} />
+        <div>
+            {courses.length === 0 && (
+                <p className="text-sm text-gray-400 italic py-4">Nog geen cursussen aangemaakt.</p>
+            )}
+
+            <div className="flex flex-col gap-3" role="list" aria-label="Overzicht van alle cursussen">
+                {courses.map((course) => {
+                    const exerciseCount = course.exercises?.length ?? 0;
+
+                    return (
+                        <button
+                            key={course.id}
+                            role="listitem"
+                            onClick={() => handleCourseClick(course.id)}
+                            aria-label={`Open cursus: ${course.course_name}, ${exerciseCount} oefening${exerciseCount !== 1 ? "en" : ""}`}
+                            className="w-full text-left bg-white rounded-xl border-2 border-gray-300 px-5 py-4 hover:border-purple-400 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
+                        >
+                            <p className="font-bold text-gray-900 text-base mb-1">{course.course_name}</p>
+
+                            {course.description && (
+                                <p className="text-sm text-gray-500 mb-2 leading-snug">
+                                    {course.description}
+                                </p>
+                            )}
+
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                                 style={{ backgroundColor: "#F0E8FF", color: "#6C4092" }}>
+                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                                </svg>
+                                {exerciseCount} oefening{exerciseCount !== 1 ? "en" : ""}
+                            </div>
+                        </button>
+                    );
+                })}
+            </div>
+
             {selectedCourse && (
                 <CourseModal
                     course={selectedCourse}
                     onClose={() => setSelectedCourse(null)}
-                    onEditCourseName={handleEditCourseName}
-                    onDeleteCourse={handleDeleteCourse}
-                    onEditExercise={handleEditExercise}
+                    onCourseUpdated={handleCourseUpdated}
+                    onCourseDeleted={handleCourseDeleted}
+                    onExerciseUpdated={handleExerciseUpdated}
+                    onExerciseDeleted={handleExerciseDeleted}
                 />
             )}
         </div>
     );
 }
-
-
-// import { useEffect, useState } from "react";
-// import axios from "axios";
-// import AudioControl from "@/Components/AudioControl.jsx";
-//
-// export default function CourseEditor() {
-//     const [courses, setCourses] = useState([]);
-//     const [selectedCourse, setSelectedCourse] = useState(null);
-//     const [showModal, setShowModal] = useState(false);
-//     const [isEditingName, setIsEditingName] = useState(false);
-//     const [course_name, setCourse_Name] = useState();
-//     const [editingExercise, setEditingExercise] = useState(null);
-//
-//     useEffect(() => {
-//         const fetchCourses = async () => {
-//             try {
-//                 const response = await axios.get(route("courses.get.all"));
-//                 setCourses(response.data);
-//             } catch (error) {
-//                 console.error("Failed to fetch courses:", error);
-//             }
-//         };
-//
-//         fetchCourses();
-//     }, []);
-//
-//     const editCourseName = async (courseName, courseId) => {
-//         try {
-//
-//             const response = await axios.put(route("courses.update", {
-//                 course_name: course_name,
-//                 id: courseId.course_id
-//             }));
-//             console.log(response.course);
-//
-//             if (selectedCourse) {
-//                 setCourses((prevCourses) => {
-//                     return prevCourses.map((course) => {
-//                         if (course.id === selectedCourse.id) {
-//                             return { ...course, course_name: course_name }; // Bijwerken van de cursusnaam
-//                         }
-//                         return course;
-//                     });
-//                 });
-//             }
-//
-//
-//             setIsEditingName(false);
-//             closeModal()
-//         } catch (error) {
-//             console.error("Failed to update course: ", error)
-//         }
-//     }
-//
-//     const handleUpdateName = (e) => {
-//         setIsEditingName(true)
-//         const newName = e.target.value
-//     }
-//
-//     const handleDeleteCourse = (course_id) => {
-//         try{
-//             const response = axios.delete(route("courses.delete", {
-//                 "id": course_id
-//             }))
-//
-//             closeModal()
-//         } catch (error) {
-//             console.error("Failed to delete course")
-//         }
-//     }
-//
-//     const handleCardClick = async (courseId) => {
-//         try {
-//             const response = await axios.get(route("courses.details", { id: courseId }));
-//             setSelectedCourse(response.data);
-//             setShowModal(true);
-//         } catch (error) {
-//             console.error("Failed to fetch course details:", error);
-//         }
-//     };
-//
-//     const cancelEdit = () => {
-//         setIsEditingName(false);
-//         setCourse_Name(selectedCourse.course_name);
-//     };
-//
-//     const closeModal = () => {
-//         setShowModal(false);
-//         setSelectedCourse(null);
-//     };
-//
-//     return (
-//         <div className="p-6 bg-gray-100 min-h-screen">
-//             <h1 className="text-2xl font-bold mb-6">Cursussen</h1>
-//             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-//                 {courses.map((course) => (
-//                     <div
-//                         key={course.id}
-//                         className="p-4 bg-white rounded-lg shadow cursor-pointer hover:shadow-lg"
-//                         onClick={() => handleCardClick(course.id)}
-//                     >
-//                         <h2 className="text-lg font-bold">{course.course_name}</h2>
-//                         <p className="text-gray-600">Oefeningen: {course.exercises?.length || 0}</p>
-//                     </div>
-//                 ))}
-//             </div>
-//
-//             {showModal && selectedCourse && (
-//                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-//                     <div className="bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-3xl">
-//                         {isEditingName ? (
-//                             <form
-//                                 onSubmit={(e) => {
-//                                     e.preventDefault();
-//                                     const course_id = selectedCourse.id
-//                                     setCourse_Name()
-//                                     editCourseName({},{course_id}); // Save the new name
-//                                 }}
-//                                 className="mb-4"
-//                             >
-//                                 <input
-//                                     type="text"
-//                                     value={course_name}
-//                                     onChange={(e) => setCourse_Name(e.target.value)}
-//                                     className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-//                                 />
-//                                 <div className="flex space-x-4 mt-2">
-//                                     <button
-//                                         type="submit"
-//                                         className="px-4 py-2 bg-green-600 text-white font-semibold rounded shadow hover:bg-green-700"
-//                                     >
-//                                         Opslaan
-//                                     </button>
-//                                     <button
-//                                         type="button"
-//                                         onClick={cancelEdit}
-//                                         className="px-4 py-2 bg-gray-600 text-white font-semibold rounded shadow hover:bg-gray-700"
-//                                     >
-//                                         Annuleren
-//                                     </button>
-//                                 </div>
-//                             </form>
-//                         ) : (
-//                             <h2 className="text-xl font-bold mb-4">{selectedCourse.course_name}</h2>
-//                         )}
-//
-//                         <h3 className="text-lg font-semibold mb-2">Oefeningen</h3>
-//                         <div className="space-y-2">
-//                             {selectedCourse.exercises.map((exercise) => (
-//                                 <div key={exercise.id} className="p-2 bg-gray-100 rounded shadow">
-//                                     <p className="font-bold">{exercise.exercise_name}</p>
-//                                     <p className="text-sm text-gray-600">Bestand: {exercise.audio_file_path}</p>
-//                                     <p className="text-sm text-gray-600">Times Done: {exercise.times_done}</p>
-//                                     <p className="text-sm text-gray-600">
-//                                         Laatste keer: {exercise.last_time || 'Nog niet gedaan'}
-//                                     </p>
-//                                     <AudioControl AudioName={exercise.audio_file_path}/>
-//
-//                                     {exercise.form_answers && exercise.form_answers.length > 0 && (
-//                                         <>
-//                                             <p className="text-sm font-bold mt-2">Vraag:</p>
-//                                             <p className="text-sm text-gray-700">{exercise.form_question}</p>
-//                                             <p className="text-sm font-bold mt-2">Antwoorden:</p>
-//                                             <ul className="list-disc list-inside">
-//                                                 {exercise.form_answers.map((answer, index) => (
-//                                                     <li key={index} className="text-sm text-gray-700">
-//                                                         {answer || "Geen antwoord ingevuld"}
-//                                                     </li>
-//                                                 ))}
-//                                             </ul>
-//                                         </>
-//                                     )}
-//
-//                                     {/* Toevoegen van de edit knop */}
-//                                     <button
-//                                         onClick={() => setEditingExercise(exercise)}
-//                                         className="mt-2 px-4 py-2 bg-yellow-500 text-white font-semibold rounded shadow hover:bg-yellow-600"
-//                                     >
-//                                         Bewerk oefening
-//                                     </button>
-//                                 </div>
-//                             ))}
-//                             {editingExercise && (
-//                                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-//                                     <div className="bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-2xl">
-//                                         <h2 className="text-lg font-bold mb-4">Bewerk Oefening</h2>
-//
-//                                         <form
-//                                             onSubmit={async (e) => {
-//                                                 e.preventDefault();
-//
-//                                                 const formData = new FormData();
-//                                                 formData.append("exercise_id", editingExercise.id);
-//                                                 formData.append("exercise_name", editingExercise.exercise_name);
-//                                                 formData.append("form_question", editingExercise.form_question);
-//                                                 editingExercise.form_answers.forEach((answer) => {
-//                                                     formData.append("form_answers[]", answer);
-//                                                 });
-//
-//                                                 if (editingExercise.newFile) {
-//                                                     formData.append("audio", editingExercise.newFile);
-//                                                 }
-//
-//                                                 try {
-//                                                     await axios.post(route("exercises.update"), formData, {
-//                                                         headers: {
-//                                                             "Content-Type": "multipart/form-data",
-//                                                         },
-//                                                     });
-//
-//                                                     alert("Oefening succesvol bijgewerkt!");
-//                                                     setEditingExercise(null);
-//                                                     // Vernieuw cursusgegevens (bijvoorbeeld door `handleCardClick` opnieuw aan te roepen)
-//                                                     handleCardClick(selectedCourse.id);
-//                                                 } catch (error) {
-//                                                     console.error("Fout bij bijwerken van oefening:", error);
-//                                                     alert("Fout bij bijwerken van oefening.");
-//                                                 }
-//                                             }}
-//                                         >
-//                                             {/* Naam */}
-//                                             <div className="mb-4">
-//                                                 <label className="block text-sm font-medium text-gray-700">Naam</label>
-//                                                 <input
-//                                                     type="text"
-//                                                     value={editingExercise.exercise_name}
-//                                                     onChange={(e) =>
-//                                                         setEditingExercise({
-//                                                             ...editingExercise,
-//                                                             exercise_name: e.target.value,
-//                                                         })
-//                                                     }
-//                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-//                                                 />
-//                                             </div>
-//
-//                                             {/* Vraag */}
-//                                             <div className="mb-4">
-//                                                 <label className="block text-sm font-medium text-gray-700">Vraag</label>
-//                                                 <input
-//                                                     type="text"
-//                                                     value={editingExercise.form_question}
-//                                                     onChange={(e) =>
-//                                                         setEditingExercise({
-//                                                             ...editingExercise,
-//                                                             form_question: e.target.value,
-//                                                         })
-//                                                     }
-//                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-//                                                 />
-//                                             </div>
-//
-//                                             {/* Antwoorden */}
-//                                             <div className="mb-4">
-//                                                 <label className="block text-sm font-medium text-gray-700">Antwoorden</label>
-//                                                 {editingExercise.form_answers.map((answer, index) => (
-//                                                     <input
-//                                                         key={index}
-//                                                         type="text"
-//                                                         value={answer}
-//                                                         onChange={(e) => {
-//                                                             const updatedAnswers = [...editingExercise.form_answers];
-//                                                             updatedAnswers[index] = e.target.value;
-//                                                             setEditingExercise({
-//                                                                 ...editingExercise,
-//                                                                 form_answers: updatedAnswers,
-//                                                             });
-//                                                         }}
-//                                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-//                                                         placeholder={`Antwoord ${index + 1}`}
-//                                                     />
-//                                                 ))}
-//                                             </div>
-//
-//                                             {/* Audio */}
-//                                             <div className="mb-4">
-//                                                 <label className="block text-sm font-medium text-gray-700">Nieuwe audio (optioneel)</label>
-//                                                 <input
-//                                                     type="file"
-//                                                     accept="audio/*"
-//                                                     onChange={(e) =>
-//                                                         setEditingExercise({
-//                                                             ...editingExercise,
-//                                                             newFile: e.target.files[0],
-//                                                         })
-//                                                     }
-//                                                     className="mt-1 block w-full text-sm text-gray-500"
-//                                                 />
-//                                             </div>
-//
-//                                             <div className="flex justify-end space-x-4">
-//                                                 <button
-//                                                     type="button"
-//                                                     onClick={() => setEditingExercise(null)}
-//                                                     className="px-4 py-2 bg-gray-600 text-white font-semibold rounded shadow hover:bg-gray-700"
-//                                                 >
-//                                                     Annuleren
-//                                                 </button>
-//                                                 <button
-//                                                     type="submit"
-//                                                     className="px-4 py-2 bg-blue-600 text-white font-semibold rounded shadow hover:bg-blue-700"
-//                                                 >
-//                                                     Opslaan
-//                                                 </button>
-//                                             </div>
-//                                         </form>
-//                                     </div>
-//                                 </div>
-//                             )}
-//                         </div>
-//
-//                         <div className="button-group flex space-x-4 mt-2">
-//                             <button
-//                                 onClick={closeModal}
-//                                 className="px-4 py-2 bg-red-600 text-white font-semibold rounded shadow hover:bg-red-700"
-//                             >
-//                                 Sluiten
-//                             </button>
-//                             <button
-//                                 onClick={handleUpdateName}
-//                                 className="px-4 py-2 bg-blue-600 text-white font-semibold rounded shadow hover:bg-blue-700"
-//                             >
-//                                 Verander de naam
-//                             </button>
-//                             <button
-//                                 onClick={() => {
-//                                     handleDeleteCourse(selectedCourse.id)
-//                                 }}
-//                                 className="px-4 py-2 bg-gray-600 text-white font-semibold rounded shadow hover:bg-gray-700"
-//                             >
-//                                 Verwijderen
-//                             </button>
-//                         </div>
-//                     </div>
-//                 </div>
-//             )}
-//
-//         </div>
-//     );
-// }
-

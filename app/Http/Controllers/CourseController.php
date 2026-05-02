@@ -86,6 +86,7 @@ class CourseController extends Controller
     {
         $validated = $request->validate([
             'course_name' => 'required|string|max:255',
+            'description' => 'nullable|string',
         ]);
 
         $exists = Course::where('course_name', $validated['course_name'])->exists();
@@ -98,6 +99,7 @@ class CourseController extends Controller
 
         $course = Course::create([
             'course_name' => $validated['course_name'],
+            'description' => $validated['description'] ?? null,
         ]);
 
         return response()->json([

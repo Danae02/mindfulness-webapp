@@ -129,6 +129,13 @@ function CourseModal({ course, onClose }) {
                     </button>
                 </div>
 
+                {/* Beschrijving */}
+                {course.description && (
+                    <p className="px-6 pb-3 text-sm text-gray-500 leading-relaxed">
+                        {course.description}
+                    </p>
+                )}
+
                 {/* Subtitel */}
                 <p className="px-6 pb-4 text-base font-semibold" style={{ color: '#7B5EA7' }}>
                     Oefeningen in deze cursus
@@ -398,7 +405,12 @@ export default function CourseList() {
                                 <p className="text-base font-bold" style={{ color: "#7B5EA7" }}>
                                     {course.course_name}
                                 </p>
-                                <p className="text-sm text-gray-500">
+                                {course.description && (
+                                    <p className="text-xs text-gray-500 mt-0.5 leading-snug line-clamp-2">
+                                        {course.description}
+                                    </p>
+                                )}
+                                <p className="text-sm text-gray-400 mt-0.5">
                                     {course.exercises?.length || 0} oefeningen
                                 </p>
                             </div>
