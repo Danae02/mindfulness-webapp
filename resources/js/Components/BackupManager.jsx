@@ -93,7 +93,6 @@ export default function BackupManager() {
             {/* backup downloaden  */}
             <section className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
-                    <span className="text-2xl">📦</span>
                     <div>
                         <h4 className="font-semibold text-gray-800">Backup downloaden</h4>
                         <p className="text-sm text-gray-500">
@@ -107,8 +106,8 @@ export default function BackupManager() {
                     </p>
                     <ul className="text-sm text-gray-600 space-y-1 mb-5 list-none">
                         {[
-                            "metadata.json — alle cursussen, oefeningen, vragen en antwoorden",
-                            "audio/ — alle MP3-bestanden",
+                            "metadata.json: alle cursussen, oefeningen, vragen en antwoorden",
+                            "audio/: alle MP3-bestanden",
                         ].map((item) => (
                             <li key={item} className="flex items-start gap-2">
                                 <span>{item}</span>
@@ -146,7 +145,6 @@ export default function BackupManager() {
             {/* backup herstellen/terugzetten */}
             <section className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
-                    <span className="text-2xl">🔄</span>
                     <div>
                         <h4 className="font-semibold text-gray-800">Backup terugzetten</h4>
                         <p className="text-sm text-gray-500">
