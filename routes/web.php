@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AudioController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
@@ -126,6 +127,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/{groupId}/users', [ResearchGroupController::class, 'addUser'])->name('addUser');
         Route::delete('/{groupId}/users/{userId}', [ResearchGroupController::class, 'removeUser'])->name('removeUser');
         //Route::get('/active-question', [ResearchGroupController::class, 'getActiveQuestion'])->name('activeQuestion');
+    });
+
+    // Backup routes alleen voor admins
+    Route::middleware(['auth', 'admin'])->group(function () {
+        Route::get('/admin/backup/download', [BackupController::class, 'downloadBackup'])
+            ->name('admin.backup.download');
+
+        Route::post('/admin/backup/restore', [BackupController::class, 'restoreBackup'])
+            ->name('admin.backup.restore');
     });
 
     // Standaardvragen

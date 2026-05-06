@@ -104,6 +104,23 @@ export default function Sidebar({ setView, currentView }) {
                             <span className="break-words">Gevoelsvragen beheren</span>
                         </button>
                     </li>
+                    <li>
+                        <button
+                            onClick={() => handleViewChange("backup")}
+                            className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
+                                currentView === "backup"
+                                    ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
+                                    : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
+                            }`}
+                            style={{
+                                ...(currentView === "backup" && {
+                                    boxShadow: 'inset 3px 0 0 #9B6DD4'
+                                })
+                            }}
+                        >
+                            <span className="break-words">Backup & Herstel</span>
+                        </button>
+                    </li>
                 </ul>
             </div>
         </div>
