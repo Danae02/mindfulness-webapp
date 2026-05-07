@@ -13,24 +13,11 @@ export default function AccessibilityButton({ variant = 'plain' }) {
     }, []);
 
     const toggleBold = () => {
-        if (isBold) {
-            document.body.classList.remove('bold-font');
-            document.body.style.fontWeight = '';
-            localStorage.setItem('bold-font', 'false');
-            setIsBold(false);
-        } else {
-            document.body.classList.add('bold-font');
-            document.body.style.fontWeight = '800';
-            localStorage.setItem('bold-font', 'true');
-            setIsBold(true);
-        }
-    };
-
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            toggleBold();
-        }
+        const next = !isBold;
+        document.body.classList.toggle('bold-font', next);
+        document.body.style.fontWeight = next ? '800' : '';
+        localStorage.setItem('bold-font', String(next));
+        setIsBold(next);
     };
 
     const wrapperClass = variant === 'button'
@@ -42,32 +29,23 @@ export default function AccessibilityButton({ variant = 'plain' }) {
         : {};
 
     return (
-        <div
-            className={wrapperClass}
+        <label
+            className={`${wrapperClass} select-none`}
             style={wrapperStyle}
-            onClick={toggleBold}
-            onKeyDown={handleKeyDown}
-            tabIndex={0}
-            role="switch"
-            aria-checked={isBold}
-            aria-label={isBold ? "Dikke tekst aan, klik om uit te schakelen" : "Dikke tekst uit, klik om in te schakelen"}
         >
-            <label className="flex items-center cursor-pointer select-none">
-                <input
-                    type="checkbox"
-                    role="switch"
-                    aria-checked={isBold}
-                    checked={isBold}
-                    onChange={() => {}}
-                    className="h-5 w-5 rounded border-2 focus:ring-primary focus:ring-offset-0"
-                    style={{ borderColor: '#000000' }}
-                    tabIndex={-1}
-                />
-                <span className="ms-3 text-base font-medium text-gray-800">
-                    <span className="font-bold text-xl mr-1" aria-hidden="true">A </span>
-                    Zet de dikke tekst aan/uit
-                </span>
-            </label>
-        </div>
+            <input
+                type="checkbox"
+                role="switch"
+                aria-checked={isBold}
+                checked={isBold}
+                onChange={toggleBold}
+                className="h-5 w-5 rounded border-2 focus:ring-primary focus:ring-offset-0"
+                style={{ borderColor: '#000000' }}
+            />
+            <span className="ms-3 text-base font-medium text-gray-800">
+                <span className="font-bold text-xl mr-1" aria-hidden="true">A </span>
+                Zet de dikke tekst aan/uit
+            </span>
+        </label>
     );
 }

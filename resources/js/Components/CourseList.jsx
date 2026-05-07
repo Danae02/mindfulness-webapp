@@ -177,17 +177,17 @@ function CourseModal({ course, onClose }) {
                                 >
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="flex-1">
-                                            <p className="text-base font-bold text-gray-500">
+                                            <p className="text-base font-bold text-gray-600">
                                                 {exercise.exercise_name}
                                             </p>
-                                            <div className="flex items-center gap-1 text-sm text-gray-400 mt-1">
+                                            <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
                                                 <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                                 <span>Ongeveer {exercise.duration || 5} minuten</span>
                                             </div>
                                             {availableLabel && (
-                                                <p className="text-sm text-gray-400 mt-2 font-medium">
+                                                <p className="text-sm text-gray-600 mt-2 font-medium">
                                                     {availableLabel}
                                                 </p>
                                             )}
@@ -363,10 +363,10 @@ export default function CourseList() {
                                 </div>
 
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-base font-bold text-gray-400">
+                                    <p className="text-base font-bold text-gray-600">
                                         {course.course_name}
                                     </p>
-                                    <p className="text-sm text-gray-400">
+                                    <p className="text-sm text-gray-600">
                                         {course.available_label || "Nog niet beschikbaar"}
                                     </p>
                                 </div>
@@ -377,47 +377,48 @@ export default function CourseList() {
                     }
 
                     return (
-                        <div
-                            key={course.id}
-                            className="flex items-center gap-4 p-4 bg-white rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
-                            style={{ border: "2px solid #7B5EA7" }}
-                            onClick={() => handleCardClick(course)}
-                            onKeyDown={(e) => handleKeyDown(e, course)}
-                            tabIndex={0}
-                            role="button"
-                            aria-label={`Open cursus: ${course.course_name}, ${course.exercises?.length || 0} oefeningen`}
-                        >
+                        <div key={course.id} role="listitem">
                             <div
-                                className="flex items-center justify-center w-14 h-14 rounded-lg flex-shrink-0"
-                                style={{ backgroundColor: "#F0E8FF", border: "2px solid #7B5EA7" }}
-                                aria-hidden="true"
+                                className="flex items-center gap-4 p-4 bg-white rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
+                                style={{ border: "2px solid #7B5EA7" }}
+                                onClick={() => handleCardClick(course)}
+                                onKeyDown={(e) => handleKeyDown(e, course)}
+                                tabIndex={0}
+                                role="button"
+                                aria-label={`Open cursus: ${course.course_name}, ${course.exercises?.length || 0} oefeningen`}
                             >
-                                <img
-                                    src="/icons/lotus.png"
-                                    alt=""
+                                <div
+                                    className="flex items-center justify-center w-14 h-14 rounded-lg flex-shrink-0"
+                                    style={{ backgroundColor: "#F0E8FF", border: "2px solid #7B5EA7" }}
                                     aria-hidden="true"
-                                    className="w-10 h-10 object-contain"
-                                    style={{ filter: "invert(35%) sepia(40%) saturate(500%) hue-rotate(240deg) brightness(80%)" }}
-                                />
-                            </div>
+                                >
+                                    <img
+                                        src="/icons/lotus.png"
+                                        alt=""
+                                        aria-hidden="true"
+                                        className="w-10 h-10 object-contain"
+                                        style={{ filter: "invert(35%) sepia(40%) saturate(500%) hue-rotate(240deg) brightness(80%)" }}
+                                    />
+                                </div>
 
-                            <div className="flex-1 min-w-0">
-                                <p className="text-base font-bold" style={{ color: "#7B5EA7" }}>
-                                    {course.course_name}
-                                </p>
-                                {course.description && (
-                                    <p className="text-xs text-gray-500 mt-0.5 leading-snug line-clamp-2">
-                                        {course.description}
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-base font-bold" style={{ color: "#7B5EA7" }}>
+                                        {course.course_name}
                                     </p>
-                                )}
-                                <p className="text-sm text-gray-400 mt-0.5">
-                                    {course.exercises?.length || 0} oefeningen
-                                </p>
-                            </div>
+                                    {course.description && (
+                                        <p className="text-xs text-gray-500 mt-0.5 leading-snug line-clamp-2">
+                                            {course.description}
+                                        </p>
+                                    )}
+                                    <p className="text-sm text-gray-600 mt-0.5">
+                                        {course.exercises?.length || 0} oefeningen
+                                    </p>
+                                </div>
 
-                            <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
+                                <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
                         </div>
                     );
                 })}

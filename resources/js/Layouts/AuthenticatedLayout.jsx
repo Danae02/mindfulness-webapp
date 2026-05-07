@@ -48,12 +48,12 @@ export default function AuthenticatedLayout({ header, children, topBar }) {
                                     backgroundColor: '#F0E8FF',
                                     borderColor: '#000000'
                                 }}
-                                aria-label="Mijn profiel"
                             >
                                 <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
                                 <span className="text-sm font-medium text-gray-800">
+                                    <span className="sr-only">Profiel van </span>
                                     {user.name}
                                 </span>
                             </Link>
@@ -87,13 +87,6 @@ export default function AuthenticatedLayout({ header, children, topBar }) {
             {topBar && topBar}
 
             <main>
-                {/*{header && (*/}
-                {/*    <header className="bg-white shadow">*/}
-                {/*        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">*/}
-                {/*            {header}*/}
-                {/*        </div>*/}
-                {/*    </header>*/}
-                {/*)}*/}
                 <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     {children}
                 </div>
