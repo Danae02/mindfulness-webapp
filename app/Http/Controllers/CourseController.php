@@ -113,12 +113,22 @@ class CourseController extends Controller
         $course = Course::with('exercises')->find($id);
 
         if (!$course) {
-            return response()->json([
-                'message' => 'Course not found.',
-            ], 404);
+            return response()->json(['message' => 'Course not found.'], 404);
         }
 
-        return response()->json($course);
+        // Voeg duration toe aan elke oefening
+        $exercises = $course->exercises->map(function ($exercise) {
+            return array_merge($exercise->toArray(), [
+                'duration' => $exercise->duration_minutes,
+            ]);
+        });
+
+        return response()->json([
+            'id' => $course->id,
+            'course_name' => $course->course_name,
+            'description' => $course->description,
+            'exercises' => $exercises,
+        ]);
     }
 
     public function updateCourse(Request $request, $id)

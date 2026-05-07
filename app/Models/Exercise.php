@@ -19,10 +19,11 @@ class Exercise extends Model
         'created_by',
         'times_done',
         'last_time',
-        'chapter_id', // Nieuwe veld
+        'chapter_id',
         'course_id',
         'form_question',
-        'form_answers'
+        'form_answers',
+        'duration_seconds',
     ];
 
     protected $casts = [
@@ -45,6 +46,30 @@ class Exercise extends Model
     public function favoritedBy()
     {
         return $this->belongsToMany(User::class, 'favorites');
+    }
+
+    /**
+     * Geeft de totale duur in minuten terug (afgerond naar boven).
+     * Bevat audio + 60 seconden voor de gevoelsvragen.
+     * Geeft null terug als de duur onbekend is.
+     */
+    public function getDurationMinutesAttribute(): ?int
+    {
+        if ($this->duration_seconds === null) {
+            return null;
+        }
+
+        return (int) ceil($this->duration_seconds / 60);
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+
+    public function userExerciseLogs()
+    {
+        return $this->hasMany(UserExerciseLog::class);
     }
 
 }

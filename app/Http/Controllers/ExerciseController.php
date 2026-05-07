@@ -21,7 +21,14 @@ class ExerciseController extends Controller
             ], 404);
         }
 
-        return response()->json($course->exercises);
+        // Voeg een berekend 'duration' veld (minuten) toe aan elke oefening
+        $exercises = $course->exercises->map(function (Exercise $exercise) {
+            return array_merge($exercise->toArray(), [
+                'duration' => $exercise->duration_minutes,
+            ]);
+        });
+
+        return response()->json($exercises);
     }
 
     public function showExercise($id)
@@ -56,10 +63,13 @@ class ExerciseController extends Controller
         }
 
         return Inertia::render('ExercisePage', [
-            'exercise'             => $exercise,
-            'researchMode'         => 'per_exercise',
-            'researchQuestion'     => $question,
-            'researchAnswers'      => $answers,
+            'exercise'              => array_merge($exercise->toArray(), [
+                // Stuur de duur in minuten mee naar de frontend
+                'duration' => $exercise->duration_minutes,
+            ]),
+            'researchMode'          => 'per_exercise',
+            'researchQuestion'      => $question,
+            'researchAnswers'       => $answers,
             'alreadyCompletedToday' => $alreadyCompletedToday,
         ]);
     }
@@ -67,11 +77,11 @@ class ExerciseController extends Controller
     public function updateExercise(Request $request, $id)
     {
         $request->validate([
-            'exercise_name' => 'required|string|max:255',
-            'form_question' => 'nullable|string|max:500',
-            'form_answers'  => 'nullable|array',
+            'exercise_name'  => 'required|string|max:255',
+            'form_question'  => 'nullable|string|max:500',
+            'form_answers'   => 'nullable|array',
             'form_answers.*' => 'nullable|string|max:255',
-            'audio'         => 'nullable|file|mimes:mp3,wav|max:10240',
+            'audio'          => 'nullable|file|mimes:mp3,wav|max:10240',
         ]);
 
         // Controleer of de oefening bestaat
@@ -87,18 +97,32 @@ class ExerciseController extends Controller
 
         // Controleer of er een nieuw audiobestand is geüpload
         if ($request->hasFile('audio')) {
-            $audioPath = $request->file('audio')->store('public/audio');
-            $exercise->audio_file_path = $audioPath;
+            $file     = $request->file('audio');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('audio', $filename, 'public');
+
+            $exercise->audio_file_path = asset('storage/audio/' . $filename);
+
+            // Herbereken duur bij nieuw audiobestand
+            $durationSeconds = $this->getAudioDurationSeconds(
+                storage_path('app/public/audio/' . $filename)
+            );
+
+            $exercise->duration_seconds = $durationSeconds !== null ? $durationSeconds + 60 : null;
         }
 
         // Sla de wijzigingen op
         if ($exercise->save()) {
-            return response()->json(['success' => true, 'exercise' => $exercise], 200);
+            return response()->json([
+                'success'  => true,
+                'exercise' => array_merge($exercise->toArray(), [
+                    'duration' => $exercise->duration_minutes,
+                ]),
+            ], 200);
         }
 
         return response()->json(['success' => false, 'message' => 'Failed to update exercise'], 500);
     }
-
 
     public function submitCompletedLog(Request $request)
     {
@@ -120,24 +144,47 @@ class ExerciseController extends Controller
         };
 
         $normalizedBefore = $normalize($request->feeling_before, $request->feeling_scale);
-        $normalizedAfter = $normalize($request->feeling_after, $request->feeling_scale);
+        $normalizedAfter  = $normalize($request->feeling_after, $request->feeling_scale);
 
         $log = UserExerciseLog::create([
-            'user_id'           => $request->user_id,
-            'exercise_id'       => $request->exercise_id,
-            'date_time'         => $request->date_time ?? now(),
-            'completed'         => true,
-            'feeling_before'    => $request->feeling_before,      // Originele waarde
-            'feeling_after'     => $request->feeling_after,       // Originele waarde
-            'feeling_scale'     => $request->feeling_scale,       // Aantal opties
-            'feeling_before_pct' => $normalizedBefore,            // Genormaliseerd (0-100)
-            'feeling_after_pct'  => $normalizedAfter,             // Genormaliseerd (0-100)
-            'session_duration'   => $request->session_duration ?? 0,   // ← NIEUW
+            'user_id'            => $request->user_id,
+            'exercise_id'        => $request->exercise_id,
+            'date_time'          => $request->date_time ?? now(),
+            'completed'          => true,
+            'feeling_before'     => $request->feeling_before,
+            'feeling_after'      => $request->feeling_after,
+            'feeling_scale'      => $request->feeling_scale,
+            'feeling_before_pct' => $normalizedBefore,
+            'feeling_after_pct'  => $normalizedAfter,
+            'session_duration'   => $request->session_duration ?? 0,
         ]);
 
         return response()->json([
             'message' => 'Answer submitted successfully.',
             'log'     => $log,
         ]);
+    }
+
+    /**
+     * Lees de afspeelduur van een audiobestand uit via getID3.
+     */
+    private function getAudioDurationSeconds(string $absolutePath): ?int
+    {
+        if (!file_exists($absolutePath) || !class_exists(\getID3::class)) {
+            return null;
+        }
+
+        try {
+            $getID3   = new \getID3();
+            $fileInfo = $getID3->analyze($absolutePath);
+
+            if (isset($fileInfo['playtime_seconds'])) {
+                return (int) ceil($fileInfo['playtime_seconds']);
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('getID3 kon duur niet lezen: ' . $e->getMessage());
+        }
+
+        return null;
     }
 }

@@ -52,7 +52,7 @@ export default function AudioButton({ audioFile, label = "Lees voor" }) {
             <button
                 type="button"
                 disabled
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 text-gray-400 cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 text-gray-600 border-2 border-gray-400 cursor-not-allowed"
                 title="Audiobestand niet beschikbaar"
             >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,7 +67,7 @@ export default function AudioButton({ audioFile, label = "Lees voor" }) {
         <button
             type="button"
             onClick={togglePlay}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 border-2 border-gray-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             aria-label={isPlaying ? "Stop met voorlezen" : "Lees tekst voor"}
             title={isPlaying ? "Stop met voorlezen" : "Lees tekst voor"}
         >

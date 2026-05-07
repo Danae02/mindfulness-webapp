@@ -7,6 +7,14 @@ import FeelingQuestion from "@/Components/FeelingQuestion.jsx";
 import CompletionScreen from "@/Components/CompletionScreen.jsx";
 import axios from 'axios';
 
+function formatDuration(minutes) {
+    if (!minutes) return null;
+    if (minutes < 60) return `${minutes} min`;
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m > 0 ? `${h} u ${m} min` : `${h} uur`;
+}
+
 export default function ExercisePage({ exercise, researchMode, researchQuestion, researchAnswers, alreadyCompletedToday }) {
     const [isCompleted, setIsCompleted] = useState(false);
     const [showStartQuestion, setShowStartQuestion] = useState(true);
@@ -15,38 +23,33 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
     const [skipQuestions, setSkipQuestions] = useState(false);
     const [showCompletion, setShowCompletion] = useState(false);
 
-    // Bewaar de numerieke waarde (1-based) die door FeelingQuestion wordt teruggegeven
     const [feelingBefore, setFeelingBefore] = useState(null);
 
-    // Bijhouden hoe lang de gebruiker met de audio bezig is geweest
     const sessionStartRef = useRef(null);
 
     const user = usePage().props.auth.user;
 
     const getQuestion = () => {
-        if (researchMode === 'per_exercise' && researchQuestion) {
-            return researchQuestion;
-        }
+        if (researchMode === 'per_exercise' && researchQuestion) return researchQuestion;
         return exercise.form_question;
     };
 
     const getAnswers = () => {
         if (researchMode === 'per_exercise' && researchAnswers) {
-            if (typeof researchAnswers === 'string') {
-                return JSON.parse(researchAnswers);
-            }
-            return researchAnswers;
+            return typeof researchAnswers === 'string' ? JSON.parse(researchAnswers) : researchAnswers;
         }
-        if (typeof exercise.form_answers === 'string') {
-            return JSON.parse(exercise.form_answers);
-        }
-        return exercise.form_answers;
+        return typeof exercise.form_answers === 'string'
+            ? JSON.parse(exercise.form_answers)
+            : exercise.form_answers;
     };
 
     const currentQuestion = getQuestion();
-    const currentAnswers = getAnswers();
-    const hasQuestions = currentQuestion && currentAnswers && currentAnswers.length > 0;
-    const feelingScale = currentAnswers?.length ?? 5;
+    const currentAnswers  = getAnswers();
+    const hasQuestions    = currentQuestion && currentAnswers && currentAnswers.length > 0;
+    const feelingScale    = currentAnswers?.length ?? 5;
+
+    // Duur: vanuit de database (in minuten), of null als onbekend
+    const durationLabel = formatDuration(exercise.duration ?? null);
 
     useEffect(() => {
         if (alreadyCompletedToday) {
@@ -78,14 +81,10 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
 
     const handleCompletion = () => {
         setIsCompleted(true);
-        if (!skipQuestions) {
-            setShowEndQuestion(true);
-        }
+        if (!skipQuestions) setShowEndQuestion(true);
     };
 
-    const handleBack = () => {
-        router.visit('/dashboard');
-    };
+    const handleBack = () => router.visit('/dashboard');
 
     const handleConfirmEnd = async (valueOneBased) => {
         localStorage.setItem('feeling_after', valueOneBased);
@@ -95,18 +94,17 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
             : 0;
 
         const payload = {
-            user_id: user.id,
-            exercise_id: exercise.id,
-            feeling_before: feelingBefore,
-            feeling_after: valueOneBased,
-            feeling_scale: feelingScale,
+            user_id:          user.id,
+            exercise_id:      exercise.id,
+            feeling_before:   feelingBefore,
+            feeling_after:    valueOneBased,
+            feeling_scale:    feelingScale,
             session_duration: sessionDurationSeconds,
-            date_time: new Date().toISOString(),
+            date_time:        new Date().toISOString(),
         };
 
         try {
             await axios.post(route('exercises.submit'), payload);
-            console.log('Log created successfully');
             setShowCompletion(true);
         } catch (error) {
             console.error('Error creating log:', error);
@@ -129,10 +127,7 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
             >
                 <div className="flex items-center justify-center min-h-screen bg-gray-100 py-8">
                     <div className="bg-white rounded-lg shadow-lg max-w-lg w-full overflow-hidden p-8">
-                        <CompletionScreen
-                            userName={user.name}
-                            onBack={handleBack}
-                        />
+                        <CompletionScreen userName={user.name} onBack={handleBack} />
                     </div>
                 </div>
             </AuthenticatedLayout>
@@ -152,6 +147,25 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
                     {/* Paarse header */}
                     <div className="px-8 py-6 text-center" style={{ backgroundColor: '#7B5EA7' }}>
                         <h1 className="text-2xl font-bold text-white">{exercise.exercise_name}</h1>
+
+                        {/* lengte van oefening */}
+                        {durationLabel && (
+                            <div className="flex items-center justify-center gap-1.5 mt-2">
+                                <svg
+                                    className="w-4 h-4 text-purple-200"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    aria-hidden="true"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="text-sm text-purple-100">
+                                    Ongeveer {durationLabel}
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     <div className="p-8 space-y-6">
