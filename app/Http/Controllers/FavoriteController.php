@@ -15,6 +15,13 @@ class FavoriteController extends Controller
     public function index()
     {
         $favorites = Auth::user()->favoriteExercises()->get();
+
+        // Voeg de duration (in minuten) toe aan elke oefening
+        $favorites = $favorites->map(function($exercise) {
+            $exercise->duration = $exercise->duration_minutes;
+            return $exercise;
+        });
+
         return response()->json($favorites);
     }
 

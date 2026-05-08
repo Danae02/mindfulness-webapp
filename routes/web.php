@@ -90,7 +90,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{id}/delete', [CourseController::class, 'deleteCourse'])->name('delete');
         Route::get('/{id}', [CourseController::class, 'getCourseDetails'])->name('details');
         Route::get('/{id}/exercises', [ExerciseController::class, 'getExercises'])->name('exercises');
-        Route::get('/{id}/availability', [CourseController::class, 'getCourseAvailability'])->name('availability'); // ← NIEUW
+        Route::get('/{id}/availability', [CourseController::class, 'getCourseAvailability'])->name('availability');
     });
 
     // Favorieten routes
@@ -133,7 +133,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/admin/backup/download', [BackupController::class, 'downloadBackup'])
             ->name('admin.backup.download');
-
         Route::post('/admin/backup/restore', [BackupController::class, 'restoreBackup'])
             ->name('admin.backup.restore');
     });

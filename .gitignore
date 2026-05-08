@@ -18,5 +18,8 @@ npm-debug.log
 yarn-error.log
 /.fleet
 /.idea
+.idea/
 /.vscode
+.vscode/
 /.zed
+/bootstrap/cache/

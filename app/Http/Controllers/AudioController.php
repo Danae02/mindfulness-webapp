@@ -3,16 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exercise;
+use App\Models\ResearchSettings;
+use App\Models\UserExerciseLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AudioController extends Controller
 {
-    // ================================
-    // CRUD voor Exercises
-    // ================================
 
+    // CRUD voor Exercises
     public function getAllAudios()
     {
         return response()->json(Exercise::all());
@@ -29,6 +30,60 @@ class AudioController extends Controller
         }
 
         return Storage::download($filePath);
+    }
+
+    //Toont de ExercisePage voor een oefening.Ondersteunt de vaste introductie-oefening via id='intro'.
+    public function showExercise($id)
+    {
+        // Introductie-oefening (hardcoded, geen DB)
+        if ($id === 'intro') {
+            return Inertia::render('IntroExercisePage', [
+                'exercise' => [
+                    'id'              => 'intro',
+                    'exercise_name'   => 'Introductie mindfulness app',
+                    'audio_file_path' => '/audio/1.mindfulness_app_inleiding.m4a',
+                ],
+            ]);
+        }
+
+        // Gewone oefening uit DB
+        $exercise = Exercise::find($id);
+
+        if (!$exercise) {
+            abort(404, 'Exercise not found');
+        }
+
+        $alreadyCompletedToday = false;
+        if (auth()->check()) {
+            $alreadyCompletedToday = UserExerciseLog::where('user_id', auth()->id())
+                ->where('exercise_id', $id)
+                ->whereDate('date_time', today())
+                ->where('completed', true)
+                ->exists();
+        }
+
+        $user     = auth()->user();
+        $question = null;
+        $answers  = null;
+
+        if ($user && $user->researchGroup && $user->researchGroup->question) {
+            $question = $user->researchGroup->question;
+            $answers  = $user->researchGroup->answers;
+        } else {
+            $setting  = ResearchSettings::where('key_name', 'mode')->first();
+            $question = $setting->question ?? null;
+            $answers  = $setting->answers ?? null;
+        }
+
+        return Inertia::render('ExercisePage', [
+            'exercise'              => array_merge($exercise->toArray(), [
+                'duration' => $exercise->duration_minutes,
+            ]),
+            'researchMode'          => 'per_exercise',
+            'researchQuestion'      => $question,
+            'researchAnswers'       => $answers,
+            'alreadyCompletedToday' => $alreadyCompletedToday,
+        ]);
     }
 
     public function uploadAudio(Request $request)
@@ -80,16 +135,13 @@ class AudioController extends Controller
         ]);
     }
 
-
     private function getAudioDurationSeconds(string $absolutePath): ?int
     {
-
         if (!file_exists($absolutePath)) {
             return null;
         }
 
-        // getID3 staat standaard in laravel via james-heinrich/getid3
-        // Installeer via: composer require james-heinrich/getid3
+        // getID3 staat standaard in laravel via composer require james-heinrich/getid3
         if (!class_exists(\getID3::class)) {
             return null;
         }
@@ -104,7 +156,6 @@ class AudioController extends Controller
         } catch (\Throwable $e) {
             \Log::warning('getID3 kon duur niet lezen: ' . $e->getMessage());
         }
-
         return null;
     }
 }

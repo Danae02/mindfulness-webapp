@@ -3,9 +3,9 @@ import axios from "axios";
 
 
 function ExerciseEditForm({ exercise, onSave, onCancel }) {
-    const [name, setName]       = useState(exercise.exercise_name);
+    const [name, setName]         = useState(exercise.exercise_name);
     const [question, setQuestion] = useState(exercise.form_question || "");
-    const [answers, setAnswers] = useState(
+    const [answers, setAnswers]   = useState(
         exercise.form_answers?.length ? exercise.form_answers : ["", "", "", "", ""]
     );
     const [newFile, setNewFile] = useState(null);
@@ -21,36 +21,36 @@ function ExerciseEditForm({ exercise, onSave, onCancel }) {
     return (
         <form onSubmit={handleSubmit} className="mt-3 space-y-3 pt-3 border-t border-gray-100">
             <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Naam oefening</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Naam oefening</label>
                 <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-1"
                 />
             </div>
             <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Nieuw audiobestand (optioneel)</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Nieuw audiobestand (optioneel)</label>
                 <input
                     type="file"
                     accept="audio/*"
                     onChange={(e) => setNewFile(e.target.files[0])}
-                    className="w-full text-sm text-gray-500"
+                    className="w-full text-sm text-gray-700"
                 />
             </div>
             <div className="flex justify-end gap-2 pt-1">
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-4 py-1.5 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-400 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-1"
                 >
                     Annuleren
                 </button>
                 <button
                     type="submit"
                     disabled={saving}
-                    className="px-4 py-1.5 text-sm font-semibold text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-60"
+                    className="px-4 py-2 text-sm font-semibold text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-1 disabled:opacity-60"
                     style={{ backgroundColor: "#6C4092" }}
                 >
                     {saving ? "Opslaan..." : "Opslaan"}
@@ -62,9 +62,9 @@ function ExerciseEditForm({ exercise, onSave, onCancel }) {
 
 
 function CourseEditForm({ course, onSave, onCancel }) {
-    const [name, setName]             = useState(course.course_name);
+    const [name, setName]               = useState(course.course_name);
     const [description, setDescription] = useState(course.description || "");
-    const [saving, setSaving]         = useState(false);
+    const [saving, setSaving]           = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -82,7 +82,7 @@ function CourseEditForm({ course, onSave, onCancel }) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-1"
                 />
             </div>
             <div>
@@ -92,21 +92,21 @@ function CourseEditForm({ course, onSave, onCancel }) {
                     onChange={(e) => setDescription(e.target.value)}
                     rows={3}
                     placeholder="Korte beschrijving zichtbaar voor cliënten..."
-                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
+                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-1 resize-none"
                 />
             </div>
             <div className="flex justify-end gap-2">
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-400 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-1"
                 >
                     Annuleren
                 </button>
                 <button
                     type="submit"
                     disabled={saving}
-                    className="px-5 py-2 text-sm font-semibold text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-60"
+                    className="px-5 py-2 text-sm font-semibold text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-1 disabled:opacity-60"
                     style={{ backgroundColor: "#6C4092" }}
                 >
                     {saving ? "Opslaan..." : "Wijzigingen opslaan"}
@@ -125,7 +125,6 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
     const [confirmDelete, setConfirmDelete]         = useState(false);
     const [localCourse, setLocalCourse]             = useState(course);
 
-    // Focus trap
     useEffect(() => {
         const prev = document.activeElement;
         closeRef.current?.focus();
@@ -152,10 +151,7 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
 
     const handleSaveCourse = async ({ course_name, description }) => {
         try {
-            const response = await axios.put(route("courses.update", { id: localCourse.id }), {
-                course_name,
-                description,
-            });
+            await axios.put(route("courses.update", { id: localCourse.id }), { course_name, description });
             const updated = { ...localCourse, course_name, description };
             setLocalCourse(updated);
             onCourseUpdated(updated);
@@ -238,7 +234,6 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                 className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
                 <div className="flex items-start justify-between p-6 pb-0">
                     <h2 id="modal-course-title" className="text-xl font-bold text-gray-900 pr-4">
                         {localCourse.course_name}
@@ -247,29 +242,28 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                         ref={closeRef}
                         onClick={onClose}
                         aria-label="Sluit venster"
-                        className="w-8 h-8 flex-shrink-0 flex items-center justify-center border border-gray-300 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                        className="w-11 h-11 flex-shrink-0 flex items-center justify-center border border-gray-400 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-1"
                     >
                         ✕
                     </button>
                 </div>
 
                 <div className="px-6 pb-6">
-                    {/* Omschrijving */}
                     {!editingCourse && (
                         <div className="mt-4">
-                            <p className="text-sm font-semibold text-gray-500 mb-1">Omschrijving</p>
+                            {/* text-gray-700 op wit = 9.5:1 ✓ */}
+                            <p className="text-sm font-semibold text-gray-700 mb-1">Omschrijving</p>
                             <div
                                 className="w-full px-4 py-3 rounded-xl text-sm text-gray-700 leading-relaxed"
                                 style={{ backgroundColor: "#F0E8FF", border: "1px solid #D4C5F0" }}
                             >
                                 {localCourse.description || (
-                                    <span className="italic text-gray-400">Geen omschrijving</span>
+                                    <span className="italic text-gray-600">Geen omschrijving</span>
                                 )}
                             </div>
                         </div>
                     )}
 
-                    {/* Cursus bewerkformulier */}
                     {editingCourse && (
                         <CourseEditForm
                             course={localCourse}
@@ -278,15 +272,14 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                         />
                     )}
 
-                    {/* Oefeningen */}
                     {!editingCourse && (
                         <>
-                            <h3 className="text-base font-semibold text-gray-500 mt-6 mb-3">
+                            <h3 className="text-base font-semibold text-gray-600 mt-6 mb-3">
                                 Oefeningen in deze cursus
                             </h3>
 
                             {localCourse.exercises?.length === 0 && (
-                                <p className="text-sm text-gray-400 italic">Geen oefeningen in deze cursus.</p>
+                                <p className="text-sm text-gray-600 italic">Geen oefeningen in deze cursus.</p>
                             )}
 
                             <div className="space-y-3" role="list">
@@ -298,7 +291,7 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                                     >
                                         <p className="font-bold text-gray-900 mb-1">{exercise.exercise_name}</p>
 
-                                        <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-0.5">
+                                        <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-0.5">
                                             <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h4l2 10h6l2-10h4M9 17v2m6-2v2" />
                                             </svg>
@@ -307,7 +300,7 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                                             </span>
                                         </div>
 
-                                        <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-3">
+                                        <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-3">
                                             <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
@@ -318,15 +311,15 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => handleDeleteExercise(exercise.id)}
-                                                    aria-label={`Verwijder oefening ${exercise.exercise_name}`}
-                                                    className="px-3 py-1.5 text-sm font-semibold rounded-lg border-2 border-red-500 text-red-500 hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+                                                    aria-label={"Verwijder oefening " + exercise.exercise_name}
+                                                    className="px-3 py-2 text-sm font-semibold rounded-lg border-2 border-red-600 text-red-700 hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-1"
                                                 >
                                                     Verwijderen
                                                 </button>
                                                 <button
                                                     onClick={() => setEditingExerciseId(exercise.id)}
-                                                    aria-label={`Bewerk oefening ${exercise.exercise_name}`}
-                                                    className="px-3 py-1.5 text-sm font-semibold rounded-lg border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                                    aria-label={"Bewerk oefening " + exercise.exercise_name}
+                                                    className="px-3 py-2 text-sm font-semibold rounded-lg border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-1"
                                                     style={{ borderColor: "#6C4092", color: "#6C4092" }}
                                                 >
                                                     Bewerken
@@ -345,30 +338,30 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                         </>
                     )}
 
-                    {/* Onderste knoppen */}
-                    {!editingCourse && (
+                    {!editingCourse && !localCourse.is_intro && (
                         <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100">
                             {!confirmDelete ? (
                                 <button
                                     onClick={() => setConfirmDelete(true)}
-                                    className="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    className="flex-1 py-3 text-sm font-semibold text-white rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2"
                                     style={{ backgroundColor: "#DC2626" }}
-                                    aria-label={`Verwijder cursus ${localCourse.course_name}`}
+                                    aria-label={"Verwijder cursus " + localCourse.course_name}
                                 >
                                     Cursus verwijderen
                                 </button>
                             ) : (
-                                <div className="flex-1 flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
-                                    <p className="text-xs text-red-700 font-medium flex-1">Zeker weten?</p>
+                                <div className="flex-1 flex items-center gap-2 bg-red-50 border border-red-300 rounded-xl px-3 py-2">
+                                    {/* text-red-800 op red-50 = voldoende contrast ✓ */}
+                                    <p className="text-xs text-red-800 font-medium flex-1">Zeker weten?</p>
                                     <button
                                         onClick={() => setConfirmDelete(false)}
-                                        className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                                        className="px-3 py-2 text-xs font-medium text-gray-700 border border-gray-400 rounded-lg hover:bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-1"
                                     >
                                         Nee
                                     </button>
                                     <button
                                         onClick={handleDeleteCourse}
-                                        className="px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+                                        className="px-3 py-2 text-xs font-semibold text-white bg-red-700 rounded-lg hover:bg-red-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-1"
                                     >
                                         Ja, verwijderen
                                     </button>
@@ -377,9 +370,9 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
 
                             <button
                                 onClick={() => setEditingCourse(true)}
-                                className="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                className="flex-1 py-3 text-sm font-semibold text-white rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-2"
                                 style={{ backgroundColor: "#6C4092" }}
-                                aria-label={`Bewerk cursus ${localCourse.course_name}`}
+                                aria-label={"Bewerk cursus " + localCourse.course_name}
                             >
                                 Cursus bewerken
                             </button>
@@ -391,9 +384,8 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
     );
 }
 
-// ─────────────────────────────────────────────
-// CourseEditor – hoofdcomponent
-// ─────────────────────────────────────────────
+
+// CourseEditor
 export default function CourseEditor({ onAddCourse }) {
     const [courses,        setCourses]        = useState([]);
     const [selectedCourse, setSelectedCourse] = useState(null);
@@ -449,8 +441,8 @@ export default function CourseEditor({ onAddCourse }) {
 
     if (loading) {
         return (
-            <div className="flex items-center gap-2 py-8 text-gray-400 text-sm" aria-live="polite">
-                <svg className="animate-spin h-4 w-4 text-purple-500" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <div className="flex items-center gap-2 py-8 text-gray-600 text-sm" aria-live="polite">
+                <svg className="animate-spin h-4 w-4 text-purple-700" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                 </svg>
@@ -462,25 +454,61 @@ export default function CourseEditor({ onAddCourse }) {
     return (
         <div>
             {courses.length === 0 && (
-                <p className="text-sm text-gray-400 italic py-4">Nog geen cursussen aangemaakt.</p>
+                <p className="text-sm text-gray-600 italic py-4">Nog geen cursussen aangemaakt.</p>
             )}
 
             <div className="flex flex-col gap-3" role="list" aria-label="Overzicht van alle cursussen">
                 {courses.map((course) => {
                     const exerciseCount = course.exercises?.length ?? 0;
+                    const isIntro = course.is_intro || course.id === 'intro';
+
+                    if (isIntro) {
+                        return (
+                            <div
+                                key={course.id}
+                                role="listitem"
+                                aria-label={course.course_name + " — standaard introductie, niet bewerkbaar"}
+                                className="w-full bg-gray-50 rounded-xl border-2 border-gray-300 px-5 py-4 cursor-default"
+                            >
+                                <div className="flex items-center justify-between mb-1">
+                                    <p className="font-bold text-gray-800 text-base">{course.course_name}</p>
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold text-gray-700 bg-gray-200 border border-gray-400">
+                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                                        </svg>
+                                        Niet bewerkbaar
+                                    </span>
+                                </div>
+
+                                {course.description && (
+                                    <p className="text-sm text-gray-600 mb-2 leading-snug">
+                                        {course.description}
+                                    </p>
+                                )}
+
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                                     style={{ backgroundColor: "#F0E8FF", color: "#6C4092" }}>
+                                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                                    </svg>
+                                    {exerciseCount} oefening{exerciseCount !== 1 ? "en" : ""}
+                                </div>
+                            </div>
+                        );
+                    }
 
                     return (
                         <button
                             key={course.id}
                             role="listitem"
                             onClick={() => handleCourseClick(course.id)}
-                            aria-label={`Open cursus: ${course.course_name}, ${exerciseCount} oefening${exerciseCount !== 1 ? "en" : ""}`}
-                            className="w-full text-left bg-white rounded-xl border-2 border-gray-300 px-5 py-4 hover:border-purple-400 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
+                            aria-label={"Open cursus: " + course.course_name + ", " + exerciseCount + " oefening" + (exerciseCount !== 1 ? "en" : "")}
+                            className="w-full text-left bg-white rounded-xl border-2 border-gray-300 px-5 py-4 hover:border-purple-600 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-2"
                         >
                             <p className="font-bold text-gray-900 text-base mb-1">{course.course_name}</p>
 
                             {course.description && (
-                                <p className="text-sm text-gray-500 mb-2 leading-snug">
+                                <p className="text-sm text-gray-600 mb-2 leading-snug">
                                     {course.description}
                                 </p>
                             )}

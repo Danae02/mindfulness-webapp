@@ -53,7 +53,7 @@ export default function Register() {
 
                 <div>
                     <div className="flex items-center gap-1 mb-1">
-                        <InputLabel htmlFor="name" value="Naam" />
+                        <InputLabel htmlFor="name" value="Voornaam" />
                         <span className="text-red-600 text-sm font-bold" aria-hidden="true">*</span>
                         <span className="sr-only">(verplicht veld)</span>
                     </div>
@@ -75,7 +75,7 @@ export default function Register() {
                             onChange={(e) => setData('name', e.target.value)}
                             required
                             aria-required="true"
-                            placeholder="Jouw naam"
+                            placeholder="Jouw voornaam"
                         />
                     </div>
 

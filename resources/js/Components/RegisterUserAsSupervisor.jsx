@@ -35,7 +35,7 @@ export default function RegisterUserAsSupervisor() {
             <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-lg">
                 <form onSubmit={submit}>
                     <div>
-                        <InputLabel htmlFor="name" value="Naam"/>
+                        <InputLabel htmlFor="name" value="Voornaam"/>
 
                         <TextInput
                             id="name"
