@@ -1,28 +1,11 @@
 import { useState } from "react";
 import ScatterChart from "@/Components/ScatterChart.jsx";
 
-/**
- *
- * nog mee bezig!! idee claude:
- *
- *
- * Normaliseer een feeling-waarde naar 0–100%.
- * Hiermee zijn waarden van 3-schaal en 5-schaal vergelijkbaar.
- *
- * Formule: (waarde - 1) / (schaal - 1) * 100
- * Voorbeeld: waarde 3 op 5-schaal → 50%
- * Voorbeeld: waarde 2 op 3-schaal → 50%
- */
 function normalizeFeeling(value, scale = 5) {
     if (value == null || scale <= 1) return null;
     return Math.round((value - 1) / (scale - 1) * 100);
 }
 
-/**
- * Bereken het verschil in stemming na − voor de oefening.
- * Positief = verbetering, negatief = verslechtering.
- * Altijd op 0–100 schaal zodat 3- en 5-schaal logs vergelijkbaar zijn.
- */
 function calculateDifference(feelingBefore, feelingAfter, scale = 5) {
     const before = normalizeFeeling(feelingBefore, scale);
     const after  = normalizeFeeling(feelingAfter, scale);
@@ -34,9 +17,11 @@ export default function LogDurationToDifference({ exerciseNames }) {
     const [statistics, setStatistics] = useState([]);
     const [selectedExercise, setSelectedExercise] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const fetchStatistics = async (exerciseName) => {
         setLoading(true);
+        setError(null);
         try {
             const res = await fetch(route('exercise-logs.statistics', { exercise_name: exerciseName }));
             if (!res.ok) throw new Error('Er is iets mis gegaan met het ophalen van de data.');
@@ -55,6 +40,7 @@ export default function LogDurationToDifference({ exerciseNames }) {
             setStatistics(enriched);
         } catch (e) {
             console.error(e);
+            setError('Kon de data niet laden. Probeer het opnieuw.');
         } finally {
             setLoading(false);
         }
@@ -91,25 +77,31 @@ export default function LogDurationToDifference({ exerciseNames }) {
             <div className="flex-1 p-4 bg-white rounded-lg shadow-lg">
                 {loading ? (
                     <p className="text-gray-500">Laden...</p>
+                ) : error ? (
+                    <p className="text-red-500">{error}</p>
                 ) : selectedExercise ? (
-                    <>
-                        {/* Legenda onder de grafiek */}
-                        <ScatterChart data={statistics} />
-
-                        <div className="mt-4 text-sm text-gray-500 space-y-1 border-t pt-3">
-                            <p>
-                                <strong>Y-as (verschil):</strong> stemming na − stemming voor de oefening,
-                                genormaliseerd naar −100 tot +100.
-                                Positief = verbetering, negatief = verslechtering.
-                            </p>
-                            <p>
-                                <strong>X-as:</strong> luisterduur in seconden.
-                            </p>
-                            <p className="text-xs text-gray-400">
-                                Waarden zijn genormaliseerd — 3-schaal en 5-schaal logs zijn vergelijkbaar.
-                            </p>
-                        </div>
-                    </>
+                    statistics.length === 0 ? (
+                        <p className="text-gray-400 italic">
+                            Geen logs gevonden met zowel een gevoel als een sessieduur voor deze oefening.
+                        </p>
+                    ) : (
+                        <>
+                            <ScatterChart data={statistics} />
+                            <div className="mt-4 text-sm text-gray-600 space-y-1 border-t pt-3">
+                                <p>
+                                    <strong>Y-as (verschil):</strong> stemming na − stemming voor de oefening,
+                                    genormaliseerd naar −100 tot +100.
+                                    Positief = verbetering, negatief = verslechtering.
+                                </p>
+                                <p>
+                                    <strong>X-as:</strong> luisterduur in seconden.
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                    Waarden zijn genormaliseerd — 3-schaal en 5-schaal logs zijn vergelijkbaar.
+                                </p>
+                            </div>
+                        </>
+                    )
                 ) : (
                     <p className="text-gray-400 italic">
                         Selecteer een oefening om de data te bekijken.

@@ -11,7 +11,7 @@ function StepIndicator({ currentStep }) {
                     className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all"
                     style={{
                         backgroundColor: currentStep >= 1 ? "#6C4092" : "#E5E7EB",
-                        color: currentStep >= 1 ? "#fff" : "#9CA3AF",
+                        color: currentStep >= 1 ? "#fff" : "#4B5563",
                     }}
                 >
                     {currentStep > 1 ? (
@@ -22,7 +22,7 @@ function StepIndicator({ currentStep }) {
                 </div>
                 <span
                     className="text-sm font-semibold"
-                    style={{ color: currentStep >= 1 ? "#6C4092" : "#9CA3AF" }}
+                    style={{ color: currentStep >= 1 ? "#6C4092" : "#4B5563" }}
                 >
                     Cursus informatie
                 </span>
@@ -40,14 +40,14 @@ function StepIndicator({ currentStep }) {
                     className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all"
                     style={{
                         backgroundColor: currentStep >= 2 ? "#6C4092" : "#E5E7EB",
-                        color: currentStep >= 2 ? "#fff" : "#9CA3AF",
+                        color: currentStep >= 2 ? "#fff" : "#4B5563",
                     }}
                 >
                     2
                 </div>
                 <span
                     className="text-sm font-semibold"
-                    style={{ color: currentStep >= 2 ? "#6C4092" : "#9CA3AF" }}
+                    style={{ color: currentStep >= 2 ? "#6C4092" : "#4B5563" }}
                 >
                     Oefening uploaden
                 </span>
@@ -73,7 +73,6 @@ export default function CourseUploader({ onCancel }) {
 
     const hasAtLeastOneUpload = uploadedIndexes.size > 0;
 
-    // Stap 1: valideren en cursus aanmaken
     const handleStep1Submit = async (e) => {
         e.preventDefault();
         const newErrors = {};
@@ -124,17 +123,18 @@ export default function CourseUploader({ onCancel }) {
         <div className="max-w-2xl mx-auto">
             <StepIndicator currentStep={step} />
 
-            {/* stap 1 */}
+            {/* Stap 1 */}
             {step === 1 && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
                     <h2 className="text-xl font-bold text-gray-900 mb-1">Nieuwe cursus aanmaken</h2>
-                    <p className="text-sm text-gray-400 mb-6">Stap 1 van de 2</p>
+                    <p className="text-sm text-gray-600 mb-6">Stap 1 van de 2</p>
 
                     <form onSubmit={handleStep1Submit} className="space-y-5">
                         {/* Cursusnaam */}
                         <div>
                             <label htmlFor="courseName" className="block text-sm font-medium text-gray-700 mb-1">
-                                Naam van de cursus <span className="text-red-500">*</span>
+                                Naam van de cursus <span className="text-red-500" aria-hidden="true">*</span>
+                                <span className="sr-only">(verplicht)</span>
                             </label>
                             <input
                                 type="text"
@@ -142,12 +142,17 @@ export default function CourseUploader({ onCancel }) {
                                 value={courseName}
                                 onChange={(e) => setCourseName(e.target.value)}
                                 placeholder="Bijvoorbeeld: Mindfulness Basics"
+                                required
+                                aria-required="true"
+                                aria-describedby={errors.courseName ? "courseName-error" : undefined}
                                 className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors ${
                                     errors.courseName ? "border-red-400 bg-red-50" : "border-gray-300"
                                 }`}
                             />
                             {errors.courseName && (
-                                <p className="mt-1 text-xs text-red-500">{errors.courseName}</p>
+                                <p id="courseName-error" className="mt-1 text-xs text-red-600" role="alert">
+                                    {errors.courseName}
+                                </p>
                             )}
                         </div>
 
@@ -169,7 +174,8 @@ export default function CourseUploader({ onCancel }) {
                         {/* Aantal oefeningen */}
                         <div>
                             <label htmlFor="numExercises" className="block text-sm font-medium text-gray-700 mb-1">
-                                Aantal oefeningen <span className="text-red-500">*</span>
+                                Aantal oefeningen <span className="text-red-500" aria-hidden="true">*</span>
+                                <span className="sr-only">(verplicht)</span>
                             </label>
                             <input
                                 type="number"
@@ -177,18 +183,25 @@ export default function CourseUploader({ onCancel }) {
                                 value={numExercises}
                                 min={1}
                                 max={50}
+                                required
+                                aria-required="true"
+                                aria-describedby={errors.numExercises ? "numExercises-error" : undefined}
                                 onChange={(e) => setNumExercises(Number(e.target.value))}
                                 className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors ${
                                     errors.numExercises ? "border-red-400 bg-red-50" : "border-gray-300"
                                 }`}
                             />
                             {errors.numExercises && (
-                                <p className="mt-1 text-xs text-red-500">{errors.numExercises}</p>
+                                <p id="numExercises-error" className="mt-1 text-xs text-red-600" role="alert">
+                                    {errors.numExercises}
+                                </p>
                             )}
                         </div>
 
                         {errors.general && (
-                            <p className="text-xs text-red-500 bg-red-50 px-3 py-2 rounded-lg">{errors.general}</p>
+                            <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg" role="alert">
+                                {errors.general}
+                            </p>
                         )}
 
                         {/* Knoppen */}
@@ -212,7 +225,7 @@ export default function CourseUploader({ onCancel }) {
                                 {isSubmitting ? "Bezig..." : (
                                     <>
                                         Volgende stap
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
                                     </>
@@ -223,11 +236,11 @@ export default function CourseUploader({ onCancel }) {
                 </div>
             )}
 
-            {/* stap 2 */}
+            {/* Stap 2 */}
             {step === 2 && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
                     <h2 className="text-xl font-bold text-gray-900 mb-1">Oefeningen uploaden</h2>
-                    <p className="text-sm text-gray-400 mb-6">Stap 2 van de 2</p>
+                    <p className="text-sm text-gray-600 mb-6">Stap 2 van de 2</p>
 
                     <div className="space-y-4">
                         {chapters.map((chapter, index) => (
@@ -249,7 +262,7 @@ export default function CourseUploader({ onCancel }) {
                             onClick={() => setStep(1)}
                             className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
                         >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
                             Vorige stap
@@ -257,7 +270,7 @@ export default function CourseUploader({ onCancel }) {
 
                         <div className="flex flex-col items-end gap-1">
                             {!hasAtLeastOneUpload && (
-                                <p className="text-xs text-amber-600" role="alert">
+                                <p className="text-xs text-amber-700" role="alert">
                                     Upload minimaal één oefening om op te slaan.
                                 </p>
                             )}
@@ -279,7 +292,7 @@ export default function CourseUploader({ onCancel }) {
                                 aria-disabled={!hasAtLeastOneUpload}
                             >
                                 Cursus opslaan
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
                             </button>

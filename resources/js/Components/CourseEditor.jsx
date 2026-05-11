@@ -10,6 +10,7 @@ function ExerciseEditForm({ exercise, onSave, onCancel }) {
     );
     const [newFile, setNewFile] = useState(null);
     const [saving, setSaving]   = useState(false);
+    const fileInputRef = useRef(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -21,24 +22,53 @@ function ExerciseEditForm({ exercise, onSave, onCancel }) {
     return (
         <form onSubmit={handleSubmit} className="mt-3 space-y-3 pt-3 border-t border-gray-100">
             <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Naam oefening</label>
+                <label htmlFor={`exercise-name-${exercise.id}`} className="block text-xs font-semibold text-gray-700 mb-1">
+                    Naam oefening
+                </label>
                 <input
+                    id={`exercise-name-${exercise.id}`}
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-1"
+                    aria-required="true"
                 />
             </div>
+
             <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Nieuw audiobestand (optioneel)</label>
-                <input
-                    type="file"
-                    accept="audio/*"
-                    onChange={(e) => setNewFile(e.target.files[0])}
-                    className="w-full text-sm text-gray-700"
-                />
+                <label htmlFor={`audio-file-${exercise.id}`} className="block text-xs font-semibold text-gray-700 mb-1">
+                    Nieuw audiobestand (optioneel)
+                </label>
+                <div className="relative">
+                    <input
+                        id={`audio-file-${exercise.id}`}
+                        ref={fileInputRef}
+                        type="file"
+                        accept="audio/*"
+                        onChange={(e) => setNewFile(e.target.files[0])}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        aria-label="Kies een nieuw audiobestand"
+                    />
+                    <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-[#6C4092] border-2 border-[#6C4092] rounded-lg hover:bg-purple-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-1"
+                        aria-hidden="true"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {newFile ? newFile.name : "Bestand kiezen"}
+                    </button>
+                </div>
+                {newFile && (
+                    <p className="text-xs text-green-600 mt-1">
+                        Geselecteerd: {newFile.name}
+                    </p>
+                )}
             </div>
+
             <div className="flex justify-end gap-2 pt-1">
                 <button
                     type="button"
@@ -76,18 +106,25 @@ function CourseEditForm({ course, onSave, onCancel }) {
     return (
         <form onSubmit={handleSubmit} className="space-y-4 mt-4 pt-4 border-t border-gray-100">
             <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Naam van de cursus</label>
+                <label htmlFor="course-name-edit" className="block text-sm font-semibold text-gray-700 mb-1">
+                    Naam van de cursus
+                </label>
                 <input
+                    id="course-name-edit"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
                     className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-1"
+                    aria-required="true"
                 />
             </div>
             <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Omschrijving</label>
+                <label htmlFor="course-description-edit" className="block text-sm font-semibold text-gray-700 mb-1">
+                    Omschrijving
+                </label>
                 <textarea
+                    id="course-description-edit"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={3}
@@ -241,17 +278,17 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                     <button
                         ref={closeRef}
                         onClick={onClose}
-                        aria-label="Sluit venster"
                         className="w-11 h-11 flex-shrink-0 flex items-center justify-center border border-gray-400 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-1"
+                        aria-label="Sluit venster"
                     >
-                        ✕
+                        <span aria-hidden="true">✕</span>
+                        <span className="sr-only">Sluit dit venster</span>
                     </button>
                 </div>
 
                 <div className="px-6 pb-6">
                     {!editingCourse && (
                         <div className="mt-4">
-                            {/* text-gray-700 op wit = 9.5:1 ✓ */}
                             <p className="text-sm font-semibold text-gray-700 mb-1">Omschrijving</p>
                             <div
                                 className="w-full px-4 py-3 rounded-xl text-sm text-gray-700 leading-relaxed"
@@ -292,8 +329,10 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                                         <p className="font-bold text-gray-900 mb-1">{exercise.exercise_name}</p>
 
                                         <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-0.5">
-                                            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h4l2 10h6l2-10h4M9 17v2m6-2v2" />
+                                            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor"
+                                                 viewBox="0 0 24 24" aria-hidden="true">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                                      d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                                             </svg>
                                             <span className="truncate max-w-xs">
                                                 Bestand: {exercise.audio_file_path || "–"}
@@ -301,7 +340,8 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                                         </div>
 
                                         <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-3">
-                                            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor"
+                                                 viewBox="0 0 24 24" aria-hidden="true">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
                                             <span>Keren gedaan: {exercise.times_done ?? 0}</span>
@@ -311,14 +351,14 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => handleDeleteExercise(exercise.id)}
-                                                    aria-label={"Verwijder oefening " + exercise.exercise_name}
+                                                    aria-label={`Verwijder oefening ${exercise.exercise_name}`}
                                                     className="px-3 py-2 text-sm font-semibold rounded-lg border-2 border-red-600 text-red-700 hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-1"
                                                 >
                                                     Verwijderen
                                                 </button>
                                                 <button
                                                     onClick={() => setEditingExerciseId(exercise.id)}
-                                                    aria-label={"Bewerk oefening " + exercise.exercise_name}
+                                                    aria-label={`Bewerk oefening ${exercise.exercise_name}`}
                                                     className="px-3 py-2 text-sm font-semibold rounded-lg border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-1"
                                                     style={{ borderColor: "#6C4092", color: "#6C4092" }}
                                                 >
@@ -345,13 +385,12 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                                     onClick={() => setConfirmDelete(true)}
                                     className="flex-1 py-3 text-sm font-semibold text-white rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2"
                                     style={{ backgroundColor: "#DC2626" }}
-                                    aria-label={"Verwijder cursus " + localCourse.course_name}
+                                    aria-label={`Verwijder cursus ${localCourse.course_name}`}
                                 >
                                     Cursus verwijderen
                                 </button>
                             ) : (
                                 <div className="flex-1 flex items-center gap-2 bg-red-50 border border-red-300 rounded-xl px-3 py-2">
-                                    {/* text-red-800 op red-50 = voldoende contrast ✓ */}
                                     <p className="text-xs text-red-800 font-medium flex-1">Zeker weten?</p>
                                     <button
                                         onClick={() => setConfirmDelete(false)}
@@ -372,7 +411,7 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                                 onClick={() => setEditingCourse(true)}
                                 className="flex-1 py-3 text-sm font-semibold text-white rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-2"
                                 style={{ backgroundColor: "#6C4092" }}
-                                aria-label={"Bewerk cursus " + localCourse.course_name}
+                                aria-label={`Bewerk cursus ${localCourse.course_name}`}
                             >
                                 Cursus bewerken
                             </button>
@@ -467,7 +506,7 @@ export default function CourseEditor({ onAddCourse }) {
                             <div
                                 key={course.id}
                                 role="listitem"
-                                aria-label={course.course_name + " — standaard introductie, niet bewerkbaar"}
+                                aria-label={`${course.course_name} — standaard introductie, niet bewerkbaar`}
                                 className="w-full bg-gray-50 rounded-xl border-2 border-gray-300 px-5 py-4 cursor-default"
                             >
                                 <div className="flex items-center justify-between mb-1">
@@ -502,7 +541,7 @@ export default function CourseEditor({ onAddCourse }) {
                             key={course.id}
                             role="listitem"
                             onClick={() => handleCourseClick(course.id)}
-                            aria-label={"Open cursus: " + course.course_name + ", " + exerciseCount + " oefening" + (exerciseCount !== 1 ? "en" : "")}
+                            aria-label={`Open cursus: ${course.course_name}, ${exerciseCount} oefening${exerciseCount !== 1 ? "en" : ""}`}
                             className="w-full text-left bg-white rounded-xl border-2 border-gray-300 px-5 py-4 hover:border-purple-600 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-2"
                         >
                             <p className="font-bold text-gray-900 text-base mb-1">{course.course_name}</p>

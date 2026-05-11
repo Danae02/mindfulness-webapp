@@ -38,16 +38,16 @@ export default function Register() {
             <Head title="Registreren" />
 
             <form onSubmit={submit}>
-                <div className="mb-6 text-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                <div className="mb-3 text-center">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-1">
                         Account aanmaken
                     </h1>
-                    <h2 className="text-lg font-medium text-gray-600">
+                    <h2 className="text-base font-medium text-gray-600">
                         Nieuwe gebruiker
                     </h2>
                 </div>
 
-                <div className="mb-6 flex justify-center">
+                <div className="mb-3 flex justify-center">
                     <AccessibilityButton variant="button" />
                 </div>
 
@@ -82,7 +82,7 @@ export default function Register() {
                     <InputError message={errors.name} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-3">
                     <div className="flex items-center gap-1 mb-1">
                         <InputLabel htmlFor="email" value="E-mailadres" />
                         <span className="text-red-600 text-sm font-bold" aria-hidden="true">*</span>
@@ -113,7 +113,7 @@ export default function Register() {
                     <InputError message={errors.email} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-3">
                     <div className="flex items-center gap-1 mb-1">
                         <InputLabel htmlFor="password" value="Wachtwoord" />
                         <span className="text-red-600 text-sm font-bold" aria-hidden="true">*</span>
@@ -145,7 +145,7 @@ export default function Register() {
                     <InputError message={errors.password} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-3">
                     <div className="flex items-center gap-1 mb-1">
                         <InputLabel htmlFor="password_confirmation" value="Herhaal wachtwoord" />
                         <span className="text-red-600 text-sm font-bold" aria-hidden="true">*</span>
@@ -179,39 +179,39 @@ export default function Register() {
                     />
                 </div>
 
-                <div className="mt-4 text-sm text-gray-500">
+                <div className="mt-2 text-sm text-gray-500">
                     <span className="text-red-600 font-bold" aria-hidden="true">*</span>
                     <span className="sr-only">Sterretje betekent: </span>
                     Verplicht veld
                 </div>
 
-                <div className="mt-6">
+                <div className="mt-4">
                     <button
                         type="submit"
                         disabled={processing}
-                        className="w-full justify-center py-3 text-base font-semibold bg-[#6c4092] hover:bg-[#5a337a] text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2 disabled:opacity-50"
+                        className="w-full justify-center py-2.5 text-base font-semibold bg-[#6c4092] hover:bg-[#5a337a] text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2 disabled:opacity-50"
                     >
                         Account aanmaken
                     </button>
                 </div>
             </form>
 
-            <div className="mt-8 text-center">
+            <div className="mt-4 text-center">
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-300"></div>
+                        <div className="w-full border-t-2 border-gray-400"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                        <span className="px-4 bg-white text-gray-500">
+                        <span className="px-4 bg-white text-gray-500 font-medium">
                             of
                         </span>
                     </div>
                 </div>
 
-                <div className="mt-6">
+                <div className="mt-3">
                     <Link
                         href={route('login')}
-                        className="block w-full text-center py-3 px-4 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                        className="block w-full text-center py-2.5 px-4 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     >
                         Inloggen met bestaand account
                     </Link>

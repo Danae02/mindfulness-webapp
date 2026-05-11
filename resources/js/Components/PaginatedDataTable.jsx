@@ -18,7 +18,7 @@ function formatDuration(sec) {
 
 // Kleine score-badge: groen als hoog, oranje als laag
 function ScoreBadge({ value }) {
-    if (value == null) return <span className="text-gray-400">–</span>;
+    if (value == null) return <span className="text-gray-600">–</span>;
     const color =
         value >= 66
             ? "bg-green-100 text-green-800"
@@ -110,8 +110,9 @@ export default function PaginatedDataTable({
 
                 {researchGroups.length > 0 && (
                     <div>
-                        <label className="block text-xs text-gray-500 mb-1">Onderzoeksgroep</label>
+                        <label htmlFor="filter-group" className="block text-xs text-gray-600 mb-1">Onderzoeksgroep</label>
                         <select
+                            id="filter-group"
                             value={selectedGroup}
                             onChange={(e) => setSelectedGroup(e.target.value)}
                             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
@@ -126,8 +127,9 @@ export default function PaginatedDataTable({
 
                 {exercises.length > 0 && (
                     <div>
-                        <label className="block text-xs text-gray-500 mb-1">Oefening</label>
+                        <label htmlFor="filter-exercise" className="block text-xs text-gray-600 mb-1">Oefening</label>
                         <select
+                            id="filter-exercise"
                             value={selectedExercise}
                             onChange={(e) => setSelectedExercise(e.target.value)}
                             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
@@ -141,8 +143,9 @@ export default function PaginatedDataTable({
                 )}
 
                 <div>
-                    <label className="block text-xs text-gray-500 mb-1">Van</label>
+                    <label htmlFor="filter-date-from" className="block text-xs text-gray-600 mb-1">Van</label>
                     <input
+                        id="filter-date-from"
                         type="date"
                         value={dateFrom}
                         onChange={(e) => setDateFrom(e.target.value)}
@@ -150,8 +153,9 @@ export default function PaginatedDataTable({
                     />
                 </div>
                 <div>
-                    <label className="block text-xs text-gray-500 mb-1">Tot</label>
+                    <label htmlFor="filter-date-to" className="block text-xs text-gray-600 mb-1">Tot</label>
                     <input
+                        id="filter-date-to"
                         type="date"
                         value={dateTo}
                         onChange={(e) => setDateTo(e.target.value)}
@@ -172,10 +176,15 @@ export default function PaginatedDataTable({
             {loading ? (
                 <LoadingIndicator message="Datapunten laden..." />
             ) : filtered.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">Geen data gevonden</div>
+                <div className="text-center py-8 text-gray-700">Geen data gevonden</div>
             ) : (
                 <>
-                    <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+                    <div
+                        className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm"
+                        tabIndex={0}
+                        role="region"
+                        aria-label="Datapunten tabel"
+                    >
                         <table className="min-w-full divide-y divide-gray-200 text-sm">
                             <thead className="bg-gray-50">
                             <tr>
@@ -192,7 +201,7 @@ export default function PaginatedDataTable({
                                 ].map((h) => (
                                     <th
                                         key={h}
-                                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                                        className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider whitespace-nowrap"
                                     >
                                         {h}
                                     </th>
@@ -215,17 +224,17 @@ export default function PaginatedDataTable({
 
                                 return (
                                     <tr key={log.log_id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-4 py-3 text-gray-400 font-mono">{log.log_id}</td>
+                                        <td className="px-4 py-3 text-gray-600 font-mono">{log.log_id}</td>
                                         <td className="px-4 py-3 text-gray-600">{log.user_id}</td>
                                         <td className="px-4 py-3 font-medium text-gray-900">
                                             {log.exercise?.exercise_name ?? "–"}
                                         </td>
-                                        <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                                        <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
                                             {log.date_time
                                                 ? new Date(log.date_time).toLocaleDateString("nl-NL")
                                                 : "–"}
                                         </td>
-                                        <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                                        <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
                                             {formatDuration(log.session_duration)}
                                         </td>
                                         <td className="px-4 py-3">
@@ -249,7 +258,7 @@ export default function PaginatedDataTable({
                                             style={{
                                                 color:
                                                     diff == null
-                                                        ? "#9ca3af"
+                                                        ? "#4b5563"
                                                         : diff >= 0
                                                             ? "#15803d"
                                                             : "#b91c1c",
@@ -273,7 +282,7 @@ export default function PaginatedDataTable({
                         >
                             ← Vorige
                         </button>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-gray-700">
                             Pagina {currentPage} van {totalPages}
                         </span>
                         <button

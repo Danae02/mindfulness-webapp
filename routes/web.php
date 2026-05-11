@@ -148,5 +148,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/storage/audio/{filename}', [AudioController::class, 'getAudio'])
     ->name('audio.get');
 
+
+
+
 // Authentication routes
 require __DIR__ . '/auth.php';

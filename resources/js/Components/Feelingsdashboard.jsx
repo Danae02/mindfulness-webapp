@@ -37,7 +37,7 @@ function groupByWeek(logs) {
             weeks[key] = { week: key, beforeSum: 0, afterSum: 0, count: 0, order: weekNum };
         }
 
-        // Gebruik _pct velden als die er zijn (opgeslagen genormaliseerd),anders bereken zelf via feeling_scale
+        // Gebruik _pct velden als die er zijn (opgeslagen genormaliseerd), anders bereken zelf via feeling_scale
         const before =
             log.feeling_before_pct != null
                 ? log.feeling_before_pct
@@ -66,9 +66,9 @@ function groupByWeek(logs) {
 function StatCard({ label, value, sub }) {
     return (
         <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 min-w-[120px]">
-            <p className="text-xs text-gray-500 mb-1">{label}</p>
+            <p className="text-xs text-gray-600 mb-1">{label}</p>
             <p className="text-2xl font-bold text-gray-900">{value ?? "–"}</p>
-            {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+            {sub && <p className="text-xs text-gray-600 mt-0.5">{sub}</p>}
         </div>
     );
 }
@@ -188,7 +188,8 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
             {/* Titel */}
             <div>
                 <h2 className="text-2xl font-bold text-gray-900">Gevoelsmetingen</h2>
-                <p className="text-sm text-gray-500 mt-0.5">
+                {/* text-gray-700 ipv text-gray-500: contrast was 4.39 op bg-gray-100, nu voldoende */}
+                <p className="text-sm text-gray-700 mt-0.5">
                     Genormaliseerde scores (0–100) — 3-schaal en 5-schaal zijn vergelijkbaar
                 </p>
             </div>
@@ -214,8 +215,11 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
             {/* Filters */}
             <div className="flex flex-wrap gap-3 items-end">
                 <div>
-                    <label className="block text-xs text-gray-500 mb-1">Oefening</label>
+                    <label htmlFor="filter-exercise" className="block text-xs text-gray-700 mb-1">
+                        Oefening
+                    </label>
                     <select
+                        id="filter-exercise"
                         value={selectedExercise}
                         onChange={(e) => setSelectedExercise(e.target.value)}
                         className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
@@ -229,8 +233,11 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
                     </select>
                 </div>
                 <div>
-                    <label className="block text-xs text-gray-500 mb-1">Van</label>
+                    <label htmlFor="filter-date-from" className="block text-xs text-gray-700 mb-1">
+                        Van
+                    </label>
                     <input
+                        id="filter-date-from"
                         type="date"
                         value={dateFrom}
                         onChange={(e) => setDateFrom(e.target.value)}
@@ -238,8 +245,11 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
                     />
                 </div>
                 <div>
-                    <label className="block text-xs text-gray-500 mb-1">Tot</label>
+                    <label htmlFor="filter-date-to" className="block text-xs text-gray-700 mb-1">
+                        Tot
+                    </label>
                     <input
+                        id="filter-date-to"
                         type="date"
                         value={dateTo}
                         onChange={(e) => setDateTo(e.target.value)}
@@ -301,7 +311,7 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
                             <h3 className="text-base font-semibold text-gray-800 mb-1">
                                 Gevoel voor en na oefening
                             </h3>
-                            <p className="text-xs text-gray-400 mb-5">
+                            <p className="text-xs text-gray-600 mb-5">
                                 Gemiddelde score per week – {activeGroupName} (anoniem) · scores 0–100
                             </p>
                             <ResponsiveContainer width="100%" height={280}>
@@ -320,9 +330,9 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
                                         type="monotone"
                                         dataKey="voor"
                                         name="voor"
-                                        stroke="#C4B5E8"
+                                        stroke="#B85B06"
                                         strokeWidth={2}
-                                        dot={{ r: 4, fill: "#C4B5E8" }}
+                                        dot={{ r: 4, fill: "#B85B06" }}
                                         activeDot={{ r: 6 }}
                                         connectNulls
                                     />
@@ -351,7 +361,7 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
                             <h3 className="text-base font-semibold text-gray-800 mb-4">
                                 Verschil (na − voor) per week
                             </h3>
-                            <div className="overflow-x-auto">
+                            <div className="overflow-x-auto" tabIndex={0}>
                                 <table className="min-w-full text-sm">
                                     <thead>
                                     <tr className="border-b border-gray-100">
@@ -373,7 +383,7 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
                                                 <td className="py-2 pr-6 text-right text-gray-600">{row.voor ?? "–"}</td>
                                                 <td className="py-2 pr-6 text-right text-gray-600">{row.na ?? "–"}</td>
                                                 <td className="py-2 text-right font-semibold"
-                                                    style={{ color: diff == null ? "#9ca3af" : diff >= 0 ? "#15803d" : "#b91c1c" }}
+                                                    style={{color: diff == null ? "#9ca3af" : diff >= 0 ? "#15803d" : "#b91c1c"}}
                                                 >
                                                     {diff == null ? "–" : (diff >= 0 ? "+" : "") + diff}
                                                 </td>

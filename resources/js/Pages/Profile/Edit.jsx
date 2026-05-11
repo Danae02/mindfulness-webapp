@@ -14,7 +14,7 @@ export default function Edit({ mustVerifyEmail, status }) {
 
                     <div>
                         <h1 className="text-2xl font-bold text-darkGray">Mijn profiel</h1>
-                        <p className="text-gray-500 mt-1">
+                        <p className="text-gray-700 mt-1">
                             Pas hier je naam, e-mailadres en wachtwoord aan.
                         </p>
                     </div>
@@ -22,7 +22,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                     <div className="bg-white rounded-xl shadow-card border border-gray-200 overflow-hidden">
                         <div className="px-6 py-5 border-b border-gray-100">
                             <h2 className="text-lg font-semibold text-darkGray">Profiel gegevens</h2>
-                            <p className="text-sm text-gray-500 mt-0.5">
+                            <p className="text-sm text-gray-600 mt-0.5">
                                 Verander hier je naam en e-mailadres.
                             </p>
                         </div>
@@ -37,7 +37,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                     <div className="bg-white rounded-xl shadow-card border border-gray-200 overflow-hidden">
                         <div className="px-6 py-5 border-b border-gray-100">
                             <h2 className="text-lg font-semibold text-darkGray">Wachtwoord wijzigen</h2>
-                            <p className="text-sm text-gray-500 mt-0.5">
+                            <p className="text-sm text-gray-600 mt-0.5">
                                 Kies een nieuw wachtwoord dat minstens 8 tekens lang, een hoofdletter heeft én een getal bevat.
                             </p>
                         </div>

@@ -27,7 +27,8 @@ export default function IntroExercisePage({ exercise }) {
                             style={{ backgroundColor: '#F0E8FF', borderColor: '#5F5F5F' }}
                         >
                             <p className="text-gray-700 text-sm leading-relaxed">
-                                Welkom! Beluister deze introductie om te leren hoe de app werkt.
+                                Welkom! Luister deze introductie om te leren waarom mindfulness oefenen werkt.
+                                <p className="sr-only">Afspeelknop voor de oefening</p>
                                 Druk op de afspeelknop om te starten.
                             </p>
                         </div>

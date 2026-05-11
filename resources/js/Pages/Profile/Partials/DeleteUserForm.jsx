@@ -44,10 +44,10 @@ export default function DeleteUserForm({ className = '' }) {
     };
 
     return (
-        <div className={`border-2 border-red-600 rounded-xl overflow-hidden ${className}`}>
-            <div className="px-6 py-5 bg-red-50">
+        <div className={`border-2 border-red-700 rounded-xl overflow-hidden ${className}`}>
+            <div className="px-6 py-5 bg-red-100">
                 <h2 className="text-lg font-semibold text-red-800">Account verwijderen</h2>
-                <p className="text-sm text-red-600 mt-0.5">
+                <p className="text-sm text-red-700 mt-0.5">
                     Als je je account verwijdert, worden al je gegevens permanent gewist.
                     Dit kan niet ongedaan worden gemaakt.
                 </p>
@@ -85,10 +85,10 @@ export default function DeleteUserForm({ className = '' }) {
                     </h2>
 
                     {/* Beschrijving */}
-                    <p className="text-base text-gray-700 mb-6 max-w-sm" aria-live="polite">
+                    <p className="text-base text-gray-800 mb-6 max-w-sm" aria-live="polite">
                         Je staat op het punt om je account te verwijderen.
                         Al je gegevens worden voor altijd verwijderd.
-                        Dit kan <strong>niet</strong> worden teruggedraaid.
+                        Dit kan <strong className="text-gray-900">niet</strong> worden teruggedraaid.
                     </p>
 
                     {/* Wachtwoordveld */}

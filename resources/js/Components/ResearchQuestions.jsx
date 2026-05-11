@@ -43,8 +43,8 @@ function TextInput({ label, id, value, onChange, placeholder, required }) {
     return (
         <div className="mb-3">
             {label && (
-                <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
-                    {label}{required && <span className="text-red-500 ml-1">*</span>}
+                <label htmlFor={id} className="block text-sm font-medium text-gray-800 mb-1">
+                    {label}{required && <span className="text-red-600 ml-1">*</span>}
                 </label>
             )}
             <input
@@ -63,11 +63,11 @@ function TextInput({ label, id, value, onChange, placeholder, required }) {
 function StatusMessage({ message, type }) {
     if (!message) return null;
     const styles = {
-        success: "bg-green-50 text-green-800 border border-green-200",
-        error: "bg-red-50 text-red-800 border border-red-200",
+        success: "bg-green-600 text-white border border-green-700",
+        error: "bg-red-600 text-white border border-red-700",
     };
     return (
-        <div className={`rounded-lg px-4 py-2 text-sm mb-4 ${styles[type]}`}>
+        <div className={`rounded-lg px-4 py-2 text-sm mb-4 text-center ${styles[type]}`}>
             {message}
         </div>
     );
@@ -77,7 +77,7 @@ function AnswerRow({ index, answer, onChange, showNumber = true }) {
     return (
         <div className="flex gap-2 items-center">
             {showNumber && (
-                <span className="text-sm font-bold text-purple-700 w-5 text-right flex-shrink-0">
+                <span className="text-sm font-bold text-purple-800 w-5 text-right flex-shrink-0">
                     {index + 1}
                 </span>
             )}
@@ -102,14 +102,13 @@ function AnswerRow({ index, answer, onChange, showNumber = true }) {
 
 function AnswersEditor({ answerCount, answers, onAnswerChange }) {
     if (answerCount !== 5) {
-        // weergave voor 3 of 4 antwoorden
         return (
             <div className="space-y-2">
                 {Array.from({ length: answerCount }).map((_, i) => (
-                    <div key={i} className="p-3 border border-gray-100 rounded-lg bg-gray-50">
+                    <div key={i} className="p-3 border border-gray-200 rounded-lg bg-gray-50">
                         <AnswerRow index={i} answer={answers[i]} onChange={onAnswerChange} />
                         {answers[i]?.icon?.src && (
-                            <p className="text-xs text-gray-400 mt-1 ml-7">
+                            <p className="text-xs text-gray-600 mt-1 ml-7">
                                 Emoticon: {answers[i].icon.label}
                             </p>
                         )}
@@ -118,13 +117,6 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
             </div>
         );
     }
-
-    // Twee-stappen weergave voor 5 antwoorden
-    //   [0] = Heel slecht  ┐ vervolgscherm "Slecht"
-    //   [1] = Slecht       ┘
-    //   [2] = Neutraal         → direct door
-    //   [3] = Goed         ┐ vervolgscherm "Goed"
-    //   [4] = Heel goed    ┘
 
     const SubScreen = ({ indices, label, color }) => (
         <div
@@ -135,13 +127,15 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
                 <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 10 10">
                     <path d="M2 0 L2 5 Q2 8 5 8" stroke={color} strokeWidth="1.5" fill="none" strokeLinecap="round"/>
                 </svg>
-                <span className="text-xs font-semibold" style={{ color }}>Vervolgscherm</span>
+                <span className="text-xs font-semibold" style={{ color: "#4A2B6D" }}>
+                Vervolgscherm
+            </span>
             </div>
             {indices.map((i) => (
                 <div key={i} className="bg-white rounded-lg p-2.5 border" style={{ borderColor: `${color}40` }}>
                     <AnswerRow index={i} answer={answers[i]} onChange={onAnswerChange} />
                     {answers[i]?.icon?.src && (
-                        <p className="text-xs text-gray-400 mt-1 ml-7">Emoticon: {answers[i].icon.label}</p>
+                        <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[i].icon.label}</p>
                     )}
                 </div>
             ))}
@@ -150,41 +144,36 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
 
     return (
         <div className="space-y-3">
-            {/* Antwoord 1 globaal slecht */}
-            <div className="p-3 border border-gray-100 rounded-lg bg-gray-50">
+            <div className="p-3 border border-gray-200 rounded-lg bg-gray-50">
                 <AnswerRow index={0} answer={answers[0]} onChange={onAnswerChange} />
                 {answers[0]?.icon?.src && (
-                    <p className="text-xs text-gray-400 mt-1 ml-7">Emoticon: {answers[0].icon.label}</p>
+                    <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[0].icon.label}</p>
                 )}
-                {/* tweede-scherm: verfijning slecht */}
                 <SubScreen indices={[0, 1]} label="Vervolgscherm" color="#7B5EA7" />
             </div>
 
-            {/* Antwoord 3; neutraal / middenpunt */}
             <div className="p-3 border-2 border-dashed rounded-lg" style={{ borderColor: "#6C4092", backgroundColor: "#faf8ff" }}>
                 <AnswerRow index={2} answer={answers[2]} onChange={onAnswerChange} />
                 {answers[2]?.icon?.src && (
-                    <p className="text-xs text-gray-400 mt-1 ml-7">Emoticon: {answers[2].icon.label}</p>
+                    <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[2].icon.label}</p>
                 )}
                 <div className="flex items-center gap-1.5 mt-2">
                     <span className="text-lg">🚫</span>
-                    <p className="text-xs text-purple-700 font-medium">
+                    <p className="text-xs text-purple-800 font-medium">
                         Geen vervolgscherm, middelste optie gaat direct door
                     </p>
                 </div>
             </div>
 
-            {/* Antwoord 5: globale goede kant */}
-            <div className="p-3 border border-gray-100 rounded-lg bg-gray-50">
+            <div className="p-3 border border-gray-200 rounded-lg bg-gray-50">
                 <AnswerRow index={4} answer={answers[4]} onChange={onAnswerChange} />
                 {answers[4]?.icon?.src && (
-                    <p className="text-xs text-gray-400 mt-1 ml-7">Emoticon: {answers[4].icon.label}</p>
+                    <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[4].icon.label}</p>
                 )}
-                {/* tweede-scherm: verfijning goed */}
                 <SubScreen indices={[3, 4]} label="Vervolgscherm" color="#7B5EA7" />
             </div>
 
-            <p className="text-xs text-gray-400 mt-1 px-1">
+            <p className="text-xs text-gray-600 mt-1 px-1">
                 Bij 5 antwoorden ziet de gebruiker eerst 3 globale opties. Kiest hij de eerste of laatste, dan volgt een tweede verfijningsstap.
             </p>
         </div>
@@ -267,7 +256,7 @@ function DefaultQuestion() {
         }
     };
 
-    if (loading) return <p className="text-sm text-gray-400">Laden…</p>;
+    if (loading) return <p className="text-sm text-gray-500">Laden…</p>;
 
     return (
         <>
@@ -283,7 +272,7 @@ function DefaultQuestion() {
 
                     <div className="text-center mb-5">
                         <p className="text-lg font-medium text-gray-800">
-                            {question || <span className="text-gray-400 italic">Geen vraag ingesteld</span>}
+                            {question || <span className="text-gray-500 italic">Geen vraag ingesteld</span>}
                         </p>
                     </div>
 
@@ -303,7 +292,7 @@ function DefaultQuestion() {
                     </div>
 
                     <div className="text-center mt-5 pt-2 border-t border-gray-100">
-                        <p className="text-xs text-gray-400">
+                        <p className="text-sm text-gray-600">
                             {answerCount} antwoordopties · Per oefening · <span className="font-medium" style={{ color: "#6C4092" }}>Actief voor alle niet-groep cliënten</span>
                         </p>
                     </div>
@@ -325,9 +314,8 @@ function DefaultQuestion() {
                         required
                     />
 
-                    {/* Aantal antwoorden selector */}
                     <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-800 mb-1">
                             Aantal antwoorden
                         </label>
                         <div className="flex gap-2">
@@ -339,7 +327,7 @@ function DefaultQuestion() {
                                     className={`px-3 py-1 rounded-lg text-sm font-medium border transition-colors
                                         ${answerCount === n
                                         ? "text-white border-transparent"
-                                        : "bg-white text-gray-700 border-gray-300 hover:border-purple-400"
+                                        : "bg-white text-gray-800 border-gray-300 hover:border-purple-400"
                                     }`}
                                     style={answerCount === n ? { backgroundColor: "#6C4092" } : {}}
                                 >
@@ -348,15 +336,15 @@ function DefaultQuestion() {
                             ))}
                         </div>
                         {answerCount === 5 && (
-                            <p className="text-xs text-purple-600 mt-1 font-medium">
+                            <p className="text-xs text-purple-700 mt-1 font-medium">
                                 Bij 5 opties ziet de gebruiker een twee-stappen vraag.
                             </p>
                         )}
                     </div>
 
-                    <p className="text-sm font-medium text-gray-700 mb-2">
+                    <p className="text-sm font-medium text-gray-800 mb-2">
                         Antwoordopties instellen
-                        <span className="text-red-500 ml-1">*</span>
+                        <span className="text-red-600 ml-1">*</span>
                     </p>
                     <AnswersEditor
                         answerCount={answerCount}
@@ -439,7 +427,7 @@ function GroupForm({ initial, onSave, onCancel }) {
     };
 
     return (
-        <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-4">
+        <div className="bg-purple-100 border border-purple-300 rounded-xl p-4 mb-4">
             {error && <StatusMessage message={error} type="error" />}
 
             <TextInput
@@ -459,7 +447,7 @@ function GroupForm({ initial, onSave, onCancel }) {
             />
 
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-800 mb-1">
                     Aantal antwoorden
                 </label>
                 <div className="flex gap-2">
@@ -471,7 +459,7 @@ function GroupForm({ initial, onSave, onCancel }) {
                             className={`px-3 py-1 rounded-lg text-sm font-medium border transition-colors
                                 ${answerCount === n
                                 ? "text-white border-transparent"
-                                : "bg-white text-gray-700 border-gray-300 hover:border-purple-400"
+                                : "bg-white text-gray-800 border-gray-300 hover:border-purple-400"
                             }`}
                             style={answerCount === n ? { backgroundColor: "#6C4092" } : {}}
                         >
@@ -480,15 +468,15 @@ function GroupForm({ initial, onSave, onCancel }) {
                     ))}
                 </div>
                 {answerCount === 5 && (
-                    <p className="text-xs text-purple-600 mt-1 font-medium">
+                    <p className="text-xs text-purple-700 mt-1 font-medium">
                         Bij 5 opties ziet de gebruiker een twee-stappen vraag.
                     </p>
                 )}
             </div>
 
-            <p className="text-sm font-medium text-gray-700 mb-2">
+            <p className="text-sm font-medium text-gray-800 mb-2">
                 Antwoordopties instellen
-                <span className="text-red-500 ml-1">*</span>
+                <span className="text-red-600 ml-1">*</span>
             </p>
             <AnswersEditor
                 answerCount={answerCount}
@@ -507,7 +495,7 @@ function GroupForm({ initial, onSave, onCancel }) {
 }
 
 
-// gebruikersbeheer binnen een groep (ongewijzigd)
+// gebruikersbeheer binnen een groep
 function GroupMembers({ group, allUsers, onAddUser, onRemoveUser }) {
     const [selectedUserId, setSelectedUserId] = useState("");
 
@@ -522,16 +510,16 @@ function GroupMembers({ group, allUsers, onAddUser, onRemoveUser }) {
     };
 
     return (
-        <div className="mt-3 pt-3 border-t border-purple-100">
-            <p className="text-sm font-medium text-gray-700 mb-2">Leden</p>
+        <div className="mt-3 pt-3 border-t border-purple-200">
+            <p className="text-sm font-medium text-gray-800 mb-2">Leden</p>
             {group.users?.length > 0 ? (
                 <ul className="space-y-1 mb-3">
                     {group.users.map((u) => (
-                        <li key={u.id} className="flex items-center justify-between bg-white rounded-lg px-3 py-1.5 text-sm border border-gray-100">
+                        <li key={u.id} className="flex items-center justify-between bg-white rounded-lg px-3 py-1.5 text-sm border border-gray-200">
                             <span className="text-gray-800">{u.name}</span>
                             <button
                                 onClick={() => onRemoveUser(group.id, u.id)}
-                                className="text-red-500 hover:text-red-700 text-xs font-medium"
+                                className="text-red-600 hover:text-red-800 text-xs font-medium"
                                 aria-label={`${u.name} verwijderen uit groep`}
                             >
                                 Verwijderen
@@ -540,7 +528,7 @@ function GroupMembers({ group, allUsers, onAddUser, onRemoveUser }) {
                     ))}
                 </ul>
             ) : (
-                <p className="text-sm text-gray-400 italic mb-3">Nog geen leden</p>
+                <p className="text-sm text-gray-500 italic mb-3">Nog geen leden</p>
             )}
 
             {available.length > 0 && (
@@ -594,11 +582,11 @@ function GroupCard({ group, allUsers, onUpdated, onDeleted, onAddUser, onRemoveU
                         <div className="flex-1">
                             <p className="font-semibold text-gray-900">{group.name}</p>
                             {group.question ? (
-                                <p className="text-sm text-gray-600 mt-0.5">"{group.question}"</p>
+                                <p className="text-sm text-gray-700 mt-0.5">"{group.question}"</p>
                             ) : (
-                                <p className="text-sm text-gray-400 italic">Geen vraag ingesteld</p>
+                                <p className="text-sm text-gray-500 italic">Geen vraag ingesteld</p>
                             )}
-                            <p className="text-xs text-gray-400 mt-2">{group.users?.length ?? 0} leden</p>
+                            <p className="text-xs text-gray-500 mt-2">{group.users?.length ?? 0} leden</p>
                         </div>
                         <div className="flex gap-2 flex-shrink-0">
                             <PurpleButton variant="secondary" onClick={() => setIsEditing(true)}>Bewerken</PurpleButton>
@@ -710,7 +698,7 @@ export default function ResearchQuestions() {
     return (
         <div className="max-w-2xl mx-auto px-4 py-6">
             <h1 className="text-3xl font-bold text-purple-900 mb-2">Onderzoeksvragen</h1>
-            <p className="text-gray-500 mb-6 text-sm">
+            <p className="text-gray-700 mb-6 text-sm">
                 Maak hier de gevoelsvragen aan die een gebruiker vóór en na een oefening invult. De standaard vraag wordt gesteld aan alle cliënten zonder groep. Voor cliënten in een onderzoeksgroep geldt de vraag van die groep en vervangt die dus de standaard vraag.
             </p>
             <StatusMessage message={status?.message} type={status?.type} />
@@ -720,16 +708,16 @@ export default function ResearchQuestions() {
             </SectionCard>
 
             <SectionCard title="Onderzoeksgroepen">
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-gray-700 mb-4">
                     Cliënten in een groep zien de groepsvraag in plaats van de standaardvraag.
                 </p>
 
                 {loading ? (
-                    <p className="text-sm text-gray-400">Laden…</p>
+                    <p className="text-sm text-gray-500">Laden…</p>
                 ) : (
                     <>
                         {groups.length === 0 && (
-                            <p className="text-sm text-gray-400 italic mb-4">Nog geen groepen aangemaakt.</p>
+                            <p className="text-sm text-gray-500 italic mb-4">Nog geen groepen aangemaakt.</p>
                         )}
                         {groups.map((group) => (
                             <GroupCard

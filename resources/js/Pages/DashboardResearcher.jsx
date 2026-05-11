@@ -62,7 +62,7 @@ export default function DashboardResearcher({
                 </nav>
 
                 {/* Main content */}
-                <main className="flex-1 p-4 md:p-6 overflow-x-auto">
+                <main className="flex-1 p-4 md:p-6 overflow-x-auto" tabIndex={0}>
                     {view === "gevoelsmetingen" && (
                         <Feelingsdashboard
                             researchGroups={researchGroups}
@@ -73,7 +73,7 @@ export default function DashboardResearcher({
                     {view === "logDuration" && (
                         <div>
                             <h3 className="text-lg font-bold mb-4 break-words">Log van de Duur</h3>
-                            <LogDurationToDifference exerciseNames={exerciseNames} />
+                            <LogDurationToDifference exerciseNames={exerciseNames}/>
                         </div>
                     )}
 

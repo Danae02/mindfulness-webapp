@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\EmailEncryptionService;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -78,15 +77,14 @@ class RegisteredUserController extends Controller
         return redirect(route('dashboard', absolute: false));
     }
 
-    public function RegisterBySupervisor(Request $request): JsonResponse
+    public function RegisterBySupervisor(Request $request): RedirectResponse
     {
         try {
             // Controleer of de aanroepende gebruiker de juiste rol heeft
             if (Auth::user()->role_id !== 3) {
-
-                return response()->json([
+                return redirect()->back()->withErrors([
                     'error' => 'Unauthorized: Alleen supervisors kunnen gebruikers aanmaken.'
-                ], 403);
+                ]);
             }
 
             // Validatie van de input
@@ -109,17 +107,13 @@ class RegisteredUserController extends Controller
             // Event triggeren
             event(new Registered($user));
 
-            // Succesvolle JSON-response
-            return response()->json([
-                'message' => 'Gebruiker succesvol aangemaakt.',
-                'user' => $user,
-            ], 201);
+            // Redirect terug met succesmelding
+            return redirect()->back()->with('success', 'Gebruiker succesvol aangemaakt.');
         } catch (\Exception $e) {
             // Fout afhandelen en foutmelding retourneren
-            return response()->json([
+            return redirect()->back()->withErrors([
                 'error' => 'Er is een fout opgetreden bij het aanmaken van de gebruiker.',
-                'details' => $e->getMessage(),
-            ], 500);
+            ]);
         }
     }
 

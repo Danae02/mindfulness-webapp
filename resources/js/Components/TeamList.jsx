@@ -16,27 +16,34 @@ export default function TeamList() {
         setShowUserModal(true);
     };
 
+    const fetchTeamMembers = async () => {
+        try {
+            const response = await axios.get(route('users.get.team'));
+            setTeamMembers(response.data);
+        } catch (err) {
+            console.error("Error fetching team members:", err);
+            setError("Er is een probleem opgetreden bij het ophalen van de teamleden.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchTeamMembers = async () => {
-            try {
-                const response = await axios.get(route('users.get.team'));
-                setTeamMembers(response.data); // vanuit gaan dat de data een lijst van teamleden is
-            } catch (err) {
-                console.error("Error fetching team members:", err);
-                setError("Er is een probleem opgetreden bij het ophalen van de teamleden.");
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchTeamMembers();
     }, []);
+
+    // Modal sluiten en lijst opnieuw ophalen na succesvol registreren
+    const handleSuccess = async () => {
+        setShowModal(false);
+        await fetchTeamMembers();
+    };
 
     const getInitial = (name) => name?.charAt(0).toUpperCase() ?? '?';
 
     if (loading) {
         return (
             <div className="flex items-center justify-center py-20">
-                <p className="text-gray-400 text-sm">Teamleden laden...</p>
+                <p className="text-gray-600 text-sm">Teamleden laden...</p>
             </div>
         );
     }
@@ -44,7 +51,7 @@ export default function TeamList() {
     if (error) {
         return (
             <div className="flex items-center justify-center py-20">
-                <p className="text-red-400 text-sm">{error}</p>
+                <p className="text-red-700 text-sm" role="alert">{error}</p>
             </div>
         );
     }
@@ -54,12 +61,12 @@ export default function TeamList() {
 
             {/* Page header */}
             <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold" style={{ color: '#5B3F8C' }}>
+                <h1 className="text-2xl font-bold" style={{ color: '#4A2B7A' }}>
                     Mijn cliënten dashboard
                 </h1>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-700 mt-1">
                     Je kan op dit moment{' '}
-                    <span className="font-semibold">{teamMembers.length}</span>{' '}
+                    <span className="font-semibold text-gray-900">{teamMembers.length}</span>{' '}
                     {teamMembers.length === 1 ? 'persoon' : 'mensen'} begeleiden.
                     Klik op een naam om hun voortgang te bekijken of om een oefening
                     voor ze te starten.
@@ -85,7 +92,7 @@ export default function TeamList() {
                             <li key={member.id}>
                                 <button
                                     onClick={() => handleUserClick(member)}
-                                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-150"
+                                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
                                     style={{
                                         backgroundColor: '#EDE5F8',
                                         border: '1.5px solid #C9B8E8',
@@ -115,7 +122,7 @@ export default function TeamList() {
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-sm text-gray-400 text-center py-4">
+                    <p className="text-sm text-gray-600 text-center py-4">
                         Er zijn nog geen cliënten gevonden.
                     </p>
                 )}
@@ -123,7 +130,7 @@ export default function TeamList() {
                 {/* Add client button */}
                 <button
                     onClick={() => setShowModal(true)}
-                    className="w-full mt-4 py-3 rounded-xl text-sm font-semibold transition-all duration-150"
+                    className="w-full mt-4 py-3 rounded-xl text-sm font-semibold transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
                     style={{
                         border: '2px dashed #C9B8E8',
                         backgroundColor: 'transparent',
@@ -138,16 +145,25 @@ export default function TeamList() {
 
             {/* Modal: gebruiker toevoegen */}
             {showModal && (
-                <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50 px-4">
-                    <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-lg relative">
-                        <h2 className="text-lg font-bold mb-4 text-center" style={{ color: '#3D2A6E' }}>
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="add-client-modal-title"
+                    onClick={() => setShowModal(false)}
+                >
+                    <div
+                        className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-lg relative"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2 id="add-client-modal-title" className="text-lg font-bold mb-4 text-center" style={{ color: '#3D2A6E' }}>
                             Cliënt registreren
                         </h2>
-                        <RegisterUserAsSupervisor />
+                        <RegisterUserAsSupervisor onSuccess={handleSuccess} />
                         <div className="mt-6 flex justify-center">
                             <button
                                 onClick={() => setShowModal(false)}
-                                className="py-2 px-6 rounded-lg text-sm font-medium text-white transition"
+                                className="py-2 px-6 rounded-lg text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7B5EA7]"
                                 style={{ backgroundColor: '#7B5EA7' }}
                                 onMouseEnter={e => e.currentTarget.style.backgroundColor = '#6a4e8e'}
                                 onMouseLeave={e => e.currentTarget.style.backgroundColor = '#7B5EA7'}
@@ -161,16 +177,25 @@ export default function TeamList() {
 
             {/* Modal: gebruiker detail */}
             {showUserModal && selectedUser && (
-                <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50 px-4">
-                    <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl relative max-h-[85vh] overflow-y-auto">
-                        <h2 className="text-lg font-bold mb-4" style={{ color: '#3D2A6E' }}>
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="user-detail-modal-title"
+                    onClick={() => setShowUserModal(false)}
+                >
+                    <div
+                        className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl relative max-h-[85vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2 id="user-detail-modal-title" className="text-lg font-bold mb-4" style={{ color: '#3D2A6E' }}>
                             Oefeningen voor {selectedUser.name}
                         </h2>
                         <CourseList userId={selectedUser.id} />
                         <div className="mt-6 flex justify-center">
                             <button
                                 onClick={() => setShowUserModal(false)}
-                                className="py-2 px-6 rounded-lg text-sm font-medium text-white transition"
+                                className="py-2 px-6 rounded-lg text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7B5EA7]"
                                 style={{ backgroundColor: '#7B5EA7' }}
                                 onMouseEnter={e => e.currentTarget.style.backgroundColor = '#6a4e8e'}
                                 onMouseLeave={e => e.currentTarget.style.backgroundColor = '#7B5EA7'}

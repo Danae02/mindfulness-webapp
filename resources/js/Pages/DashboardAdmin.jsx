@@ -1,37 +1,3 @@
-// ============================================================
-// DashboardAdmin.jsx — patch
-// Voeg BackupManager toe aan het admin-dashboard
-// ============================================================
-
-// STAP 1: Voeg de import toe bovenaan het bestand, bij de andere imports:
-//import BackupManager from "@/Components/BackupManager.jsx";
-
-// STAP 2: Voeg de view toe in de JSX, na de bestaande views (bv. na "researchSettings"):
-//
-//   {view === "backup" && (
-//       <div>
-//           <h3 className="text-lg font-bold mb-4">Backup & Herstel</h3>
-//           <BackupManager />
-//       </div>
-//   )}
-//
-// STAP 3: Voeg een knop toe in de Sidebar-component (Sidebar.jsx).
-// Zoek de plek waar de andere menu-items staan en voeg dit toe:
-//
-//   <SidebarItem
-//       label="Backup & Herstel"
-//       view="backup"
-//       icon="💾"          // pas aan naar jouw icon-systeem
-//       setView={setView}
-//       currentView={currentView}
-//   />
-
-
-// ============================================================
-// Hieronder staat de VOLLEDIGE bijgewerkte DashboardAdmin.jsx
-// zodat je het als drop-in vervanging kunt gebruiken:
-// ============================================================
-
 import { useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import Sidebar from "@/Components/Sidebar.jsx";
@@ -39,7 +5,6 @@ import CourseUploader from "@/Components/CourseUploader.jsx";
 import CourseEditor from "@/Components/CourseEditor.jsx";
 import ListOfAllDataPoints from "@/Components/ListOfAllDataPoints.jsx";
 import ListOfAllUsers from "@/Components/ListOfAllUsers.jsx";
-import ResearchSettings from "@/Components/ResearchSettings.jsx";
 import ResearchQuestions from "@/Components/ResearchQuestions.jsx";
 import LoadingIndicator from "@/Components/LoadingIndicator.jsx";
 import BackupManager from "@/Components/BackupManager.jsx"; // ← NIEUW
@@ -92,7 +57,7 @@ export default function DashboardAdmin() {
                                 {/* View Nieuwe Cursus Toevoegen */}
                                 {view === "addCourse" && (
                                     <div>
-                                        <h3 className="text-lg font-bold mb-4">Nieuwe Cursus Toevoegen</h3>
+                                        <h3 className="text-lg font-bold mb-4">Nieuwe cursus toevoegen</h3>
                                         <CourseUploader />
                                     </div>
                                 )}
@@ -105,13 +70,6 @@ export default function DashboardAdmin() {
                                     </div>
                                 )}
 
-                                {/* Uitgeschakelde view voor Grafieken van de duur */}
-                                {/*{view === "logDuration" && (*/}
-                                {/*    <div>*/}
-                                {/*        <h3 className="text-lg font-bold mb-4">Grafieken van de duur</h3>*/}
-                                {/*        <LogDurationToDifference />*/}
-                                {/*    </div>*/}
-                                {/*)}*/}
 
                                 {/* View Lijst van alle gebruikers */}
                                 {view === "listOfAllUsers" && (
@@ -132,7 +90,7 @@ export default function DashboardAdmin() {
                                 {/* backup opties */}
                                 {view === "backup" && (
                                     <div>
-                                        <h3 className="text-lg font-bold mb-4">Backup & Herstel</h3>
+                                        <h3 className="text-lg font-bold mb-4">Backup en herstel</h3>
                                         <BackupManager />
                                     </div>
                                 )}

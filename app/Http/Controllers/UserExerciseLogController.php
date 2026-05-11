@@ -6,7 +6,6 @@ use App\Models\Exercise;
 use App\Models\UserExerciseLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 
 class UserExerciseLogController extends Controller
 {
@@ -25,22 +24,21 @@ class UserExerciseLogController extends Controller
 //        return response()->json($userExerciseLogs);
 //    }
 
-
     public function index(Request $request)
     {
         $query = UserExerciseLog::with(['exercise', 'user'])
-            ->when($request->filled('exercise_id'), function($q) use ($request) {
+            ->when($request->filled('exercise_id'), function ($q) use ($request) {
                 $q->where('exercise_id', $request->exercise_id);
             })
-            ->when($request->filled('research_group_id'), function($q) use ($request) {
-                $q->whereHas('user', function($u) use ($request) {
+            ->when($request->filled('research_group_id'), function ($q) use ($request) {
+                $q->whereHas('user', function ($u) use ($request) {
                     $u->where('research_group_id', $request->research_group_id);
                 });
             })
-            ->when($request->filled('date_from'), function($q) use ($request) {
+            ->when($request->filled('date_from'), function ($q) use ($request) {
                 $q->whereDate('date_time', '>=', $request->date_from);
             })
-            ->when($request->filled('date_to'), function($q) use ($request) {
+            ->when($request->filled('date_to'), function ($q) use ($request) {
                 $q->whereDate('date_time', '<=', $request->date_to);
             })
             ->orderBy('date_time', 'desc');
@@ -48,24 +46,21 @@ class UserExerciseLogController extends Controller
         return response()->json($query->paginate(20));
     }
 
-//    public function index()
-//    {
-//        // Haal de logs op met paginering
-//        $userExerciseLogs = UserExerciseLog::with('exercise') // Als je oefeninggegevens nodig hebt
-//        ->paginate(10);  // Je kunt het aantal per pagina aanpassen (10 is hier als voorbeeld)
-//
-//        return Inertia::render('UserExerciseLogs', [
-//            'userExerciseLogs' => $userExerciseLogs
-//        ]);
-//    }
-
-    public function statistics(Request $request) {
+    public function statistics(Request $request)
+    {
         $exerciseName = $request->query('exercise_name');
-        $exerciseId = Exercise::where('exercise_name', $exerciseName)->first()->id;
+        $exercise = Exercise::where('exercise_name', $exerciseName)->first();
 
-        if($exerciseId) {
-            return UserExerciseLog::where('exercise_id', $exerciseId)->get();
+        if (!$exercise) {
+            return response()->json([]);
         }
+
+        return UserExerciseLog::where('exercise_id', $exercise->id)
+            ->whereNotNull('feeling_before')
+            ->whereNotNull('feeling_after')
+            ->whereNotNull('session_duration')  // alleen logs mét duration
+            ->where('session_duration', '>', 0) // geen nul-waarden
+            ->get();
     }
 
     public function trackSession(Request $request, $logId)
@@ -75,9 +70,7 @@ class UserExerciseLogController extends Controller
         ]);
 
         $log = UserExerciseLog::findOrFail($logId);
-
-        // Update sessieduur
-        $log->session_duration = $log->session_duration + $request->duration ?? $request->duration;
+        $log->session_duration = ($log->session_duration ?? 0) + $request->duration;
         $log->save();
 
         return response()->json(['message' => 'Session duration updated successfully!']);

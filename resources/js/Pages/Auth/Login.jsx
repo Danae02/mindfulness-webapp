@@ -5,9 +5,10 @@ import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import AccessibilityButton from '@/Components/AccessibilityButton';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 
 export default function Login({ status, canResetPassword }) {
+    const { flash } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
@@ -24,28 +25,28 @@ export default function Login({ status, canResetPassword }) {
         });
     };
 
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
-    };
+    // Status kan komen als directe prop (ForgotPassword redirect)
+    // of als flash.status (ResetPassword redirect via middleware)
+    const successMessage = flash?.status || status;
 
     return (
         <GuestLayout>
             <Head title="Log in" />
 
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
+            {successMessage && (
+                <div className="mb-4 text-sm font-medium text-green-600 bg-green-50 p-3 rounded-lg">
+                    {successMessage}
                 </div>
             )}
 
             <form onSubmit={submit}>
-                <div className="mb-6 text-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                <div className="mb-3 text-center">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-1">
                         Inloggen
                     </h1>
                 </div>
 
-                <div className="mb-6 flex justify-center">
+                <div className="mb-3 flex justify-center">
                     <AccessibilityButton variant="button" />
                 </div>
 
@@ -78,7 +79,7 @@ export default function Login({ status, canResetPassword }) {
                     <InputError message={errors.email} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-3">
                     <div className="flex items-center gap-1 mb-1">
                         <InputLabel htmlFor="password" value="Wachtwoord" />
                     </div>
@@ -92,7 +93,7 @@ export default function Login({ status, canResetPassword }) {
 
                         <TextInput
                             id="password"
-                            type={showPassword ? "text" : "password"}
+                            type={showPassword ? 'text' : 'password'}
                             name="password"
                             value={data.password}
                             className="mt-1 block w-full pl-10 pr-10"
@@ -105,9 +106,9 @@ export default function Login({ status, canResetPassword }) {
 
                         <button
                             type="button"
-                            onClick={togglePasswordVisibility}
+                            onClick={() => setShowPassword(!showPassword)}
                             className="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none focus:ring-2 focus:ring-primary rounded-md"
-                            aria-label={showPassword ? "Verberg wachtwoord" : "Toon wachtwoord"}
+                            aria-label={showPassword ? 'Verberg wachtwoord' : 'Toon wachtwoord'}
                         >
                             {showPassword ? (
                                 <svg aria-hidden="true" className="w-5 h-5 text-gray-500 hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,8 +137,6 @@ export default function Login({ status, canResetPassword }) {
                                 textUnderlineOffset: '3px',
                                 textDecorationThickness: '2px'
                             }}
-                            onMouseEnter={(e) => e.target.style.color = '#1E4A76'}
-                            onMouseLeave={(e) => e.target.style.color = '#0B2B4F'}
                         >
                             <svg aria-hidden="true" className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -147,14 +146,12 @@ export default function Login({ status, canResetPassword }) {
                     )}
                 </div>
 
-                <div className="mt-4 block">
+                <div className="mt-2 block">
                     <label className="flex items-center">
                         <Checkbox
                             name="remember"
                             checked={data.remember}
-                            onChange={(e) =>
-                                setData('remember', e.target.checked)
-                            }
+                            onChange={(e) => setData('remember', e.target.checked)}
                         />
                         <span className="ms-2 text-sm text-gray-600">
                             Onthoud mij
@@ -162,18 +159,18 @@ export default function Login({ status, canResetPassword }) {
                     </label>
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-3">
                     <button
                         type="submit"
                         disabled={processing}
-                        className="w-full justify-center py-3 text-base font-semibold bg-[#6c4092] hover:bg-[#5a337a] text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2 disabled:opacity-50"
+                        className="w-full justify-center py-2.5 text-base font-semibold bg-[#6c4092] hover:bg-[#5a337a] text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2 disabled:opacity-50"
                     >
                         Inloggen
                     </button>
                 </div>
             </form>
 
-            <div className="mt-8 text-center">
+            <div className="mt-4 text-center">
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                         <div className="w-full border-t-2 border-gray-400"></div>
@@ -185,10 +182,10 @@ export default function Login({ status, canResetPassword }) {
                     </div>
                 </div>
 
-                <div className="mt-6">
+                <div className="mt-3">
                     <Link
                         href={route('register')}
-                        className="block w-full text-center py-3 px-4 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                        className="block w-full text-center py-2.5 px-4 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     >
                         Account aanmaken
                     </Link>

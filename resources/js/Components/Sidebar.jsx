@@ -25,7 +25,7 @@ export default function Sidebar({ setView, currentView }) {
                                 })
                             }}
                         >
-                            <span className="break-words">Alle Cursussen</span>
+                            <span className="break-words">Alle cursussen</span>
                         </button>
                     </li>
                     <li>
@@ -42,7 +42,7 @@ export default function Sidebar({ setView, currentView }) {
                                 })
                             }}
                         >
-                            <span className="break-words">Cursus Toevoegen</span>
+                            <span className="break-words">Cursus toevoegen</span>
                         </button>
                     </li>
                     <li>
@@ -118,7 +118,7 @@ export default function Sidebar({ setView, currentView }) {
                                 })
                             }}
                         >
-                            <span className="break-words">Backup & Herstel</span>
+                            <span className="break-words">Backup en herstel</span>
                         </button>
                     </li>
                 </ul>

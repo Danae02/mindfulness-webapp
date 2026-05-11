@@ -83,9 +83,10 @@ export default function AudioFileUploader({
         <div
             className="rounded-xl border-2 p-5 transition-all"
             style={{
-                borderColor: uploaded ? "#16A34A" : "#E5E7EB",
+                borderColor: uploaded ? "#16A34A" : "#6B7280",
                 backgroundColor: uploaded ? "#F0FDF4" : "#FAFAFA",
-            }}>
+            }}
+        >
             <div className="flex items-center gap-3 mb-4">
                 <div
                     className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
@@ -104,7 +105,7 @@ export default function AudioFileUploader({
                     Oefening {chapterNumber}
                 </h3>
                 {uploaded && (
-                    <span className="ml-auto text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+                    <span className="ml-auto text-xs font-medium text-white bg-green-600 px-2 py-0.5 rounded-full">
                         Geüpload!
                     </span>
                 )}
@@ -119,7 +120,7 @@ export default function AudioFileUploader({
                             htmlFor={`chapter-name-${chapterNumber}`}
                             className="block text-sm font-medium text-gray-700 mb-1"
                         >
-                            Naam van de oefening <span className="text-red-500">*</span>
+                            Naam van de oefening <span className="text-red-600">*</span>
                         </label>
                         <input
                             type="text"
@@ -127,20 +128,20 @@ export default function AudioFileUploader({
                             value={chapter.chapterName}
                             onChange={(e) => onChapterUpdate({ ...chapter, chapterName: e.target.value })}
                             placeholder="Bijvoorbeeld: Ademhalingsoefening"
-                            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors bg-white"
+                            className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 transition-colors bg-white text-gray-900"
                         />
                     </div>
 
                     {/* Audiobestand */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Audiobestand <span className="text-red-500">*</span>
+                            Audiobestand <span className="text-red-600">*</span>
                         </label>
                         <div
                             className="relative rounded-lg border-2 border-dashed transition-all cursor-pointer"
                             style={{
-                                borderColor: dragOver ? "#6C4092" : chapter.file ? "#16A34A" : "#C4B5E8",
-                                backgroundColor: dragOver ? "#F3EEFF" : chapter.file ? "#F0FDF4" : "#F8F5FF",
+                                borderColor: dragOver ? "#6C4092" : chapter.file ? "#16A34A" : "#6B7280", // Donkere grijze border
+                                backgroundColor: dragOver ? "#F3EEFF" : chapter.file ? "#F0FDF4" : "#FFFFFF",
                             }}
                             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                             onDragLeave={() => setDragOver(false)}
@@ -150,10 +151,10 @@ export default function AudioFileUploader({
                             <div className="py-5 px-4 text-center">
                                 {chapter.file ? (
                                     <div className="flex items-center justify-center gap-2">
-                                        <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                         </svg>
-                                        <span className="text-sm font-medium text-green-700 truncate max-w-xs">
+                                        <span className="text-sm font-medium text-gray-800 truncate max-w-xs">
                                             {chapter.file.name}
                                         </span>
                                     </div>
@@ -162,7 +163,7 @@ export default function AudioFileUploader({
                                         <p className="text-sm font-medium" style={{ color: "#6C4092" }}>
                                             Klik om een bestand te kiezen
                                         </p>
-                                        <p className="text-xs text-gray-400 mt-1">MP3, M4A, of WAV</p>
+                                        <p className="text-xs text-gray-600 mt-1">MP3, M4A, of WAV</p>
                                     </>
                                 )}
                             </div>
@@ -178,10 +179,10 @@ export default function AudioFileUploader({
                         </div>
                     </div>
 
-                    {/* Vraag & antwoorden*/}
+                    {/* Vraag & antwoorden */}
                     {mode !== "per_session" && (
-                        <div className="pt-1 space-y-3 border-t border-gray-100">
-                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide pt-1">Gevoelsvraag</p>
+                        <div className="pt-1 space-y-3 border-t border-gray-200">
+                            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide pt-1">Gevoelsvraag</p>
                             <div>
                                 <label
                                     htmlFor={`form-question-${chapterNumber}`}
@@ -194,7 +195,7 @@ export default function AudioFileUploader({
                                     id={`form-question-${chapterNumber}`}
                                     value={question}
                                     onChange={(e) => setQuestion(e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
+                                    className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 bg-white text-gray-900"
                                     placeholder="Bijvoorbeeld: Hoe moeilijk vond je deze oefening?"
                                 />
                             </div>
@@ -213,7 +214,7 @@ export default function AudioFileUploader({
                                                 updated[index] = e.target.value;
                                                 setAnswers(updated);
                                             }}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
+                                            className="w-full px-3 py-2 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 bg-white text-gray-900"
                                             placeholder={`Antwoord ${index + 1}`}
                                         />
                                     ))}
@@ -225,7 +226,7 @@ export default function AudioFileUploader({
                     <button
                         type="submit"
                         disabled={uploading}
-                        className="w-full py-2.5 text-sm font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 disabled:opacity-60"
+                        className="w-full py-2.5 text-sm font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-60"
                         style={{ backgroundColor: uploading ? "#9CA3AF" : "#6C4092", color: "#fff" }}
                     >
                         {uploading ? (

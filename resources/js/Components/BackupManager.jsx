@@ -95,24 +95,24 @@ export default function BackupManager() {
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
                     <div>
                         <h4 className="font-semibold text-gray-800">Backup downloaden</h4>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-600">
                             Download een ZIP-bestand met alle cursussen, oefeningen en audiobestanden.
                         </p>
                     </div>
                 </div>
                 <div className="px-6 py-5">
-                    <p className="text-sm text-gray-600 mb-4">
+                    <p className="text-sm text-gray-700 mb-4">
                         De backup bevat:
                     </p>
-                    <ul className="text-sm text-gray-600 space-y-1 mb-5 list-none">
-                        {[
-                            "metadata.json: alle cursussen, oefeningen, vragen en antwoorden",
-                            "audio/: alle MP3-bestanden",
-                        ].map((item) => (
-                            <li key={item} className="flex items-start gap-2">
-                                <span>{item}</span>
-                            </li>
-                        ))}
+                    <ul className="text-sm text-gray-700 space-y-2 mb-5">
+                        <li className="flex items-center gap-2">
+                            <DocumentIcon className="w-4 h-4 text-gray-500" />
+                            <span>metadata.json: alle cursussen, oefeningen, vragen en antwoorden</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                            <AudioIcon className="w-4 h-4 text-gray-500" />
+                            <span>audio-mapje: alle MP3-bestanden</span>
+                        </li>
                     </ul>
                     <button
                         onClick={handleDownload}
@@ -147,7 +147,7 @@ export default function BackupManager() {
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
                     <div>
                         <h4 className="font-semibold text-gray-800">Backup terugzetten</h4>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-600">
                             Upload een eerder gedownloade backup-ZIP-bestand om alles terug te zetten.
                         </p>
                     </div>
@@ -159,13 +159,16 @@ export default function BackupManager() {
                             dragOver
                                 ? "border-purple-400 bg-purple-50"
                                 : selectedFile
-                                    ? "border-green-400 bg-green-50"
-                                    : "border-gray-300 hover:border-purple-300 hover:bg-gray-50"
+                                    ? "border-green-500 bg-green-50"
+                                    : "border-gray-400 hover:border-purple-400 hover:bg-gray-50"
                         }`}
                         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                         onDragLeave={() => setDragOver(false)}
                         onDrop={handleDrop}
                         onClick={() => fileInputRef.current?.click()}
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Klik of sleep een ZIP-bestand om te uploaden"
                     >
                         <input
                             ref={fileInputRef}
@@ -184,11 +187,13 @@ export default function BackupManager() {
                             </div>
                         ) : (
                             <div className="space-y-2">
-                                <p className="text-3xl">📂</p>
+                                <UploadIcon className="w-10 h-10 mx-auto text-gray-400" />
                                 <p className="font-medium text-gray-600">
                                     Sleep je backup-ZIP-bestand hier naartoe
                                 </p>
-                                <p className="text-sm text-gray-400">of klik om een bestand te kiezen</p>
+                                <p className="text-sm text-gray-500">
+                                    of klik om een bestand te kiezen
+                                </p>
                             </div>
                         )}
                     </div>
@@ -219,7 +224,7 @@ export default function BackupManager() {
 
                     {/* bevestiging */}
                     {confirmVisible && (
-                        <div className="p-4 rounded-lg bg-amber-50 border border-amber-300 text-sm space-y-3">
+                        <div className="p-4 rounded-lg bg-amber-50 border border-amber-400 text-sm space-y-3">
                             <p className="font-semibold text-amber-800">⚠️ Weet je het zeker?</p>
                             <p className="text-amber-700">
                                 Bestaande cursussen worden bijgewerkt, ontbrekende worden opnieuw aangemaakt. Gebruikersdata blijft bewaard.
@@ -267,7 +272,7 @@ export default function BackupManager() {
                                     setRestoreError(null);
                                     if (fileInputRef.current) fileInputRef.current.value = "";
                                 }}
-                                className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                                className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
                             >
                                 Annuleren
                             </button>
@@ -275,8 +280,8 @@ export default function BackupManager() {
                     </div>
 
                     {/* Waarschuwing */}
-                    <p className="text-xs text-gray-400">
-                        ℹ️ Gebruikersdata wordt <strong>niet</strong> overschreven.
+                    <p className="text-xs text-gray-600">
+                        ℹ️ Gebruikersdata wordt <strong className="text-gray-700">niet</strong> overschreven.
                         Ontbrekende cursussen en oefeningen worden opnieuw aangemaakt.
                     </p>
                 </div>
@@ -285,7 +290,36 @@ export default function BackupManager() {
     );
 }
 
+
 // hulpcomponenten
+function DocumentIcon({ className = "w-4 h-4" }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M15 3v4a1 1 0 001 1h4" />
+        </svg>
+    );
+}
+
+function AudioIcon({ className = "w-4 h-4" }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+        </svg>
+    );
+}
+
+function UploadIcon({ className = "w-10 h-10" }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+    );
+}
 
 // draaiende laad-icoon
 function Spinner() {

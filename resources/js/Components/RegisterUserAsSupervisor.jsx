@@ -4,7 +4,7 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import TextInput from "@/Components/TextInput";
 import {useForm, usePage} from "@inertiajs/react";
 
-export default function RegisterUserAsSupervisor() {
+export default function RegisterUserAsSupervisor({ onSuccess }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: "",
         // email: "",
@@ -25,6 +25,10 @@ export default function RegisterUserAsSupervisor() {
         console.log("Gegevens voor POST:", data); // Debug log
 
         post(route("registerbysupervisor"), {
+            onSuccess: () => {
+                reset("password");
+                onSuccess?.(); // Modal sluiten en lijst refreshen
+            },
             onFinish: () => reset("password"),
         });
     };
@@ -50,7 +54,7 @@ export default function RegisterUserAsSupervisor() {
                         <InputError message={errors.name} className="mt-2"/>
                     </div>
 
-{/*                    <div className="mt-4">
+                    {/*                    <div className="mt-4">
                         <InputLabel htmlFor="email" value="E-mail (optioneel)"/>
 
                         <TextInput

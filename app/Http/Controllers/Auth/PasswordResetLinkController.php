@@ -37,15 +37,13 @@ class PasswordResetLinkController extends Controller
         $emailIndex = $this->emailEncryption->blindIndex($request->email);
         $user = User::where('email_index', $emailIndex)->first();
 
-        // Altijd zelfde response (security)
         if (!$user) {
-            return back()->with('status', __('passwords.sent'));
+            return back()->withErrors(['email' => 'Er is geen account gevonden met dit e-mailadres.']);
         }
 
-        // Token aanmaken en email sturen zonder de user opnieuw te laten zoeken
         $token = Password::broker()->createToken($user);
         $user->sendPasswordResetNotification($token);
 
-        return back()->with('status', __('passwords.sent'));
+        return back()->with('status', 'Als dit e-mailadres bij ons bekend is, ontvang je zo een e-mail met een resetlink.');
     }
 }

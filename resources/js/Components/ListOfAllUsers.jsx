@@ -80,20 +80,25 @@ export default function ListOfAllUsers() {
             </div>
 
             {/* Better table to displat users */}
-            <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+            <div
+                className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm"
+                tabIndex={0}
+                role="region"
+                aria-label="Gebruikerslijst"
+            >
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                     <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                             ID
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                             Naam
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                             Email
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                             Rol
                         </th>
                     </tr>
@@ -111,7 +116,7 @@ export default function ListOfAllUsers() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 {user.name}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                 {user.email}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">

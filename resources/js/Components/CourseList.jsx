@@ -259,32 +259,69 @@ function CourseModal({ course, onClose }) {
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex gap-2 flex-wrap">
+
+
+                                <div className="flex gap-3 flex-wrap">
+
+                                    {/*  Start oefening */}
                                     <Link
                                         href={route("exercise.show", { id: exercise.id })}
-                                        className="px-4 py-2 rounded-lg text-white font-semibold text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-1"
-                                        style={{ backgroundColor: "#7B5EA7" }}
+                                        className="inline-flex items-center justify-center gap-2 rounded-xl text-white font-semibold text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#5A3F88] focus:ring-offset-2"
+                                        style={{
+                                            backgroundColor: "#7B5EA7",
+                                            paddingTop: "0.625rem",       // 10px → samen met pb = 44px min hoogte
+                                            paddingBottom: "0.625rem",
+                                            paddingLeft: "1.25rem",
+                                            paddingRight: "1.25rem",
+                                            minHeight: "44px",
+                                            minWidth: "160px",
+                                        }}
                                         aria-label={`Start oefening: ${exercise.exercise_name}`}
                                     >
+                                        <svg
+                                            width="16"
+                                            height="16"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                            aria-hidden="true"
+                                            focusable="false"
+                                        >
+                                            <path d="M8 5v14l11-7z" />
+                                        </svg>
                                         Start oefening
                                     </Link>
+
+                                    {/* Favoriet toggle */}
                                     {auth.user && (
                                         <button
                                             onClick={() => toggleFavorite(exercise.id)}
-                                            className={`px-4 py-2 rounded-lg font-semibold text-sm border-2 transition-all focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-1 ${
-                                                exerciseIsFav
-                                                    ? "text-white border-[#7B5EA7]"
-                                                    : "bg-white text-[#7B5EA7] border-[#7B5EA7]"
-                                            }`}
-                                            style={exerciseIsFav ? { backgroundColor: "#7B5EA7" } : {}}
+                                            aria-pressed={exerciseIsFav}
                                             aria-label={
                                                 exerciseIsFav
                                                     ? `Verwijder ${exercise.exercise_name} uit favorieten`
                                                     : `Voeg ${exercise.exercise_name} toe aan favorieten`
                                             }
+                                            className="inline-flex items-center justify-center gap-2 rounded-xl font-semibold text-sm border-2 transition-all focus:outline-none focus:ring-2 focus:ring-[#5A3F88] focus:ring-offset-2"
+                                            style={{
+                                                backgroundColor: exerciseIsFav ? "#7B5EA7" : "#FFFFFF",
+                                                color:           exerciseIsFav ? "#FFFFFF" : "#7B5EA7",
+                                                borderColor:     "#7B5EA7",
+                                                paddingTop:      "0.625rem",
+                                                paddingBottom:   "0.625rem",
+                                                paddingLeft:     "1.25rem",
+                                                paddingRight:    "1.25rem",
+                                                minHeight:       "44px",
+                                                minWidth:        "160px",
+                                            }}
                                         >
-                                            <HeartIcon filled={exerciseIsFav} className="w-4 h-4" />
-                                            {exerciseIsFav ? "Favoriet ✓" : "Favoriet"}
+                                            <HeartIcon
+                                                filled={exerciseIsFav}
+                                                className="w-4 h-4"
+                                                aria-hidden="true"
+                                            />
+                                            {exerciseIsFav
+                                                ? "Opgeslagen als favoriet"
+                                                : "Toevoegen aan favorieten"}
                                         </button>
                                     )}
                                 </div>
@@ -347,7 +384,7 @@ export default function CourseList() {
     }
 
     // Split de intro van de gewone cursussen
-    const introCourse   = courses.find(c => c.is_intro);
+    const introCourse    = courses.find(c => c.is_intro);
     const regularCourses = courses.filter(c => !c.is_intro);
 
     return (
@@ -384,7 +421,7 @@ export default function CourseList() {
                                     cursor: "not-allowed",
                                 }}
                                 role="listitem"
-                                aria-label={`Cursus ${course.course_name} — nog niet beschikbar`}
+                                aria-label={`Cursus ${course.course_name} — nog niet beschikbaar`}
                             >
                                 <div
                                     className="flex items-center justify-center w-14 h-14 rounded-lg flex-shrink-0"
