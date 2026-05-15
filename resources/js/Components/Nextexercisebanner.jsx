@@ -12,16 +12,13 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
                 style={{ backgroundColor: "#FEF3E8", border: "2px solid #B85B06" }}
             >
                 <p
-                    className="text-xs font-semibold uppercase tracking-wider mb-1"
+                    className="text-xs font-semibold uppercase tracking-wider mb-0.5"
                     style={{ color: "#B85B06" }}
                 >
-                    Klaar voor vandaag
+                    Klaar
                 </p>
                 <p className="text-lg font-semibold mb-1" style={{ color: "#4A2400" }}>
-                    Je hebt alle oefeningen gedaan!
-                </p>
-                <p className="text-sm" style={{ color: "#7A3B00" }}>
-                    Kom morgen terug voor je volgende oefening, of doe een oudere oefening opnieuw.
+                    Je hebt de oefening van vandaag gedaan!
                 </p>
             </section>
         );

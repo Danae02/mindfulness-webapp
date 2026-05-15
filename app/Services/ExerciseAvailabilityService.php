@@ -28,7 +28,6 @@ class ExerciseAvailabilityService
 
         foreach ($allCourses as $index => $course) {
             if ($index === 0) {
-                // eerste cursus altijd beschikbaar
                 $availabilityMap[$course->id] = true;
             } else {
                 $availabilityMap[$course->id] = $previousIsAvailableAndComplete;
@@ -61,22 +60,9 @@ class ExerciseAvailabilityService
         $availabilityMap = $this->buildCourseAvailabilityMap($userId);
         $today           = now()->toDateString();
 
-        // Haal completion dates op per oefening
-        $allExerciseIds = $allCourses->flatMap(fn($c) => $c->exercises->pluck('id'));
-
-        $completionDates = UserExerciseLog::where('user_id', $userId)
-            ->whereIn('exercise_id', $allExerciseIds)
-            ->where('completed', true)
-            ->selectRaw('exercise_id, MIN(DATE(date_time)) as first_completed_date')
-            ->groupBy('exercise_id')
-            ->pluck('first_completed_date', 'exercise_id');
-
-        $completedTodayIds = UserExerciseLog::where('user_id', $userId)
-            ->whereDate('date_time', today())
-            ->where('completed', true)
-            ->pluck('exercise_id')
-            ->flip()
-            ->all();
+        $allExerciseIds  = $allCourses->flatMap(fn($c) => $c->exercises->pluck('id'));
+        $completionDates = $this->getCompletionDates($userId, $allExerciseIds);
+        $completedTodayIds = $this->getCompletedTodayIds($userId);
 
         foreach ($allCourses as $courseIndex => $course) {
             if (!($availabilityMap[$course->id] ?? false)) {
@@ -84,49 +70,19 @@ class ExerciseAvailabilityService
             }
 
             foreach ($course->exercises as $index => $exercise) {
-                if ($index === 0) {
-                    if ($courseIndex === 0) {
-                        // Eerste oefening van eerste cursus: altijd beschikbaar
-                        $availableFrom = null;
-                    } else {
-                        // Eerste oefening van latere cursus: dag na laatste oefening vorige cursus
-                        $previousCourse     = $allCourses[$courseIndex - 1];
-                        $lastExerciseOfPrev = $previousCourse->exercises->last();
+                $availableFrom = $this->resolveExerciseAvailableFrom(
+                    $course, $courseIndex, $index, $allCourses, $completionDates, $userId
+                );
 
-                        if (!$lastExerciseOfPrev) {
-                            $availableFrom = null;
-                        } else {
-                            $prevCompleted = $completionDates[$lastExerciseOfPrev->id] ?? null;
-                            $availableFrom = $prevCompleted
-                                ? Carbon::parse($prevCompleted)->addDay()->toDateString()
-                                : null;
-                        }
-                    }
-                } else {
-                    // Overige oefeningen: beschikbaar dag na voltooien vorige oefening
-                    $previousExerciseId = $course->exercises[$index - 1]->id;
-                    $prevCompleted      = $completionDates[$previousExerciseId] ?? null;
-
-                    if ($prevCompleted === null) {
-                        // Vorige oefening nog niet gedaan: rest van cursus ook niet beschikbaar
-                        break;
-                    }
-
-                    $availableFrom = Carbon::parse($prevCompleted)->addDay()->toDateString();
-                }
-
-                // Oefening nog niet beschikbaar (te vroeg)
                 if ($availableFrom !== null && $availableFrom > $today) {
-                    break; // Volgende oefeningen in deze cursus zijn ook niet beschikbaar
+                    break;
                 }
 
-                // Oefening al eerder voltooid (vóór vandaag): sla over en ga door naar volgende
                 $prevCompletedDate = $completionDates[$exercise->id] ?? null;
                 if ($prevCompletedDate !== null && $prevCompletedDate < $today) {
                     continue;
                 }
 
-                // Oefening al vandaag afgerond: sla over
                 if (array_key_exists($exercise->id, $completedTodayIds)) {
                     continue;
                 }
@@ -136,5 +92,126 @@ class ExerciseAvailabilityService
         }
 
         return null;
+    }
+
+    public function isNewestAvailableExercise(int $exerciseId, int $userId): bool
+    {
+        $today = now()->toDateString();
+        $allCourses = Course::with('exercises')->orderBy('id')->get();
+        $availabilityMap = $this->buildCourseAvailabilityMap($userId);
+
+        $allExerciseIds = $allCourses->flatMap(fn($c) => $c->exercises->pluck('id'));
+        $completionDates = $this->getCompletionDates($userId, $allExerciseIds);
+
+        $availableExercises = [];
+
+        foreach ($allCourses as $courseIndex => $course) {
+            if (!($availabilityMap[$course->id] ?? false)) {
+                continue;
+            }
+
+            foreach ($course->exercises as $exerciseIndex => $exercise) {
+                $availableFrom = $this->resolveExerciseAvailableFrom(
+                    $course, $courseIndex, $exerciseIndex, $allCourses, $completionDates, $userId
+                );
+
+                if ($availableFrom === null || $availableFrom <= $today) {
+                    $availableExercises[] = [
+                        'id'             => $exercise->id,
+                        'course_index'   => $courseIndex,
+                        'exercise_index' => $exerciseIndex,
+                    ];
+                }
+            }
+        }
+
+        if (empty($availableExercises)) {
+            return false;
+        }
+
+        usort($availableExercises, fn($a, $b) =>
+        $a['course_index'] !== $b['course_index']
+            ? $a['course_index'] <=> $b['course_index']
+            : $a['exercise_index'] <=> $b['exercise_index']
+        );
+
+        return end($availableExercises)['id'] === $exerciseId;
+    }
+
+
+    public function hasAnsweredFeelingToday(int $userId): bool
+    {
+        return UserExerciseLog::where('user_id', $userId)
+            ->whereDate('date_time', now()->toDateString())
+            ->where(function ($q) {
+                $q->whereNotNull('feeling_before')
+                    ->orWhereNotNull('feeling_after');
+            })
+            ->exists();
+    }
+
+    private function resolveExerciseAvailableFrom(
+        $course,
+        int $courseIndex,
+        int $exerciseIndex,
+        $allCourses,
+        $completionDates,
+        int $userId
+    ): ?string {
+        if ($exerciseIndex === 0) {
+            if ($courseIndex === 0) {
+                return null;
+            }
+
+            $previousCourse = $allCourses[$courseIndex - 1];
+            $lastExerciseOfPrev = $previousCourse->exercises->last();
+
+            if (!$lastExerciseOfPrev) {
+                return null;
+            }
+
+            $prevLastCompletedDate = UserExerciseLog::where('user_id', $userId)
+                ->where('exercise_id', $lastExerciseOfPrev->id)
+                ->where('completed', true)
+                ->selectRaw('MIN(DATE(date_time)) as first_completed_date')
+                ->value('first_completed_date');
+
+            if ($prevLastCompletedDate === null) {
+                return '9999-99-99';
+            }
+
+            return Carbon::parse($prevLastCompletedDate)->addDay()->toDateString();
+        }
+
+        $previousExerciseId = $course->exercises[$exerciseIndex - 1]->id;
+        $prevCompletedDate = $completionDates[$previousExerciseId] ?? null;
+
+        if ($prevCompletedDate === null) {
+            return '9999-99-99';
+        }
+
+        return Carbon::parse($prevCompletedDate)->addDay()->toDateString();
+    }
+
+
+    private function getCompletionDates(int $userId, $exerciseIds): array
+    {
+        return UserExerciseLog::where('user_id', $userId)
+            ->whereIn('exercise_id', $exerciseIds)
+            ->where('completed', true)
+            ->selectRaw('exercise_id, MIN(DATE(date_time)) as first_completed_date')
+            ->groupBy('exercise_id')
+            ->pluck('first_completed_date', 'exercise_id')
+            ->all();
+    }
+
+    private function getCompletedTodayIds(int $userId): array
+    {
+        return UserExerciseLog::where('user_id', $userId)
+            ->whereDate('date_time', today())
+            ->where('completed', true)
+            ->pluck('exercise_id')
+            ->flip()
+            ->all();
     }
 }

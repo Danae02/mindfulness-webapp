@@ -47,7 +47,7 @@ export default function Login({ status, canResetPassword }) {
             <form onSubmit={submit}>
                 <div className="mb-3 text-center">
                     <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                        Inloggen
+                        Inlogpagina
                     </h1>
                 </div>
 
@@ -178,8 +178,6 @@ export default function Login({ status, canResetPassword }) {
                             Onthoud mij
                         </span>
                     </label>
-                    {/* Buiten de label: anders leest de screenreader de helptekst
-                        als onderdeel van de labelnaam i.p.v. als beschrijving */}
                     <span id="remember-help" className="sr-only">
                         Volgende keer automatisch inloggen op deze computer
                     </span>

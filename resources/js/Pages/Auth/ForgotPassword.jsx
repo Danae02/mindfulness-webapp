@@ -24,7 +24,7 @@ export default function ForgotPassword({ status }) {
             <Head title="Wachtwoord vergeten" />
 
             <form onSubmit={submit}>
-                <div className="flex justify-end mb-2">
+                <div className="flex justify-start mb-2">
                     <Link
                         href={route('login')}
                         className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-primary hover:text-primary-dark border border-primary rounded-full hover:bg-primary hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
@@ -34,16 +34,16 @@ export default function ForgotPassword({ status }) {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                   d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                         </svg>
-                        Terug naar inloggen
+                        Terug naar de inlogpagina
                     </Link>
                 </div>
 
                 <div className="mb-3 text-center">
                     <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                        Wachtwoord vergeten?
+                        Wachtwoord vergeten pagina
                     </h1>
                     <h2 className="text-base font-medium text-gray-600">
-                        Reset je wachtwoord
+                        Verander je wachtwoord
                     </h2>
                 </div>
 
@@ -112,11 +112,11 @@ export default function ForgotPassword({ status }) {
                     <InputError message={errors.email} className="mt-2"/>
                 </div>
 
-                <div className="mt-4 text-sm text-gray-500">
-                    <span className="text-red-600 font-bold" aria-hidden="true">*</span>
-                    <span className="sr-only">Sterretje betekent: </span>
-                    Verplicht veld
-                </div>
+                {/*<div className="mt-4 text-sm text-gray-500">*/}
+                {/*    <span className="text-red-600 font-bold" aria-hidden="true">*</span>*/}
+                {/*    <span className="sr-only">Sterretje betekent: </span>*/}
+                {/*    Verplicht veld*/}
+                {/*</div>*/}
 
                 <div className="mt-4">
                     <button

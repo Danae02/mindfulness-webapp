@@ -8,7 +8,8 @@ import { useForm } from '@inertiajs/react';
 import { useRef, useState, useEffect } from 'react';
 import WarningIcon from "@/Icons/WarningIcon.jsx";
 
-const audioFilePath = '/storage/audio/ElevenLabs_instructie_verwijderAccount.mp3';
+const audioFilePath = '/audio/ElevenLabs_instructie_verwijderAccount.mp3';
+
 
 export default function DeleteUserForm({ className = '' }) {
     const [confirmingUserDeletion, setConfirmingUserDeletion] = useState(false);

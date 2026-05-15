@@ -42,15 +42,11 @@ export default function Register() {
                 aria-label="Registratieformulier voor nieuw account"
             >
                 <div className="mb-3 text-center">
-                    {/*
-                        H1 TITLE
-                        Dit is de visuele titel. Screenreaders lezen dit PLUS de aria-label
-                    */}
                     <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                        Account aanmaken
+                        Account aanmaken pagina
                     </h1>
                     <h2 className="text-base font-medium text-gray-600">
-                        Nieuwe gebruiker
+                        Als nieuwe gebruiker kan je hier jouw account aanmaken
                     </h2>
                 </div>
 

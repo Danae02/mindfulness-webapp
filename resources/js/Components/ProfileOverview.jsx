@@ -6,7 +6,7 @@ export default function ProfileOverview({ exerciseCountLastWeek }) {
     return (
         <div className="text-center">
             <h1 className="text-3xl font-heading font-bold text-darkGray mb-3">
-                Hallo <span className="text-primary">{user.name}</span>, welkom terug!
+                Hallo <span className="text-primary">{user.name}</span>, welkom bij jou oefeningen!
             </h1>
             <p className="text-lg mb-6" style={{ color: '#5F5F5F' }}>
                 {`Je hebt deze week ${exerciseCountLastWeek} oefeningen gedaan! Blijf oefenen voor de beste resultaten.`}

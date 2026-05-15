@@ -6,11 +6,19 @@ use App\Models\Course;
 use App\Models\Exercise;
 use App\Models\UserExerciseLog;
 use App\Models\ResearchSettings;
+use App\Services\ExerciseAvailabilityService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ExerciseController extends Controller
 {
+    private ExerciseAvailabilityService $availabilityService;
+
+    public function __construct(ExerciseAvailabilityService $availabilityService)
+    {
+        $this->availabilityService = $availabilityService;
+    }
+
     public function index()
     {
         $exercises = Exercise::all();
@@ -23,7 +31,6 @@ class ExerciseController extends Controller
         return response()->json($exercises);
     }
 
-
     public function showExercise($id)
     {
         $exercise = Exercise::find($id);
@@ -32,80 +39,60 @@ class ExerciseController extends Controller
             abort(404, 'Exercise not found');
         }
 
-        $exerciseData          = $exercise->toArray();
-        $exerciseAvailable     = true;
-        $availableLabel        = null;
+        $exerciseData = $exercise->toArray();
+        $exerciseAvailable = true;
+        $availableLabel = null;
         $alreadyCompletedToday = false;
-        $researchMode          = null;
-        $researchQuestion      = null;
-        $researchAnswers       = null;
-        $forUserId             = null;
-        $isProxyMode           = false;
+        $researchMode = null;
+        $researchQuestion = null;
+        $researchAnswers = null;
+        $forUserId = null;
+        $isProxyMode = false;
+        $isNewestExercise = false;
+        $proxyFeelingAnsweredToday = false;
 
         if (auth()->check()) {
             $userId = auth()->id();
-
             $rawForUser = request('for_user_id') ?? request('for_user');
+
             if ($rawForUser) {
-                $forUserId   = (int) $rawForUser;
+                $forUserId = (int) $rawForUser;
                 $isProxyMode = true;
             }
 
             $userForAvailability = $isProxyMode ? $forUserId : $userId;
 
-            // ── Cursus-beschikbaarheid ophalen ──
-            $courseId = $exercise->course_id;
-            if ($courseId) {
-                $course = Course::find($courseId);
-                if ($course) {
-                    $courseController    = new CourseController();
-                    $availabilityResponse = $courseController->getCourseAvailabilityForUser($courseId, $userForAvailability);
+            [$exerciseAvailable, $availableLabel] = $this->checkExerciseAvailability(
+                $exercise, $userForAvailability
+            );
 
-                    // getCourseAvailabilityForUser geeft een JsonResponse terug
-                    $availabilityData = json_decode($availabilityResponse->getContent(), true);
+            $alreadyCompletedToday = $this->hasCompletedTodayCheck($id, $userForAvailability);
 
-                    $exerciseAvailability = collect($availabilityData)
-                        ->firstWhere('exercise_id', (int) $id);
+            $isNewestExercise = $this->availabilityService->isNewestAvailableExercise(
+                (int) $id, $userForAvailability
+            );
 
-                    if ($exerciseAvailability) {
-                        $exerciseAvailable = $exerciseAvailability['available'] ?? true;
-                        $availableLabel    = $exerciseAvailability['available_label'] ?? null;
-                    }
-                }
-            }
+            $proxyFeelingAnsweredToday = $this->availabilityService->hasAnsweredFeelingToday(
+                $userForAvailability
+            );
 
-            $alreadyCompletedToday = UserExerciseLog::where('user_id', $userForAvailability)
-                ->where('exercise_id', $id)
-                ->whereDate('date_time', today())
-                ->where('completed', true)
-                ->exists();
-
-
-            $researchSetting = \App\Models\ResearchSettings::where('key_name', 'mode')->first();
-            if ($researchSetting) {
-                $researchMode = $researchSetting->value; // 'per_session', 'per_exercise', etc.
-
-                // Alleen als er een vraag + antwoorden geconfigureerd zijn
-                if ($researchSetting->question && $researchSetting->answers) {
-                    $researchQuestion = $researchSetting->question;
-                    $researchAnswers  = $researchSetting->answers; // JSON string of array
-                }
-            }
+            [$researchMode, $researchQuestion, $researchAnswers] = $this->getResearchSettings();
         }
 
         return Inertia::render('ExercisePage', [
-            'exercise'             => $exerciseData,
-            'available'            => $exerciseAvailable,
-            'availableLabel'       => $availableLabel,
-            'alreadyCompletedToday'=> $alreadyCompletedToday,
-            'forUserId'            => $forUserId,
-            'isProxyMode'          => $isProxyMode,
-            'researchMode'         => $researchMode,
-            'researchQuestion'     => $researchQuestion,
-            'researchAnswers'      => $researchAnswers,
+            'exercise'                  => $exerciseData,
+            'available'                 => $exerciseAvailable,
+            'availableLabel'            => $availableLabel,
+            'alreadyCompletedToday'     => $alreadyCompletedToday,
+            'forUserId'                 => $forUserId,
+            'isProxyMode'               => $isProxyMode,
+            'researchMode'              => $researchMode,
+            'researchQuestion'          => $researchQuestion,
+            'researchAnswers'           => $researchAnswers,
+            'isNewestExercise'          => $isNewestExercise,
+            'proxyFeelingAnsweredToday' => $proxyFeelingAnsweredToday,
         ]);
     }
-
 
     public function getExerciseAvailability($id)
     {
@@ -114,39 +101,16 @@ class ExerciseController extends Controller
             return response()->json(['available' => true, 'available_label' => null]);
         }
 
-        $userId    = auth()->id();
+        $userId = auth()->id();
         $rawForUser = request('for_user_id') ?? request('for_user');
         $targetUser = $rawForUser ? (int) $rawForUser : $userId;
 
-        $exerciseAvailable = true;
-        $availableLabel    = null;
+        [$available, $availableLabel] = $this->checkExerciseAvailability($exercise, $targetUser);
 
-        $courseId = $exercise->course_id;
-        if ($courseId) {
-            $course = Course::find($courseId);
-            if ($course) {
-                $courseController     = new CourseController();
-                $availabilityResponse = $courseController->getCourseAvailabilityForUser($courseId, $targetUser);
-                $availabilityData     = json_decode($availabilityResponse->getContent(), true);
-
-                $exerciseAvailability = collect($availabilityData)
-                    ->firstWhere('exercise_id', (int) $id);
-
-                if ($exerciseAvailability) {
-                    $exerciseAvailable = $exerciseAvailability['available'] ?? true;
-                    $availableLabel    = $exerciseAvailability['available_label'] ?? null;
-                }
-            }
-        }
-
-        $alreadyCompletedToday = UserExerciseLog::where('user_id', $targetUser)
-            ->where('exercise_id', $id)
-            ->whereDate('date_time', today())
-            ->where('completed', true)
-            ->exists();
+        $alreadyCompletedToday = $this->hasCompletedTodayCheck($id, $targetUser);
 
         return response()->json([
-            'available'             => $exerciseAvailable,
+            'available'             => $available,
             'available_label'       => $availableLabel,
             'alreadyCompletedToday' => $alreadyCompletedToday,
         ]);
@@ -193,13 +157,14 @@ class ExerciseController extends Controller
         ]);
 
         $currentUser = auth()->user();
-        $logUserId   = $validated['user_id'];
+        $logUserId = $validated['user_id'];
 
+        // Autorisatiecheck
         if ($currentUser->role_id === 2) {
             if ($logUserId !== $currentUser->id) {
                 return response()->json(['error' => 'Je kunt alleen voor jezelf oefeningen loggen'], 403);
             }
-        } else if (!in_array($currentUser->role_id, [1, 3, 4])) {
+        } elseif (!in_array($currentUser->role_id, [1, 3, 4])) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -226,5 +191,62 @@ class ExerciseController extends Controller
         $exercise->delete();
 
         return response()->json(['message' => 'Exercise deleted successfully']);
+    }
+
+
+    private function checkExerciseAvailability(Exercise $exercise, int $userId): array
+    {
+        $exerciseAvailable = true;
+        $availableLabel = null;
+
+        $courseId = $exercise->course_id;
+        if ($courseId) {
+            $course = Course::find($courseId);
+            if ($course) {
+                $courseController = new CourseController();
+                $availabilityResponse = $courseController->getCourseAvailabilityForUser($courseId, $userId);
+                $availabilityData = json_decode($availabilityResponse->getContent(), true);
+
+                $exerciseAvailability = collect($availabilityData)
+                    ->firstWhere('exercise_id', (int) $exercise->id);
+
+                if ($exerciseAvailability) {
+                    $exerciseAvailable = $exerciseAvailability['available'] ?? true;
+                    $availableLabel = $exerciseAvailability['available_label'] ?? null;
+                }
+            }
+        }
+
+        return [$exerciseAvailable, $availableLabel];
+    }
+
+
+    private function hasCompletedTodayCheck(int $exerciseId, int $userId): bool
+    {
+        return UserExerciseLog::where('user_id', $userId)
+            ->where('exercise_id', $exerciseId)
+            ->whereDate('date_time', today())
+            ->where('completed', true)
+            ->exists();
+    }
+
+
+    private function getResearchSettings(): array
+    {
+        $researchMode = null;
+        $researchQuestion = null;
+        $researchAnswers = null;
+
+        $researchSetting = ResearchSettings::where('key_name', 'mode')->first();
+        if ($researchSetting) {
+            $researchMode = $researchSetting->value;
+
+            if ($researchSetting->question && $researchSetting->answers) {
+                $researchQuestion = $researchSetting->question;
+                $researchAnswers = $researchSetting->answers;
+            }
+        }
+
+        return [$researchMode, $researchQuestion, $researchAnswers];
     }
 }

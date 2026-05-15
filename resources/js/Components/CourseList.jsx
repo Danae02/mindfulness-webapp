@@ -27,7 +27,7 @@ function IntroCard({ exercise }) {
                         {exercise.exercise_name}
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                        Altijd beschikbaar · introductie
+                        Altijd beschikbaar
                     </p>
                 </div>
 
@@ -213,7 +213,7 @@ function CourseModal({ course, onClose }) {
 
                 {/* Oefeningen */}
                 <div className="p-6 pt-2">
-                    <div className="space-y-3" role="list" aria-label={`Oefeningen in cursus ${course.course_name}`}>
+                    <div className="space-y-3" role="list" aria-label={`Oefeningen in deel ${course.course_name}`}>
                         {course.exercises.map((exercise) => {
                             const avail = availability[exercise.id] || { available: true };
                             const exerciseIsFav = isFavorite(exercise.id);
@@ -379,7 +379,7 @@ export default function CourseList() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                 </svg>
-                Cursussen laden…
+                Oefeningen laden…
             </div>
         );
     }
@@ -401,11 +401,11 @@ export default function CourseList() {
 
             {regularCourses.length > 0 && (
                 <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 px-1 mt-4">
-                    Cursussen
+                    Vervolg delen
                 </p>
             )}
             {regularCourses.length === 0 && !introCourse && (
-                <p className="text-gray-400 italic text-sm">Nog geen cursussen beschikbaar.</p>
+                <p className="text-gray-400 italic text-sm">Nog geen delen beschikbaar.</p>
             )}
             <div className="flex flex-col gap-3" role="list" aria-labelledby="courses-heading">
                 {regularCourses.map((course) => {
@@ -424,7 +424,7 @@ export default function CourseList() {
                                 role="listitem"
                             >
                                 <p className="sr-only">
-                                    {`Cursus ${course.course_name}: nog niet beschikbaar. ${course.available_label ? course.available_label + '. ' : ''}Deze cursus wordt ontgrendeld als je elke dag een oefening doet.`}
+                                    {`Deel: ${course.course_name}: nog niet beschikbaar. ${course.available_label ? course.available_label + '. ' : ''}Dit deel wordt ontgrendeld als je elke dag een oefening doet.`}
                                 </p>
                                 <div
                                     className="flex items-center justify-center w-14 h-14 rounded-lg flex-shrink-0"
@@ -455,7 +455,7 @@ export default function CourseList() {
                                 onKeyDown={(e) => handleKeyDown(e, course)}
                                 tabIndex={0}
                                 role="button"
-                                aria-label={`Open cursus: ${course.course_name}, ${course.exercises?.length || 0} oefeningen`}
+                                aria-label={`Open deel: ${course.course_name}, ${course.exercises?.length || 0} oefeningen`}
                             >
                                 <div
                                     className="flex items-center justify-center w-14 h-14 rounded-lg flex-shrink-0"

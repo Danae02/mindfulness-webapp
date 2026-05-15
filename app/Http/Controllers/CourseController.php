@@ -3,107 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
-use App\Models\UserExerciseLog;
+use App\Services\CourseService;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
+    private CourseService $courseService;
 
-     //De vaste introductie-oefening die altijd bovenaan staat en altijd beschikbaar is.
-     //Dit is een hardcoded object, geen DB-record.
-    private function introExercise(): array
+    public function __construct(CourseService $courseService)
     {
-        return [
-            'id'              => 'intro',
-            'exercise_name'   => 'Introductie mindfulness app',
-            'audio_file_path' => '/audio/1.mindfulness_app_inleiding.m4a',
-            'duration'        => null,
-            'form_question'   => null,
-            'form_answers'    => null,
-            'available'       => true,
-            'available_label' => null,
-        ];
+        $this->courseService = $courseService;
     }
-
-    //Het hardcoded intro-cursus-object dat boven alle echte cursussen wordt getoond.
-    private function introCourse(): array
-    {
-        return [
-            'id'          => 'intro',
-            'is_intro'    => true,
-            'course_name' => 'Welkom',
-            'description' => 'Beluister de introductie voordat je aan de cursussen begint.',
-            'available'   => true,
-            'exercises'   => [$this->introExercise()],
-        ];
-    }
-
-    // Berekent per cursus-ID of die beschikbaar is voor de opgegeven gebruiker.
-    //
-    // Cursus-volgorde = oplopend op id.
-    // Cursus 1 (index 0): altijd beschikbaar.
-    // Cursus N: beschikbaar als cursus N-1 beschikbaar ÉN alle oefeningen van cursus N-1 minstens één keer completed zijn.
-    private function buildCourseAvailabilityMap(int $userId): array
-    {
-        $allCourses = Course::with('exercises')->orderBy('id')->get();
-
-        // Haal in één query alle exercise_ids op die deze user ooit voltooid heeft
-        $allExerciseIds = $allCourses->flatMap(fn($c) => $c->exercises->pluck('id'));
-
-        $completedExerciseIds = UserExerciseLog::where('user_id', $userId)
-            ->whereIn('exercise_id', $allExerciseIds)
-            ->where('completed', true)
-            ->distinct()
-            ->pluck('exercise_id')
-            ->flip()
-            ->all();
-
-        $availabilityMap = [];
-        $previousIsAvailableAndComplete = true;
-
-        foreach ($allCourses as $index => $course) {
-            if ($index === 0) {
-                // Eerste cursus altijd beschikbaar
-                $availabilityMap[$course->id] = true;
-            } else {
-                $availabilityMap[$course->id] = $previousIsAvailableAndComplete;
-            }
-
-            // Bepaal of de cursus afgerond is
-            if ($availabilityMap[$course->id]) {
-                $exerciseIds = $course->exercises->pluck('id');
-
-                if ($exerciseIds->isEmpty()) {
-                    $previousIsAvailableAndComplete = true;
-                } else {
-                    $allCompleted = $exerciseIds->every(
-                        fn($id) => array_key_exists($id, $completedExerciseIds)
-                    );
-                    $previousIsAvailableAndComplete = $allCompleted;
-                }
-            } else {
-                $previousIsAvailableAndComplete = false;
-            }
-        }
-
-        return $availabilityMap;
-    }
-
 
     public function getAllCourses()
     {
         $courses = Course::with('exercises')->orderBy('id')->get();
-
-        // Bouw de intro-cursus alvast op
-        $intro = $this->introCourse();
+        $intro   = $this->courseService->getIntroCourse();
 
         if (!auth()->check()) {
-            // Niet ingelogd: intro + cursussen zonder beschikbaarheidsinfo
             return response()->json(array_merge([$intro], $courses->values()->all()));
         }
 
         $userId          = auth()->id();
-        $availabilityMap = $this->buildCourseAvailabilityMap($userId);
+        $availabilityMap = $this->courseService->buildCourseAvailabilityMap($userId);
 
         $result = $courses->map(function ($course) use ($availabilityMap) {
             $available = $availabilityMap[$course->id] ?? false;
@@ -120,22 +42,13 @@ class CourseController extends Controller
     public function createCourse(Request $request)
     {
         $validated = $request->validate([
-            'course_name' => 'required|string|max:255',
+            'course_name' => 'required|string|max:255|unique:courses,course_name',
             'description' => 'nullable|string',
+        ], [
+            'course_name.unique' => 'Course name already exists!',
         ]);
 
-        $exists = Course::where('course_name', $validated['course_name'])->exists();
-
-        if ($exists) {
-            return response()->json([
-                'message' => 'Course name already exists!',
-            ], 422);
-        }
-
-        $course = Course::create([
-            'course_name' => $validated['course_name'],
-            'description' => $validated['description'] ?? null,
-        ]);
+        $course = Course::create($validated);
 
         return response()->json([
             'message'   => 'Course created successfully!',
@@ -190,47 +103,20 @@ class CourseController extends Controller
         return response()->json(['message' => 'Course deleted successfully!']);
     }
 
-    // Helper om een leesbaar label te maken op basis van het aantal dagen verschil
-    private function buildAvailableLabel(string $availableFrom, string $today): string
-    {
-        $availableFromCarbon = \Carbon\Carbon::parse($availableFrom);
-        $todayCarbon         = \Carbon\Carbon::parse($today);
-        $diffDays            = $todayCarbon->diffInDays($availableFromCarbon);
-
-        if ($diffDays === 1) {
-            return 'Morgen beschikbaar';
-        } elseif ($diffDays <= 6) {
-            $days = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
-            return 'Beschikbaar op ' . $days[$availableFromCarbon->dayOfWeek];
-        } else {
-            $months = [
-                1 => 'januari', 2 => 'februari',  3 => 'maart',    4 => 'april',
-                5 => 'mei',     6 => 'juni',       7 => 'juli',     8 => 'augustus',
-                9 => 'september', 10 => 'oktober', 11 => 'november', 12 => 'december',
-            ];
-            return 'Beschikbaar op ' . $availableFromCarbon->day . ' ' . $months[$availableFromCarbon->month];
-        }
-    }
-
-    // Regels:
-    //   - Als cursus niet beschikbaar is: alles op slot
-    //   - Oefening 1 (0) van cursus 1 (index 0): altijd direct beschikbaar
-    //   - Oefening 1 (0) van cursus N (N > 0): beschikbaar de dag na afronden van de laatste oefening van de vorige cursus
-    //   - Oefening N binnen een cursus: beschikbaar de dag na afronden van oefening N-1
-    //   - Eerder vrijgekomen oefeningen blijven altijd beschikbaar
     public function getCourseAvailability($id)
     {
         $course = Course::with('exercises')->find($id);
+
         if (!$course) {
             return response()->json(['message' => 'Course not found.'], 404);
         }
 
         $userId = auth()->id();
+        $result = $this->courseService->buildExerciseAvailability($course, $userId);
 
-        return $this->buildExerciseAvailability($course, $userId);
+        return response()->json($result);
     }
 
-    // Zelfde als getCourseAvailability maar voor een specifieke gebruiker (begeleider-view)
     public function getCourseAvailabilityForUser($courseId, $userId)
     {
         if (!in_array(auth()->user()->role_id, [1, 3, 4])) {
@@ -238,194 +124,23 @@ class CourseController extends Controller
         }
 
         $course = Course::with('exercises')->find($courseId);
+
         if (!$course) {
             return response()->json(['message' => 'Course not found.'], 404);
         }
 
-        return $this->buildExerciseAvailability($course, $userId);
-    }
-
-    // Interne helper zodat getCourseAvailability en getCourseAvailabilityForUser dezelfde logica gebruiken
-    private function buildExerciseAvailability($course, int $userId)
-    {
-        // Stap 1: is de cursus beschikbaar?
-        $allCourses        = Course::with('exercises')->orderBy('id')->get();
-        $availabilityMap   = $this->buildCourseAvailabilityMap($userId);
-        $courseIsAvailable = $availabilityMap[$course->id] ?? false;
-
-        if (!$courseIsAvailable) {
-            $result = $course->exercises->map(fn($exercise) => [
-                'exercise_id'     => $exercise->id,
-                'available'       => false,
-                'available_from'  => null,
-                'available_label' => 'Voltooi eerst de vorige cursus',
-            ])->values()->all();
-
-            return response()->json($result);
-        }
-
-        // Stap 2: cursus beschikbaar en haal completion dates op voor oefeningen in deze cursus
-        $exerciseIds = $course->exercises->pluck('id');
-
-        $completionDates = UserExerciseLog::where('user_id', $userId)
-            ->whereIn('exercise_id', $exerciseIds)
-            ->where('completed', true)
-            ->selectRaw('exercise_id, MIN(DATE(date_time)) as first_completed_date')
-            ->groupBy('exercise_id')
-            ->pluck('first_completed_date', 'exercise_id');
-
-        $today       = now()->toDateString();
-        $courseIndex = $allCourses->search(fn($c) => $c->id === $course->id);
-        $result      = [];
-
-        foreach ($course->exercises as $index => $exercise) {
-
-            // Eerste oefening van de cursus
-            if ($index === 0) {
-
-                // Eerste oefening van de eerste cursus: altijd direct beschikbaar
-                if ($courseIndex === 0) {
-                    $result[] = [
-                        'exercise_id'     => $exercise->id,
-                        'available'       => true,
-                        'available_from'  => null,
-                        'available_label' => null,
-                    ];
-                    continue;
-                }
-
-                // Eerste oefening van een latere cursus: beschikbaar de dag ná de laatste oefening van de vorige cursus
-                $previousCourse     = $allCourses[$courseIndex - 1];
-                $lastExerciseOfPrev = $previousCourse->exercises->last();
-
-                if (!$lastExerciseOfPrev) {
-                    $result[] = [
-                        'exercise_id'     => $exercise->id,
-                        'available'       => true,
-                        'available_from'  => null,
-                        'available_label' => null,
-                    ];
-                    continue;
-                }
-
-                $prevLastCompletedDate = UserExerciseLog::where('user_id', $userId)
-                    ->where('exercise_id', $lastExerciseOfPrev->id)
-                    ->where('completed', true)
-                    ->selectRaw('MIN(DATE(date_time)) as first_completed_date')
-                    ->value('first_completed_date');
-
-                if ($prevLastCompletedDate === null) {
-                    $result[] = [
-                        'exercise_id'     => $exercise->id,
-                        'available'       => false,
-                        'available_from'  => null,
-                        'available_label' => 'Voltooi eerst de vorige cursus',
-                    ];
-                    continue;
-                }
-
-                $availableFrom = \Carbon\Carbon::parse($prevLastCompletedDate)->addDay()->toDateString();
-
-                if ($availableFrom <= $today) {
-                    $result[] = [
-                        'exercise_id'     => $exercise->id,
-                        'available'       => true,
-                        'available_from'  => $availableFrom,
-                        'available_label' => null,
-                    ];
-                } else {
-                    $result[] = [
-                        'exercise_id'     => $exercise->id,
-                        'available'       => false,
-                        'available_from'  => $availableFrom,
-                        'available_label' => $this->buildAvailableLabel($availableFrom, $today),
-                    ];
-                }
-
-                continue;
-            }
-
-            // Overige oefeningen binnen de cursus
-            $previousExerciseId = $course->exercises[$index - 1]->id;
-            $prevCompletedDate  = $completionDates[$previousExerciseId] ?? null;
-
-            if ($prevCompletedDate === null) {
-                $result[] = [
-                    'exercise_id'     => $exercise->id,
-                    'available'       => false,
-                    'available_from'  => null,
-                    'available_label' => 'Voltooi eerst de vorige oefening',
-                ];
-                continue;
-            }
-
-            $availableFrom = \Carbon\Carbon::parse($prevCompletedDate)->addDay()->toDateString();
-
-            if ($availableFrom <= $today) {
-                $result[] = [
-                    'exercise_id'     => $exercise->id,
-                    'available'       => true,
-                    'available_from'  => $availableFrom,
-                    'available_label' => null,
-                ];
-            } else {
-                $result[] = [
-                    'exercise_id'     => $exercise->id,
-                    'available'       => false,
-                    'available_from'  => $availableFrom,
-                    'available_label' => $this->buildAvailableLabel($availableFrom, $today),
-                ];
-            }
-        }
+        $result = $this->courseService->buildExerciseAvailability($course, $userId);
 
         return response()->json($result);
     }
 
-    // Geeft voor een specifieke gebruiker per cursus de voortgang terug.
     public function getClientProgress($userId)
     {
         if (!in_array(auth()->user()->role_id, [1, 3, 4])) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $courses         = Course::with('exercises')->orderBy('id')->get();
-        $availabilityMap = $this->buildCourseAvailabilityMap($userId);
-
-        $completedLogs = UserExerciseLog::where('user_id', $userId)
-            ->where('completed', true)
-            ->selectRaw('exercise_id, MAX(date_time) as last_completed_at')
-            ->groupBy('exercise_id')
-            ->get()
-            ->keyBy('exercise_id');
-
-        $result = $courses->map(function ($course) use ($availabilityMap, $completedLogs) {
-            $available  = $availabilityMap[$course->id] ?? false;
-            $total      = $course->exercises->count();
-            $done       = 0;
-
-            $exercises = $course->exercises->map(function ($ex) use ($completedLogs, &$done) {
-                $log       = $completedLogs->get($ex->id);
-                $completed = $log !== null;
-                if ($completed) $done++;
-
-                return [
-                    'exercise_id'        => $ex->id,
-                    'exercise_name'      => $ex->exercise_name,
-                    'completed'          => $completed,
-                    'last_completed_at'  => $completed ? $log->last_completed_at : null,
-                ];
-            });
-
-            return [
-                'course_id'   => $course->id,
-                'course_name' => $course->course_name,
-                'available'   => $available,
-                'progress'    => $total > 0 ? round($done / $total * 100) : 0,
-                'done'        => $done,
-                'total'       => $total,
-                'exercises'   => $exercises,
-            ];
-        });
+        $result = $this->courseService->getClientProgress($userId);
 
         return response()->json($result);
     }
