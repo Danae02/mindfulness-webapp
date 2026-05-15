@@ -15,28 +15,45 @@ function formatDuration(minutes) {
     return m > 0 ? `${h} u ${m} min` : `${h} uur`;
 }
 
-export default function ExercisePage({ exercise, researchMode, researchQuestion, researchAnswers, alreadyCompletedToday }) {
-    const [isCompleted, setIsCompleted] = useState(false);
+export default function ExercisePage({
+                                         exercise,
+                                         available,
+                                         availableLabel,
+                                         alreadyCompletedToday,
+                                         forUserId,
+                                         isProxyMode,
+                                         researchMode,
+                                         researchQuestion,
+                                         researchAnswers,
+                                     }) {
+    const [isCompleted,       setIsCompleted]       = useState(false);
     const [showStartQuestion, setShowStartQuestion] = useState(true);
-    const [showEndQuestion, setShowEndQuestion] = useState(false);
-    const [hasAnsweredEnd, setHasAnsweredEnd] = useState(false);
-    const [skipQuestions, setSkipQuestions] = useState(false);
-    const [showCompletion, setShowCompletion] = useState(false);
+    const [showEndQuestion,   setShowEndQuestion]   = useState(false);
+    const [hasAnsweredEnd,    setHasAnsweredEnd]     = useState(false);
+    // skipQuestions: vandaag al gedaan én NIET in proxy mode
+    const [skipQuestions,     setSkipQuestions]     = useState(false);
+    const [showCompletion,    setShowCompletion]     = useState(false);
 
     const [feelingBefore, setFeelingBefore] = useState(null);
 
     const sessionStartRef = useRef(null);
-
     const user = usePage().props.auth.user;
 
+    const effectiveUserId = forUserId || user.id;
+    const isProxy         = isProxyMode || (forUserId && forUserId !== user.id);
+
+    // Vraag & antwoorden bepalen
     const getQuestion = () => {
         if (researchMode === 'per_exercise' && researchQuestion) return researchQuestion;
+        if (researchMode === 'per_session'  && researchQuestion) return researchQuestion;
         return exercise.form_question;
     };
 
     const getAnswers = () => {
-        if (researchMode === 'per_exercise' && researchAnswers) {
-            return typeof researchAnswers === 'string' ? JSON.parse(researchAnswers) : researchAnswers;
+        if ((researchMode === 'per_exercise' || researchMode === 'per_session') && researchAnswers) {
+            return typeof researchAnswers === 'string'
+                ? JSON.parse(researchAnswers)
+                : researchAnswers;
         }
         return typeof exercise.form_answers === 'string'
             ? JSON.parse(exercise.form_answers)
@@ -48,57 +65,63 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
     const hasQuestions    = currentQuestion && currentAnswers && currentAnswers.length > 0;
     const feelingScale    = currentAnswers?.length ?? 5;
 
-    // Duur: vanuit de database (in minuten), of null als onbekend
     const durationLabel = formatDuration(exercise.duration ?? null);
 
+    // supervisor mag altijd vragen invullen namens client, ook als client vandaag al gedaan heeft (begeleider helpt expliciet mee)
     useEffect(() => {
-        if (alreadyCompletedToday) {
-            setSkipQuestions(true);
+        const shouldSkip = alreadyCompletedToday && !isProxy;
+        setSkipQuestions(shouldSkip);
+
+        if (shouldSkip) {
             setShowStartQuestion(false);
             setShowEndQuestion(false);
             setHasAnsweredEnd(true);
             setFeelingBefore(null);
-            setShowCompletion(false);
         } else {
-            setSkipQuestions(false);
             setShowStartQuestion(true);
             setShowEndQuestion(false);
             setHasAnsweredEnd(false);
             setFeelingBefore(null);
             setShowCompletion(false);
+            setIsCompleted(false);
         }
-        localStorage.removeItem('feeling_before');
-        localStorage.removeItem('feeling_after');
-    }, [exercise.id, alreadyCompletedToday]);
+    }, [exercise.id, alreadyCompletedToday, isProxy]);
 
-    // Startvraag bevestigd en ga door naar audio
     const handleConfirmStart = (valueOneBased) => {
         setFeelingBefore(valueOneBased);
-        localStorage.setItem('feeling_before', valueOneBased);
+        setShowStartQuestion(false);
+        sessionStartRef.current = Date.now();
+    };
+
+    const handleSkipStart = () => {
         setShowStartQuestion(false);
         sessionStartRef.current = Date.now();
     };
 
     const handleCompletion = () => {
         setIsCompleted(true);
-        if (!skipQuestions) setShowEndQuestion(true);
+        // Toon eindvraag als: er vragen zijn én niet al beantwoord
+        if (!skipQuestions && hasQuestions) {
+            setShowEndQuestion(true);
+        } else {
+            // Geen vragen of al beantwoord: sla op zonder gevoelsscore
+            saveLog(null);
+        }
     };
 
     const handleBack = () => router.visit('/dashboard');
 
-    const handleConfirmEnd = async (valueOneBased) => {
-        localStorage.setItem('feeling_after', valueOneBased);
-
+    const saveLog = async (feelingAfter) => {
         const sessionDurationSeconds = sessionStartRef.current
             ? Math.round((Date.now() - sessionStartRef.current) / 1000)
             : 0;
 
         const payload = {
-            user_id:          user.id,
+            user_id:          effectiveUserId,
             exercise_id:      exercise.id,
-            feeling_before:   feelingBefore,
-            feeling_after:    valueOneBased,
-            feeling_scale:    feelingScale,
+            feeling_before:   feelingBefore   ?? null,
+            feeling_after:    feelingAfter    ?? null,
+            feeling_scale:    hasQuestions ? feelingScale : null,
             session_duration: sessionDurationSeconds,
             date_time:        new Date().toISOString(),
         };
@@ -108,14 +131,57 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
             setShowCompletion(true);
         } catch (error) {
             console.error('Error creating log:', error);
-            alert('Er is een fout opgetreden bij het opslaan van je antwoord.');
+            alert('Er is een fout opgetreden bij het opslaan.');
         }
-
-        setHasAnsweredEnd(true);
-        setShowEndQuestion(false);
     };
 
-    // render afsluitende scherm
+    const handleConfirmEnd = async (valueOneBased) => {
+        setHasAnsweredEnd(true);
+        setShowEndQuestion(false);
+        await saveLog(valueOneBased);
+    };
+
+
+    const isAvailable = available !== false;
+
+
+    if (!isAvailable) {
+        return (
+            <AuthenticatedLayout
+                header={
+                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                        Oefening: {exercise.exercise_name}
+                    </h2>
+                }
+            >
+                <div className="flex items-center justify-center min-h-screen bg-gray-100 py-8">
+                    <div className="bg-white rounded-lg shadow-lg max-w-lg w-full overflow-hidden p-8">
+                        <div className="text-center space-y-4">
+                            <svg className="w-16 h-16 mx-auto text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <h3 className="text-lg font-semibold text-gray-800">Oefening nog niet beschikbaar</h3>
+                            <p className="text-gray-600">
+                                {availableLabel || 'Voltooi eerst de vorige oefeningen.'}
+                            </p>
+                            {isProxy && (
+                                <p className="text-sm text-purple-600 bg-purple-50 p-3 rounded-lg">
+                                    Deze oefening is voor deze cliënt nog niet beschikbaar.
+                                </p>
+                            )}
+                            <button
+                                onClick={handleBack}
+                                className="mt-6 w-full py-3 px-4 bg-[#7B5EA7] text-white font-semibold rounded-xl shadow hover:bg-[#6a4e8e] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200"
+                            >
+                                Terug naar dashboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </AuthenticatedLayout>
+        );
+    }
+
     if (showCompletion) {
         return (
             <AuthenticatedLayout
@@ -127,7 +193,10 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
             >
                 <div className="flex items-center justify-center min-h-screen bg-gray-100 py-8">
                     <div className="bg-white rounded-lg shadow-lg max-w-lg w-full overflow-hidden p-8">
-                        <CompletionScreen userName={user.name} onBack={handleBack} />
+                        <CompletionScreen
+                            userName={isProxy ? 'de cliënt' : user.name}
+                            onBack={handleBack}
+                        />
                     </div>
                 </div>
             </AuthenticatedLayout>
@@ -137,55 +206,64 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Oefening: {exercise.exercise_name}
-                </h2>
+                <div>
+                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                        Oefening: {exercise.exercise_name}
+                    </h2>
+                    {isProxy && (
+                        <p className="text-sm text-purple-600 mt-1">
+                            Je doet deze oefening samen met je cliënt (ID: {forUserId})
+                        </p>
+                    )}
+                </div>
             }
         >
             <div className="flex items-center justify-center min-h-screen bg-gray-100 py-8">
                 <div className="bg-white rounded-lg shadow-lg max-w-lg w-full overflow-hidden">
+
                     {/* Paarse header */}
                     <div className="px-8 py-6 text-center" style={{ backgroundColor: '#7B5EA7' }}>
                         <h1 className="text-2xl font-bold text-white">{exercise.exercise_name}</h1>
-
-                        {/* lengte van oefening */}
                         {durationLabel && (
                             <div className="flex items-center justify-center gap-1.5 mt-2">
-                                <svg
-                                    className="w-4 h-4 text-purple-200"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                >
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <svg className="w-4 h-4 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span className="text-sm text-purple-100">
-                                    De oefening duurt ongeveer {durationLabel}
-                                </span>
+                                <span className="text-sm text-purple-100">De oefening duurt ongeveer {durationLabel}</span>
+                            </div>
+                        )}
+                        {isProxy && (
+                            <div className="mt-2 text-xs text-purple-200 bg-purple-800 bg-opacity-40 rounded-lg px-3 py-1 inline-block">
+                                Begeleider-modus — namens cliënt
                             </div>
                         )}
                     </div>
 
                     <div className="p-8 space-y-6">
 
-                        {/* START VRAAG */}
+                        {/* STARTVRAAG */}
                         {!skipQuestions && hasQuestions && showStartQuestion && (
-                            <FeelingQuestion
-                                question={currentQuestion}
-                                answers={currentAnswers}
-                                namePrefix="start-answer"
-                                onConfirm={handleConfirmStart}
-                            />
+                            <div>
+                                {isProxy && (
+                                    <p className="text-sm text-purple-700 bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
+                                        <strong>Begeleider:</strong> Vraag de cliënt hoe zij/hij zich voelt <em>voor</em> de oefening en vul het in.
+                                    </p>
+                                )}
+                                <FeelingQuestion
+                                    question={currentQuestion}
+                                    answers={currentAnswers}
+                                    namePrefix="start-answer"
+                                    onConfirm={handleConfirmStart}
+                                />
+                            </div>
                         )}
 
-                        {/* GEEN VRAAG MODUS */}
+                        {/* Geen vraag */}
                         {!skipQuestions && !hasQuestions && showStartQuestion && (
                             <div className="text-center text-gray-500">
-                                <p>Geen vraag voor deze oefening. Je kunt direct beginnen.</p>
+                                <p>Geen gevoelsvraag voor deze oefening. Je kunt direct beginnen.</p>
                                 <button
-                                    onClick={() => setShowStartQuestion(false)}
+                                    onClick={handleSkipStart}
                                     className="mt-4 w-full py-2 px-4 bg-[#7B5EA7] text-white rounded-md shadow hover:bg-[#6a4e8e] focus:outline-none transition-colors"
                                 >
                                     Begin met oefening
@@ -194,17 +272,24 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
                         )}
 
                         {/* Herhaalde oefening melding */}
-                        {skipQuestions && (
+                        {!isProxy && skipQuestions && (
                             <div className="text-center text-blue-600 bg-blue-50 p-4 rounded-lg">
                                 <p>Je hebt deze oefening vandaag al gedaan.</p>
                                 <p className="text-sm mt-1">Je kunt de audio opnieuw beluisteren.</p>
                             </div>
                         )}
 
-                        {/* AUDIO SECTIE */}
-                        {((!skipQuestions && !showStartQuestion) || skipQuestions) && !isCompleted && (
+                        {/* Vandaag al gedaan maar supervisor wil nogmaals is altijd toegestaan */}
+                        {isProxy && alreadyCompletedToday && (
+                            <div className="text-center text-amber-700 bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                                <p className="font-medium">Deze cliënt heeft deze oefening vandaag al gedaan.</p>
+                                <p className="text-sm mt-1">Je kunt de oefening toch opnieuw doen en een nieuwe meting invullen.</p>
+                            </div>
+                        )}
+
+                        {/* ── AUDIO SECTIE ────────────────────────────────────────────────── */}
+                        {!showStartQuestion && !isCompleted && (
                             <div className="space-y-6">
-                                {/* instructie audio */}
                                 <div className="flex items-center gap-3 p-4 rounded-xl bg-purple-50 border border-purple-200">
                                     <span className="text-sm text-gray-600">Beluister de instructie:</span>
                                     <AudioButton
@@ -244,6 +329,11 @@ export default function ExercisePage({ exercise, researchMode, researchQuestion,
                         {/* EINDE VRAAG */}
                         {!skipQuestions && hasQuestions && showEndQuestion && !hasAnsweredEnd && (
                             <div className="space-y-4 border-t pt-4">
+                                {isProxy && (
+                                    <p className="text-sm text-purple-700 bg-purple-50 border border-purple-200 rounded-lg p-3">
+                                        <strong>Begeleider:</strong> Vraag de cliënt hoe zij/hij zich voelt <em>na</em> de oefening en vul het in.
+                                    </p>
+                                )}
                                 <FeelingQuestion
                                     question={currentQuestion}
                                     answers={currentAnswers}

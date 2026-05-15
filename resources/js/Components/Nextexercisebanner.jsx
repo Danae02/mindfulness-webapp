@@ -7,12 +7,14 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
         return (
             <section
                 role="region"
-                aria-label="Status dagelijkse oefening"
+                aria-label="Status dagelijkse oefening: alle oefeningen voltooid"
                 className="rounded-2xl px-6 py-5 mb-5"
-                style={{ backgroundColor: "#FEF3E8", border: "2px solid #B85B06" }} >
-                <p className="text-xs font-semibold uppercase tracking-wider mb-1"
-                    aria-hidden="true"
-                    style={{ color: "#B85B06" }}>
+                style={{ backgroundColor: "#FEF3E8", border: "2px solid #B85B06" }}
+            >
+                <p
+                    className="text-xs font-semibold uppercase tracking-wider mb-1"
+                    style={{ color: "#B85B06" }}
+                >
                     Klaar voor vandaag
                 </p>
                 <p className="text-lg font-semibold mb-1" style={{ color: "#4A2400" }}>
@@ -24,6 +26,7 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
             </section>
         );
     }
+
     const doneToday = completedTodayIds.includes(nextExercise.id);
 
 
@@ -32,12 +35,12 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
         return (
             <section
                 role="region"
-                aria-label="Status dagelijkse oefening"
+                aria-label="Status dagelijkse oefening: vandaag voltooid"
                 className="rounded-2xl px-6 py-5 mb-5"
-                style={{ backgroundColor: "#FEF3E8", border: "2px solid #B85B06" }}>
+                style={{ backgroundColor: "#FEF3E8", border: "2px solid #B85B06" }}
+            >
                 <p
                     className="text-xs font-semibold uppercase tracking-wider mb-1"
-                    aria-hidden="true"
                     style={{ color: "#B85B06" }}
                 >
                     Gedaan vandaag ✓
@@ -58,10 +61,10 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
             role="region"
             aria-label="Nieuwe oefening van vandaag"
             className="rounded-2xl px-6 py-5 mb-5"
-            style={{ backgroundColor: "#F0E8FF", border: "2px solid #6C4092" }}>
+            style={{ backgroundColor: "#F0E8FF", border: "2px solid #6C4092" }}
+        >
             <p
                 className="text-xs font-semibold uppercase tracking-wider mb-1"
-                aria-hidden="true"
                 style={{ color: "#6C4092" }}
             >
                 Nieuwe oefening van vandaag
@@ -71,12 +74,10 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
             </p>
             <Link
                 href={`/exercises/${nextExercise.id}`}
-                aria-label={`Start oefening: ${nextExercise.exercise_name}`}
-                className="inline-flex items-center gap-2 px-6 py-3 text-white text-base font-semibold rounded-xl transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 text-white text-base font-semibold rounded-xl transition-colors focus:outline-none focus:ring-4 focus:ring-[#6C4092] focus:ring-offset-2"
                 style={{ backgroundColor: "#6C4092" }}
-                onFocus={(e) => (e.currentTarget.style.outline = "4px solid #26215C")}
-                onBlur={(e) => (e.currentTarget.style.outline = "none")}
             >
+                <span className="sr-only">{`Start oefening: ${nextExercise.exercise_name}`}</span>
                 <svg
                     width="18"
                     height="18"
@@ -87,7 +88,7 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
                 >
                     <path d="M8 5v14l11-7z"/>
                 </svg>
-                Start nu
+                <span aria-hidden="true">Start nu</span>
             </Link>
         </section>
     );

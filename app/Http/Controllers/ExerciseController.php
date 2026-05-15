@@ -11,180 +11,220 @@ use Inertia\Inertia;
 
 class ExerciseController extends Controller
 {
-    public function getExercises($id)
+    public function index()
     {
-        $course = Course::with('exercises')->find($id);
-
-        if (!$course) {
-            return response()->json([
-                'message' => 'Course not found.',
-            ], 404);
-        }
-
-        // Voeg een berekend 'duration' veld (minuten) toe aan elke oefening
-        $exercises = $course->exercises->map(function (Exercise $exercise) {
-            return array_merge($exercise->toArray(), [
-                'duration' => $exercise->duration_minutes,
-            ]);
-        });
-
+        $exercises = Exercise::all();
         return response()->json($exercises);
     }
+
+    public function getAllExercises()
+    {
+        $exercises = Exercise::all();
+        return response()->json($exercises);
+    }
+
 
     public function showExercise($id)
     {
         $exercise = Exercise::find($id);
 
         if (!$exercise) {
-            abort(404, "Exercise not found");
+            abort(404, 'Exercise not found');
         }
 
-        // Check of de gebruiker deze oefening vandaag al heeft gedaan
+        $exerciseData          = $exercise->toArray();
+        $exerciseAvailable     = true;
+        $availableLabel        = null;
         $alreadyCompletedToday = false;
+        $researchMode          = null;
+        $researchQuestion      = null;
+        $researchAnswers       = null;
+        $forUserId             = null;
+        $isProxyMode           = false;
+
         if (auth()->check()) {
-            $alreadyCompletedToday = UserExerciseLog::where('user_id', auth()->id())
+            $userId = auth()->id();
+
+            $rawForUser = request('for_user_id') ?? request('for_user');
+            if ($rawForUser) {
+                $forUserId   = (int) $rawForUser;
+                $isProxyMode = true;
+            }
+
+            $userForAvailability = $isProxyMode ? $forUserId : $userId;
+
+            // ── Cursus-beschikbaarheid ophalen ──
+            $courseId = $exercise->course_id;
+            if ($courseId) {
+                $course = Course::find($courseId);
+                if ($course) {
+                    $courseController    = new CourseController();
+                    $availabilityResponse = $courseController->getCourseAvailabilityForUser($courseId, $userForAvailability);
+
+                    // getCourseAvailabilityForUser geeft een JsonResponse terug
+                    $availabilityData = json_decode($availabilityResponse->getContent(), true);
+
+                    $exerciseAvailability = collect($availabilityData)
+                        ->firstWhere('exercise_id', (int) $id);
+
+                    if ($exerciseAvailability) {
+                        $exerciseAvailable = $exerciseAvailability['available'] ?? true;
+                        $availableLabel    = $exerciseAvailability['available_label'] ?? null;
+                    }
+                }
+            }
+
+            $alreadyCompletedToday = UserExerciseLog::where('user_id', $userForAvailability)
                 ->where('exercise_id', $id)
                 ->whereDate('date_time', today())
                 ->where('completed', true)
                 ->exists();
-        }
 
-        $user     = auth()->user();
-        $question = null;
-        $answers  = null;
 
-        if ($user && $user->researchGroup && $user->researchGroup->question) {
-            $question = $user->researchGroup->question;
-            $answers  = $user->researchGroup->answers;
-        } else {
-            $setting  = ResearchSettings::where('key_name', 'mode')->first();
-            $question = $setting->question ?? null;
-            $answers  = $setting->answers ?? null;
+            $researchSetting = \App\Models\ResearchSettings::where('key_name', 'mode')->first();
+            if ($researchSetting) {
+                $researchMode = $researchSetting->value; // 'per_session', 'per_exercise', etc.
+
+                // Alleen als er een vraag + antwoorden geconfigureerd zijn
+                if ($researchSetting->question && $researchSetting->answers) {
+                    $researchQuestion = $researchSetting->question;
+                    $researchAnswers  = $researchSetting->answers; // JSON string of array
+                }
+            }
         }
 
         return Inertia::render('ExercisePage', [
-            'exercise'              => array_merge($exercise->toArray(), [
-                // Stuur de duur in minuten mee naar de frontend
-                'duration' => $exercise->duration_minutes,
-            ]),
-            'researchMode'          => 'per_exercise',
-            'researchQuestion'      => $question,
-            'researchAnswers'       => $answers,
+            'exercise'             => $exerciseData,
+            'available'            => $exerciseAvailable,
+            'availableLabel'       => $availableLabel,
+            'alreadyCompletedToday'=> $alreadyCompletedToday,
+            'forUserId'            => $forUserId,
+            'isProxyMode'          => $isProxyMode,
+            'researchMode'         => $researchMode,
+            'researchQuestion'     => $researchQuestion,
+            'researchAnswers'      => $researchAnswers,
+        ]);
+    }
+
+
+    public function getExerciseAvailability($id)
+    {
+        $exercise = Exercise::find($id);
+        if (!$exercise) {
+            return response()->json(['available' => true, 'available_label' => null]);
+        }
+
+        $userId    = auth()->id();
+        $rawForUser = request('for_user_id') ?? request('for_user');
+        $targetUser = $rawForUser ? (int) $rawForUser : $userId;
+
+        $exerciseAvailable = true;
+        $availableLabel    = null;
+
+        $courseId = $exercise->course_id;
+        if ($courseId) {
+            $course = Course::find($courseId);
+            if ($course) {
+                $courseController     = new CourseController();
+                $availabilityResponse = $courseController->getCourseAvailabilityForUser($courseId, $targetUser);
+                $availabilityData     = json_decode($availabilityResponse->getContent(), true);
+
+                $exerciseAvailability = collect($availabilityData)
+                    ->firstWhere('exercise_id', (int) $id);
+
+                if ($exerciseAvailability) {
+                    $exerciseAvailable = $exerciseAvailability['available'] ?? true;
+                    $availableLabel    = $exerciseAvailability['available_label'] ?? null;
+                }
+            }
+        }
+
+        $alreadyCompletedToday = UserExerciseLog::where('user_id', $targetUser)
+            ->where('exercise_id', $id)
+            ->whereDate('date_time', today())
+            ->where('completed', true)
+            ->exists();
+
+        return response()->json([
+            'available'             => $exerciseAvailable,
+            'available_label'       => $availableLabel,
             'alreadyCompletedToday' => $alreadyCompletedToday,
         ]);
+    }
+
+    public function getExercises($courseId)
+    {
+        $course = Course::with('exercises')->find($courseId);
+
+        if (!$course) {
+            return response()->json(['message' => 'Course not found'], 404);
+        }
+
+        return response()->json($course->exercises);
     }
 
     public function updateExercise(Request $request, $id)
     {
         $request->validate([
-            'exercise_name'  => 'required|string|max:255',
-            'form_question'  => 'nullable|string|max:500',
-            'form_answers'   => 'nullable|array',
-            'form_answers.*' => 'nullable|string|max:255',
-            'audio'          => 'nullable|file|mimes:mp3,wav|max:10240',
+            'exercise_name'   => 'nullable|string|max:255',
+            'description'     => 'nullable|string',
+            'audio_file_path' => 'nullable|string',
         ]);
 
-        // Controleer of de oefening bestaat
-        $exercise = Exercise::find($id);
-        if (!$exercise) {
-            return response()->json(['success' => false, 'message' => 'Exercise not found'], 404);
-        }
+        $exercise = Exercise::findOrFail($id);
+        $exercise->update($request->only(['exercise_name', 'description', 'audio_file_path']));
 
-        // Werk de oefening bij
-        $exercise->exercise_name = $request->exercise_name;
-        $exercise->form_question = $request->form_question ?? null;
-        $exercise->form_answers  = $request->form_answers ?? [];
-
-        // Controleer of er een nieuw audiobestand is geüpload
-        if ($request->hasFile('audio')) {
-            $file     = $request->file('audio');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('audio', $filename, 'public');
-
-            $exercise->audio_file_path = asset('storage/audio/' . $filename);
-
-            // Herbereken duur bij nieuw audiobestand
-            $durationSeconds = $this->getAudioDurationSeconds(
-                storage_path('app/public/audio/' . $filename)
-            );
-
-            $exercise->duration_seconds = $durationSeconds !== null ? $durationSeconds + 60 : null;
-        }
-
-        // Sla de wijzigingen op
-        if ($exercise->save()) {
-            return response()->json([
-                'success'  => true,
-                'exercise' => array_merge($exercise->toArray(), [
-                    'duration' => $exercise->duration_minutes,
-                ]),
-            ], 200);
-        }
-
-        return response()->json(['success' => false, 'message' => 'Failed to update exercise'], 500);
+        return response()->json([
+            'message'  => 'Exercise updated successfully!',
+            'exercise' => $exercise,
+        ]);
     }
 
     public function submitCompletedLog(Request $request)
     {
-        $request->validate([
-            'user_id'          => 'required|exists:users,id',
-            'exercise_id'      => 'required|exists:exercises,id',
+        $validated = $request->validate([
+            'user_id'          => 'required|integer|exists:users,id',
+            'exercise_id'      => 'required|integer|exists:exercises,id',
             'feeling_before'   => 'nullable|integer|min:1|max:10',
             'feeling_after'    => 'nullable|integer|min:1|max:10',
-            'feeling_scale'    => 'required|integer|min:3|max:10',
+            'feeling_scale'    => 'nullable|integer|min:3|max:10',
             'session_duration' => 'nullable|integer|min:0',
             'date_time'        => 'nullable|date',
         ]);
 
-        // Nieuw idee: normaliseer naar 0-100 (percentage)
-        $normalize = function($value, $scale) {
-            if ($value === null) return null;
-            // Zet om van 1..scale naar 0..100
-            return round((($value - 1) / ($scale - 1)) * 100);
-        };
+        $currentUser = auth()->user();
+        $logUserId   = $validated['user_id'];
 
-        $normalizedBefore = $normalize($request->feeling_before, $request->feeling_scale);
-        $normalizedAfter  = $normalize($request->feeling_after, $request->feeling_scale);
+        if ($currentUser->role_id === 2) {
+            if ($logUserId !== $currentUser->id) {
+                return response()->json(['error' => 'Je kunt alleen voor jezelf oefeningen loggen'], 403);
+            }
+        } else if (!in_array($currentUser->role_id, [1, 3, 4])) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
 
         $log = UserExerciseLog::create([
-            'user_id'            => $request->user_id,
-            'exercise_id'        => $request->exercise_id,
-            'date_time'          => $request->date_time ?? now(),
-            'completed'          => true,
-            'feeling_before'     => $request->feeling_before,
-            'feeling_after'      => $request->feeling_after,
-            'feeling_scale'      => $request->feeling_scale,
-            'feeling_before_pct' => $normalizedBefore,
-            'feeling_after_pct'  => $normalizedAfter,
-            'session_duration'   => $request->session_duration ?? 0,
+            'user_id'          => $logUserId,
+            'exercise_id'      => $validated['exercise_id'],
+            'feeling_before'   => $validated['feeling_before'] ?? null,
+            'feeling_after'    => $validated['feeling_after'] ?? null,
+            'feeling_scale'    => $validated['feeling_scale'] ?? null,
+            'session_duration' => $validated['session_duration'] ?? 0,
+            'date_time'        => $validated['date_time'] ?? now(),
+            'completed'        => true,
         ]);
 
         return response()->json([
-            'message' => 'Answer submitted successfully.',
+            'message' => 'Oefening voltooid en opgeslagen',
             'log'     => $log,
-        ]);
+        ], 201);
     }
 
-    /**
-     * Lees de afspeelduur van een audiobestand uit via getID3.
-     */
-    private function getAudioDurationSeconds(string $absolutePath): ?int
+    public function destroy($id)
     {
-        if (!file_exists($absolutePath) || !class_exists(\getID3::class)) {
-            return null;
-        }
+        $exercise = Exercise::findOrFail($id);
+        $exercise->delete();
 
-        try {
-            $getID3   = new \getID3();
-            $fileInfo = $getID3->analyze($absolutePath);
-
-            if (isset($fileInfo['playtime_seconds'])) {
-                return (int) ceil($fileInfo['playtime_seconds']);
-            }
-        } catch (\Throwable $e) {
-            \Log::warning('getID3 kon duur niet lezen: ' . $e->getMessage());
-        }
-
-        return null;
+        return response()->json(['message' => 'Exercise deleted successfully']);
     }
 }

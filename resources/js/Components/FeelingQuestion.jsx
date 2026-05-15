@@ -4,7 +4,7 @@ import AnswerOption from "@/Components/AnswerOption.jsx";
 export default function FeelingQuestion({ question, answers, namePrefix, onConfirm }) {
     const isTwoStep = answers.length === 5;
 
-    // Stap 1: "Slecht", "Neutraal",  "Goed"
+    // Stap 1: "Slecht", "Neutraal", "Goed"
     const [globalChoice, setGlobalChoice] = useState(null);
     // Stap 2: verfijning
     const [refinedIndex, setRefinedIndex] = useState(null);
@@ -55,7 +55,15 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
         return (
             <div className="space-y-4">
                 <h2 className="text-lg font-semibold text-gray-700">{question}</h2>
-                <div className="space-y-3">
+                <p id={`${namePrefix}-hint`} className="sr-only">
+                    Gebruik de pijltjestoetsen om tussen opties te navigeren.
+                </p>
+                <fieldset
+                    className="space-y-3"
+                    aria-labelledby={`${namePrefix}-legend`}
+                    aria-describedby={`${namePrefix}-hint`}
+                >
+                    <legend id={`${namePrefix}-legend`} className="sr-only">{question}</legend>
                     {answers.map((answerOption, index) => {
                         const text = answerOption.text || answerOption;
                         const icon = answerOption.icon;
@@ -71,10 +79,11 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
                             />
                         );
                     })}
-                </div>
+                </fieldset>
                 <button
                     onClick={handleConfirmSingle}
                     className="w-full py-2 px-4 bg-[#7B5EA7] text-white rounded-md shadow hover:bg-[#6a4e8e] focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2 transition-colors"
+                    aria-label="Verder naar volgende vraag"
                 >
                     Verder
                 </button>
@@ -82,23 +91,39 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
         );
     }
 
-    // twee-stappen modus
-    // verfijning
+    // twee-stappen modus, verfijning
     if (globalChoice !== null) {
         const refinedAnswers = globalChoice === 'bad'
             ? [{ answer: answers[0], index: 0 }, { answer: answers[1], index: 1 }]
             : [{ answer: answers[3], index: 3 }, { answer: answers[4], index: 4 }];
 
+        const hintId = `${namePrefix}-refined-hint`;
+
         return (
             <div className="space-y-4">
                 <button
                     onClick={handleBack}
-                    className="text-sm text-[#7B5EA7] hover:underline flex items-center gap-1"
+                    className="text-sm text-[#7B5EA7] hover:text-[#6a4e8e] hover:underline flex items-center gap-1 px-2 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#7B5EA7]"
+                    aria-label="Terug naar vorige stap"
                 >
                     ← Terug
                 </button>
                 <h2 className="text-lg font-semibold text-gray-700">{question}</h2>
-                <div className="space-y-3">
+                <p
+                    id={hintId}
+                    className="text-xs text-gray-500"
+                    aria-live="polite"
+                >
+                    Gebruik de <kbd className="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs">↑</kbd>{' '}
+                    <kbd className="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs">↓</kbd>{' '}
+                    pijltjestoetsen om tussen de twee opties te wisselen.
+                </p>
+
+                <fieldset
+                    className="space-y-3"
+                    aria-describedby={hintId}
+                >
+                    <legend className="sr-only">{`Verfijning: ${question}`}</legend>
                     {refinedAnswers.map(({ answer, index }) => {
                         const text = answer.text || answer;
                         const icon = answer.icon;
@@ -114,10 +139,11 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
                             />
                         );
                     })}
-                </div>
+                </fieldset>
                 <button
                     onClick={handleConfirmRefined}
                     className="w-full py-2 px-4 bg-[#7B5EA7] text-white rounded-md shadow hover:bg-[#6a4e8e] focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2 transition-colors"
+                    aria-label="Bevestigen en verder"
                 >
                     Bevestigen
                 </button>
@@ -125,7 +151,7 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
         );
     }
 
-    // globale keuze
+    // twee-stappen modus, globale keuze (stap 1)
     const globalOptions = [
         { answer: answers[0], choice: 'bad', directIndex: null },
         { answer: answers[2], choice: 'neutral', directIndex: 2 },
@@ -135,37 +161,45 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
     return (
         <div className="space-y-4">
             <h2 className="text-lg font-semibold text-gray-700">{question}</h2>
-            <div className="space-y-3">
+            <ul
+                role="group"
+                aria-label={question}
+                className="space-y-3 list-none p-0 m-0"
+            >
                 {globalOptions.map(({ answer, choice, directIndex }, i) => {
                     const text = answer?.text || answer;
                     const icon = answer?.icon;
+                    const isNeutral = choice === 'neutral';
                     return (
-                        <button
-                            key={i}
-                            onClick={() => handleGlobalChoice(choice, directIndex)}
-                            className="flex items-center gap-4 w-full px-4 py-3 rounded-2xl border-2 cursor-pointer transition-all text-left bg-white hover:bg-[#F5F0FF] border-[#D1C4E9] hover:border-[#7B5EA7]"
-                        >
-                            {icon?.src && (
-                                <div
-                                    className="flex-shrink-0 flex items-center justify-center rounded-xl"
-                                    style={{ width: '70px', height: '70px', backgroundColor: '#F0E8FF' }}
-                                >
-                                    <img
-                                        src={icon.src}
-                                        alt={icon.label}
-                                        className="object-contain"
-                                        style={{ width: '50px', height: '50px' }}
-                                    />
-                                </div>
-                            )}
-                            <span className="text-base font-semibold text-gray-800">{text}</span>
-                            {choice === 'neutral' && (
-                                <span className="ml-auto text-xs text-gray-400 italic">direct verder</span>
-                            )}
-                        </button>
+                        <li key={i}>
+                            <button
+                                onClick={() => handleGlobalChoice(choice, directIndex)}
+                                className="flex items-center gap-4 w-full px-4 py-3 rounded-2xl border-2 cursor-pointer transition-all text-left bg-white hover:bg-[#F5F0FF] border-[#D1C4E9] hover:border-[#7B5EA7] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7B5EA7]"
+                                aria-label={isNeutral ? `${text} — gaat direct verder` : text}
+                            >
+                                {icon?.src && (
+                                    <div
+                                        className="flex-shrink-0 flex items-center justify-center rounded-xl"
+                                        style={{ width: '70px', height: '70px', backgroundColor: '#F0E8FF' }}
+                                        aria-hidden="true"
+                                    >
+                                        <img
+                                            src={icon.src}
+                                            alt=""
+                                            className="object-contain"
+                                            style={{ width: '50px', height: '50px' }}
+                                        />
+                                    </div>
+                                )}
+                                <span className="text-base font-semibold text-gray-800">{text}</span>
+                                {isNeutral && (
+                                    <span className="ml-auto text-xs text-gray-400 italic" aria-hidden="true">direct verder</span>
+                                )}
+                            </button>
+                        </li>
                     );
                 })}
-            </div>
+            </ul>
             <p className="text-xs text-gray-400 text-center">
                 Kies een optie — bij Slecht of Goed volgt een tweede stap.
             </p>

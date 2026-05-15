@@ -5,7 +5,7 @@ import EmoticonPicker from "@/Components/EmoticonPicker";
 
 function SectionCard({ title, children }) {
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-purple-100 p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-purple-100 p-4 sm:p-6 mb-6">
             <h2 className="text-xl font-semibold text-purple-900 mb-4">{title}</h2>
             {children}
         </div>
@@ -16,7 +16,7 @@ function PurpleButton({ onClick, disabled, children, variant = "primary" }) {
     const base = "px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed";
     const styles = {
         primary: `${base} text-white`,
-        secondary: `${base} bg-transparent border-4 font-semibold`,
+        secondary: `${base} bg-transparent border-2 font-semibold`,
         danger: `${base} text-white`,
     };
     return (
@@ -81,7 +81,7 @@ function AnswerRow({ index, answer, onChange, showNumber = true }) {
                     {index + 1}
                 </span>
             )}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
                 <input
                     type="text"
                     value={answer?.text || ""}
@@ -158,7 +158,20 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
                     <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[2].icon.label}</p>
                 )}
                 <div className="flex items-center gap-1.5 mt-2">
-                    <span className="text-lg">🚫</span>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#6C4092"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                        className="w-4 h-4 flex-shrink-0"
+                    >
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                    </svg>
                     <p className="text-xs text-purple-800 font-medium">
                         Geen vervolgscherm, middelste optie gaat direct door
                     </p>
@@ -263,7 +276,7 @@ function DefaultQuestion() {
             <StatusMessage message={status?.message} type={status?.type} />
 
             {!isEditing ? (
-                <div className="relative border-2 rounded-xl p-6 pt-8 mt-4" style={{ borderColor: "#6C4092" }}>
+                <div className="relative border-2 rounded-xl p-4 sm:p-6 pt-8 mt-4" style={{ borderColor: "#6C4092" }}>
                     <div className="absolute -top-3 left-4">
                         <div className="text-white text-sm font-semibold px-4 py-1 rounded-full" style={{ backgroundColor: "#6C4092" }}>
                             Standaardvraag
@@ -276,24 +289,27 @@ function DefaultQuestion() {
                         </p>
                     </div>
 
-                    <div className="flex justify-center gap-6">
+                    <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
                         {answers.slice(0, answerCount).map((a, i) => (
-                            <div key={i} className="flex flex-col items-center gap-1">
+                            <div key={i} className="flex flex-col items-center gap-1 min-w-0" style={{ maxWidth: "64px" }}>
                                 {a?.icon?.src ? (
-                                    <img src={a.icon.src} alt={a.icon.label} className="w-8 h-8 object-contain" />
+                                    <img src={a.icon.src} alt={a.icon.label} className="w-8 h-8 object-contain flex-shrink-0" />
                                 ) : (
-                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium" style={{ backgroundColor: "#6C4092" }}>
+                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0" style={{ backgroundColor: "#6C4092" }}>
                                         {String.fromCharCode(65 + i)}
                                     </div>
                                 )}
-                                <span className="text-sm text-gray-700">{a?.text || "?"}</span>
+                                <span className="text-xs text-gray-700 text-center leading-tight break-words w-full">
+                                    {a?.text || "?"}
+                                </span>
                             </div>
                         ))}
                     </div>
 
                     <div className="text-center mt-5 pt-2 border-t border-gray-100">
-                        <p className="text-sm text-gray-600">
-                            {answerCount} antwoordopties · Per oefening · <span className="font-medium" style={{ color: "#6C4092" }}>Actief voor alle niet-groep cliënten</span>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                            {answerCount} antwoordopties · Per oefening ·{" "}
+                            <span className="font-medium" style={{ color: "#6C4092" }}>Actief voor alle niet-groep cliënten</span>
                         </p>
                     </div>
 
@@ -304,7 +320,7 @@ function DefaultQuestion() {
                     </div>
                 </div>
             ) : (
-                <div className="bg-white rounded-2xl shadow-sm border p-6" style={{ borderColor: "#E9E3F0" }}>
+                <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6" style={{ borderColor: "#E9E3F0" }}>
                     <TextInput
                         label="Vraag"
                         id="default-question"
@@ -515,11 +531,12 @@ function GroupMembers({ group, allUsers, onAddUser, onRemoveUser }) {
             {group.users?.length > 0 ? (
                 <ul className="space-y-1 mb-3">
                     {group.users.map((u) => (
-                        <li key={u.id} className="flex items-center justify-between bg-white rounded-lg px-3 py-1.5 text-sm border border-gray-200">
-                            <span className="text-gray-800">{u.name}</span>
+                        <li key={u.id} className="flex items-center justify-between bg-white rounded-lg px-3 py-1.5 text-sm border border-gray-200 gap-2">
+                            <span className="text-gray-800 min-w-0 truncate">{u.name}</span>
                             <button
                                 onClick={() => onRemoveUser(group.id, u.id)}
-                                className="text-red-600 hover:text-red-800 text-xs font-medium"
+                                className="text-xs font-medium flex-shrink-0"
+                                style={{ color: "#A5271A" }}
                                 aria-label={`${u.name} verwijderen uit groep`}
                             >
                                 Verwijderen
@@ -532,7 +549,7 @@ function GroupMembers({ group, allUsers, onAddUser, onRemoveUser }) {
             )}
 
             {available.length > 0 && (
-                <div className="flex gap-2 items-center">
+                <div className="flex flex-col sm:flex-row gap-2">
                     <select
                         value={selectedUserId}
                         onChange={(e) => setSelectedUserId(e.target.value)}
@@ -578,11 +595,11 @@ function GroupCard({ group, allUsers, onUpdated, onDeleted, onAddUser, onRemoveU
                 />
             ) : (
                 <>
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                        <div className="flex-1 min-w-0">
                             <p className="font-semibold text-gray-900">{group.name}</p>
                             {group.question ? (
-                                <p className="text-sm text-gray-700 mt-0.5">"{group.question}"</p>
+                                <p className="text-sm text-gray-700 mt-0.5 break-words">"{group.question}"</p>
                             ) : (
                                 <p className="text-sm text-gray-500 italic">Geen vraag ingesteld</p>
                             )}
@@ -697,7 +714,7 @@ export default function ResearchQuestions() {
 
     return (
         <div className="max-w-2xl mx-auto px-4 py-6">
-            <h1 className="text-3xl font-bold text-purple-900 mb-2">Onderzoeksvragen</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-purple-900 mb-2">Onderzoeksvragen</h1>
             <p className="text-gray-700 mb-6 text-sm">
                 Maak hier de gevoelsvragen aan die een gebruiker vóór en na een oefening invult. De standaard vraag wordt gesteld aan alle cliënten zonder groep. Voor cliënten in een onderzoeksgroep geldt de vraag van die groep en vervangt die dus de standaard vraag.
             </p>
@@ -708,7 +725,7 @@ export default function ResearchQuestions() {
             </SectionCard>
 
             <SectionCard title="Onderzoeksgroepen">
-                <p className="text-gray-700 mb-4">
+                <p className="text-gray-700 mb-4 text-sm">
                     Cliënten in een groep zien de groepsvraag in plaats van de standaardvraag.
                 </p>
 

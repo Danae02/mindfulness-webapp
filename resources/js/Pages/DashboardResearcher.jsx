@@ -2,7 +2,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import LogDurationToDifference from "@/Components/LogDurationToDifference.jsx";
 import DataExport from "@/Components/DataExport.jsx";
 import Feelingsdashboard from "@/Components/Feelingsdashboard.jsx";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ListOfAllDataPoints from "@/Components/ListOfAllDataPoints.jsx";
 
 export default function DashboardResearcher({
@@ -12,10 +12,6 @@ export default function DashboardResearcher({
                                                 exercises = [],
                                             }) {
     const [view, setView] = useState("gevoelsmetingen");
-
-    useEffect(() => {
-        console.log("Current view:", view);
-    }, [view]);
 
     const menuItems = [
         { key: "gevoelsmetingen",     label: "Gevoelsmetingen" },
@@ -27,19 +23,21 @@ export default function DashboardResearcher({
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                <span className="text-xl font-semibold leading-tight text-gray-800">
                     Onderzoekerscherm
-                </h2>
+                </span>
             }
         >
             <div className="flex flex-col md:flex-row">
-                {/* Sidebar */}
+
                 <nav
                     aria-label="Onderzoekersmenu"
                     className="w-full md:w-64 bg-[#312C50] text-white md:min-h-screen"
                 >
                     <div className="p-4">
-                        <h3 className="text-lg font-semibold break-words">Onderzoekersmenu</h3>
+                        <p className="text-lg font-semibold break-words">
+                            Onderzoekersmenu
+                        </p>
                         <ul className="mt-4 space-y-2">
                             {menuItems.map(({ key, label }) => (
                                 <li key={key}>
@@ -61,8 +59,12 @@ export default function DashboardResearcher({
                     </div>
                 </nav>
 
-                {/* Main content */}
-                <main className="flex-1 p-4 md:p-6 overflow-x-auto" tabIndex={0}>
+                <main className="flex-1 p-4 md:p-6 overflow-x-auto">
+
+                    <h1 className="text-xl font-semibold leading-tight text-gray-800 mb-4">
+                        Onderzoekerscherm
+                    </h1>
+
                     {view === "gevoelsmetingen" && (
                         <Feelingsdashboard
                             researchGroups={researchGroups}
@@ -72,14 +74,18 @@ export default function DashboardResearcher({
 
                     {view === "logDuration" && (
                         <div>
-                            <h3 className="text-lg font-bold mb-4 break-words">Log van de Duur</h3>
-                            <LogDurationToDifference exerciseNames={exerciseNames}/>
+                            <h2 className="text-lg font-bold mb-4 break-words">
+                                Log van de Duur
+                            </h2>
+                            <LogDurationToDifference exerciseNames={exerciseNames} />
                         </div>
                     )}
 
                     {view === "listOfAllDatapoints" && (
                         <div>
-                            <h3 className="text-lg font-bold mb-4 break-words">Alle datapunten bekijken</h3>
+                            <h2 className="text-lg font-bold mb-4 break-words">
+                                Alle datapunten bekijken
+                            </h2>
                             <ListOfAllDataPoints
                                 researchGroups={researchGroups}
                                 exercises={exercises}
@@ -88,11 +94,17 @@ export default function DashboardResearcher({
                     )}
 
                     {view === "dataExport" && (
-                        <DataExport
-                            researchGroups={researchGroups}
-                            exercises={exercises}
-                        />
+                        <div>
+                            <h2 className="text-lg font-bold mb-4 break-words">
+                                Exporteer data
+                            </h2>
+                            <DataExport
+                                researchGroups={researchGroups}
+                                exercises={exercises}
+                            />
+                        </div>
                     )}
+
                 </main>
             </div>
         </AuthenticatedLayout>

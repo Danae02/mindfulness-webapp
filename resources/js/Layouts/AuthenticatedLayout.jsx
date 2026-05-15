@@ -1,22 +1,9 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Link, usePage } from '@inertiajs/react';
-import { useEffect, useRef } from 'react';
+
 
 export default function AuthenticatedLayout({ header, children, topBar }) {
     const user = usePage().props.auth.user;
-    const profileButtonRef = useRef(null);
-    const logoutButtonRef = useRef(null);
-
-    // Toegankelijk voor toetsenbordgebruikers
-    useEffect(() => {
-        const handleTabKey = (e) => {
-            if (e.key === 'Tab') {
-            }
-        };
-
-        document.addEventListener('keydown', handleTabKey);
-        return () => document.removeEventListener('keydown', handleTabKey);
-    }, []);
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -28,42 +15,38 @@ export default function AuthenticatedLayout({ header, children, topBar }) {
                         <div className="flex shrink-0 items-center">
                             <Link
                                 href={route('dashboard')}
-                                aria-label="Ga naar dashboard"
-                                tabIndex={0}
                                 className="focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
                             >
-                                <ApplicationLogo className="block h-12 w-auto fill-current text-gray-800" aria-hidden="true" />
-                                <span className="sr-only">Dashboard</span>
+                                <span className="sr-only">Ga naar dashboard</span>
+                                <span aria-hidden="true">
+                                    <ApplicationLogo className="block h-12 w-auto fill-current text-gray-800" />
+                                </span>
                             </Link>
                         </div>
 
                         {/* Rechter menu */}
                         <div className="flex items-center gap-3">
                             <Link
-                                ref={profileButtonRef}
                                 href={route('profile.edit')}
-                                tabIndex={0}
                                 className="flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:bg-gray-50"
                                 style={{
                                     backgroundColor: '#F0E8FF',
                                     borderColor: '#000000'
                                 }}
                             >
-                                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <span className="sr-only">{`Profiel van ${user.name}`}</span>
+                                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
-                                <span className="text-sm font-medium text-gray-800">
-                                    <span className="sr-only">Profiel van </span>
+                                <span className="text-sm font-medium text-gray-800" aria-hidden="true">
                                     {user.name}
                                 </span>
                             </Link>
 
                             <Link
-                                ref={logoutButtonRef}
                                 href={route('logout')}
                                 method="post"
                                 as="button"
-                                tabIndex={0}
                                 className="flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C0392B] focus:bg-red-50"
                                 style={{
                                     backgroundColor: 'transparent',

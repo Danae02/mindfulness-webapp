@@ -227,6 +227,27 @@ class CourseController extends Controller
 
         $userId = auth()->id();
 
+        return $this->buildExerciseAvailability($course, $userId);
+    }
+
+    // Zelfde als getCourseAvailability maar voor een specifieke gebruiker (begeleider-view)
+    public function getCourseAvailabilityForUser($courseId, $userId)
+    {
+        if (!in_array(auth()->user()->role_id, [1, 3, 4])) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $course = Course::with('exercises')->find($courseId);
+        if (!$course) {
+            return response()->json(['message' => 'Course not found.'], 404);
+        }
+
+        return $this->buildExerciseAvailability($course, $userId);
+    }
+
+    // Interne helper zodat getCourseAvailability en getCourseAvailabilityForUser dezelfde logica gebruiken
+    private function buildExerciseAvailability($course, int $userId)
+    {
         // Stap 1: is de cursus beschikbaar?
         $allCourses        = Course::with('exercises')->orderBy('id')->get();
         $availabilityMap   = $this->buildCourseAvailabilityMap($userId);
@@ -356,6 +377,55 @@ class CourseController extends Controller
                 ];
             }
         }
+
+        return response()->json($result);
+    }
+
+    // Geeft voor een specifieke gebruiker per cursus de voortgang terug.
+    public function getClientProgress($userId)
+    {
+        if (!in_array(auth()->user()->role_id, [1, 3, 4])) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $courses         = Course::with('exercises')->orderBy('id')->get();
+        $availabilityMap = $this->buildCourseAvailabilityMap($userId);
+
+        $completedLogs = UserExerciseLog::where('user_id', $userId)
+            ->where('completed', true)
+            ->selectRaw('exercise_id, MAX(date_time) as last_completed_at')
+            ->groupBy('exercise_id')
+            ->get()
+            ->keyBy('exercise_id');
+
+        $result = $courses->map(function ($course) use ($availabilityMap, $completedLogs) {
+            $available  = $availabilityMap[$course->id] ?? false;
+            $total      = $course->exercises->count();
+            $done       = 0;
+
+            $exercises = $course->exercises->map(function ($ex) use ($completedLogs, &$done) {
+                $log       = $completedLogs->get($ex->id);
+                $completed = $log !== null;
+                if ($completed) $done++;
+
+                return [
+                    'exercise_id'        => $ex->id,
+                    'exercise_name'      => $ex->exercise_name,
+                    'completed'          => $completed,
+                    'last_completed_at'  => $completed ? $log->last_completed_at : null,
+                ];
+            });
+
+            return [
+                'course_id'   => $course->id,
+                'course_name' => $course->course_name,
+                'available'   => $available,
+                'progress'    => $total > 0 ? round($done / $total * 100) : 0,
+                'done'        => $done,
+                'total'       => $total,
+                'exercises'   => $exercises,
+            ];
+        });
 
         return response()->json($result);
     }

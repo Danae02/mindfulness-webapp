@@ -34,7 +34,12 @@ export default function Login({ status, canResetPassword }) {
             <Head title="Log in" />
 
             {successMessage && (
-                <div className="mb-4 text-sm font-medium text-green-600 bg-green-50 p-3 rounded-lg">
+                <div
+                    className="mb-4 text-sm font-medium text-green-600 bg-green-50 p-3 rounded-lg"
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                >
                     {successMessage}
                 </div>
             )}
@@ -76,7 +81,14 @@ export default function Login({ status, canResetPassword }) {
                         />
                     </div>
 
-                    <InputError message={errors.email} className="mt-2" />
+                    {errors.email && (
+                        <InputError
+                            message={errors.email}
+                            className="mt-2"
+                            role="alert"
+                            aria-live="assertive"
+                        />
+                    )}
                 </div>
 
                 <div className="mt-3">
@@ -109,6 +121,7 @@ export default function Login({ status, canResetPassword }) {
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none focus:ring-2 focus:ring-primary rounded-md"
                             aria-label={showPassword ? 'Verberg wachtwoord' : 'Toon wachtwoord'}
+                            aria-pressed={showPassword}
                         >
                             {showPassword ? (
                                 <svg aria-hidden="true" className="w-5 h-5 text-gray-500 hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,7 +136,14 @@ export default function Login({ status, canResetPassword }) {
                         </button>
                     </div>
 
-                    <InputError message={errors.password} className="mt-2" />
+                    {errors.password && (
+                        <InputError
+                            message={errors.password}
+                            className="mt-2"
+                            role="alert"
+                            aria-live="assertive"
+                        />
+                    )}
                 </div>
 
                 <div className="mt-2">
@@ -152,11 +172,17 @@ export default function Login({ status, canResetPassword }) {
                             name="remember"
                             checked={data.remember}
                             onChange={(e) => setData('remember', e.target.checked)}
+                            aria-describedby="remember-help"
                         />
                         <span className="ms-2 text-sm text-gray-600">
                             Onthoud mij
                         </span>
                     </label>
+                    {/* Buiten de label: anders leest de screenreader de helptekst
+                        als onderdeel van de labelnaam i.p.v. als beschrijving */}
+                    <span id="remember-help" className="sr-only">
+                        Volgende keer automatisch inloggen op deze computer
+                    </span>
                 </div>
 
                 <div className="mt-3">
@@ -164,8 +190,9 @@ export default function Login({ status, canResetPassword }) {
                         type="submit"
                         disabled={processing}
                         className="w-full justify-center py-2.5 text-base font-semibold bg-[#6c4092] hover:bg-[#5a337a] text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2 disabled:opacity-50"
+                        aria-busy={processing}
                     >
-                        Inloggen
+                        {processing ? 'Bezig met inloggen...' : 'Inloggen'}
                     </button>
                 </div>
             </form>

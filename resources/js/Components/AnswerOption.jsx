@@ -1,4 +1,8 @@
+import { useState } from 'react';
+
 export default function AnswerOption({ id, name, text, icon, isSelected, onChange }) {
+    const [isFocused, setIsFocused] = useState(false);
+
     return (
         <label
             htmlFor={id}
@@ -6,6 +10,8 @@ export default function AnswerOption({ id, name, text, icon, isSelected, onChang
             style={{
                 borderColor: isSelected ? '#7B5EA7' : '#D1C4E9',
                 backgroundColor: isSelected ? '#F5F0FF' : '#FFFFFF',
+                outline: isFocused ? '2px solid #7B5EA7' : 'none',
+                outlineOffset: isFocused ? '2px' : '0',
             }}
         >
             <input
@@ -14,16 +20,19 @@ export default function AnswerOption({ id, name, text, icon, isSelected, onChang
                 name={name}
                 value={text}
                 onChange={onChange}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
                 className="sr-only"
             />
             {icon?.src && (
                 <div
                     className="flex-shrink-0 flex items-center justify-center rounded-xl"
                     style={{ width: '70px', height: '70px', backgroundColor: '#F0E8FF' }}
+                    aria-hidden="true"
                 >
                     <img
                         src={icon.src}
-                        alt={icon.label}
+                        alt=""
                         className="object-contain"
                         style={{ width: '50px', height: '50px' }}
                     />

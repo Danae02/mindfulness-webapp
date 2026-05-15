@@ -86,6 +86,14 @@ class UserExerciseLogController extends Controller
         return response()->json($userLogs);
     }
 
+    public function destroy($id)
+    {
+        $log = UserExerciseLog::findOrFail($id);
+        $log->delete();
+
+        return response()->json(['message' => 'Log verwijderd.'], 200);
+    }
+
     public function export(Request $request)
     {
         $query = UserExerciseLog::with(['exercise', 'user'])

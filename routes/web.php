@@ -58,6 +58,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{id}', [UserController::class, 'update'])->name('update');
         Route::get('/my-team', [UserController::class, 'getTeamUsers'])->name('get.team');
         Route::get('/my-team-logs', [UserController::class, 'getTeamUserLogs'])->name('get.team.logs');
+        Route::get('/{userId}/progress', [CourseController::class, 'getClientProgress'])->name('progress');
+        Route::get('/{userId}/favorites', [FavoriteController::class, 'getUserFavorites'])->name('favorites');
     });
 
 
@@ -82,6 +84,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('get.duration_sessions');
     });
 
+    Route::delete('/logs/{id}', [UserExerciseLogController::class, 'destroy']);
+
     // Course routes
     Route::prefix('courses')->name('courses.')->group(function () {
         Route::post('/', [CourseController::class, 'createCourse'])->name('create');
@@ -91,11 +95,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{id}', [CourseController::class, 'getCourseDetails'])->name('details');
         Route::get('/{id}/exercises', [ExerciseController::class, 'getExercises'])->name('exercises');
         Route::get('/{id}/availability', [CourseController::class, 'getCourseAvailability'])->name('availability');
+        Route::get('/{courseId}/availability/{userId}', [CourseController::class, 'getCourseAvailabilityForUser'])
+            ->name('availability.for.user');
     });
 
     // Favorieten routes
     Route::middleware(['auth'])->group(function () {
         Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+        Route::get('/favorites/user/{userId}', [FavoriteController::class, 'getUserFavorites'])->name('favorites.user');
         Route::post('/favorites/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
         Route::get('/favorieten', function () {
             return Inertia::render('Favorites');
@@ -106,9 +113,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('exercises')->name('exercises.')->group(function () {
         Route::post('/', [AudioController::class, 'uploadAudio'])->name('create');
         Route::get('/', [ExerciseController::class, 'getAllExercises'])->name('index');
+        Route::post('/submit', [ExerciseController::class, 'submitCompletedLog'])->name('submit');
         Route::get('/{id}', [ExerciseController::class, 'showExercise'])->name('show');
         Route::put('/{id}', [ExerciseController::class, 'updateExercise'])->name('update');
-        Route::post('/submitCompletedAnswer', [ExerciseController::class, 'submitCompletedLog'])->name('submit');
+        // JSON availability endpoint (voor supervisor die beschikbaarheid voor client checkt)
+        Route::get('/{id}/availability', [ExerciseController::class, 'getExerciseAvailability'])->name('availability');
     });
 
     // Research settings

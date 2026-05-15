@@ -1,4 +1,4 @@
-import { useState, useId } from "react";
+import { useState, useId, useRef, useCallback } from "react";
 import axios from "axios";
 
 // Maak een gevoelswaarde 0–100.
@@ -13,32 +13,90 @@ function normalizeFeeling(value, scale = 5) {
     return Math.round((value - 1) / (scale - 1) * 100);
 }
 
+// 1.3.1
+const COLUMN_LABELS = {
+    log_id:                "Log ID",
+    user_id:               "Gebruiker ID",
+    user_name:             "Naam",
+    exercise:              "Oefening",
+    date_time:             "Datum en tijd",
+    duration_listened_sec: "Duur (sec)",
+    completed:             "Voltooid",
+    feeling_before:        "Gevoel voor",
+    feeling_after:         "Gevoel na",
+    feeling_scale:         "Schaal",
+    feeling_before_pct:    "Gevoel voor (%)",
+    feeling_after_pct:     "Gevoel na (%)",
+};
+
 export default function DataExport({ researchGroups = [], exercises = [] }) {
-    // filters
     const [selectedGroup, setSelectedGroup]       = useState("");
     const [selectedExercise, setSelectedExercise] = useState("");
     const [dateFrom, setDateFrom]                 = useState("2025-01-01");
     const [dateTo, setDateTo]                     = useState(new Date().toISOString().slice(0, 10));
-
-    // export setting
     const [format, setFormat]                     = useState("csv");
-
-    // ui-state
     const [loading, setLoading]                   = useState(false);
     const [error, setError]                       = useState(null);
     const [preview, setPreview]                   = useState(null);
     const [statusMessage, setStatusMessage]       = useState("");
 
-    // useId geeft stabiele, unieke id's die React intern beheert
     const formatGroupId = useId();
     const statusId      = useId();
+
+    // Refs voor roving tabindex in de radiogroup (2.1.1)
+    const radioRefs = useRef([]);
+    const formatOptions = [
+        {
+            value: "csv",
+            label: "CSV",
+            svg: (
+                <svg aria-hidden="true" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="5" fill="#1D6F42"/>
+                    <rect x="5" y="8" width="22" height="16" rx="1" fill="white" fillOpacity="0.12"/>
+                    <line x1="5" y1="13" x2="27" y2="13" stroke="white" strokeOpacity="0.4" strokeWidth="1"/>
+                    <line x1="5" y1="18" x2="27" y2="18" stroke="white" strokeOpacity="0.4" strokeWidth="1"/>
+                    <line x1="12" y1="8" x2="12" y2="24" stroke="white" strokeOpacity="0.4" strokeWidth="1"/>
+                    <line x1="19" y1="8" x2="19" y2="24" stroke="white" strokeOpacity="0.4" strokeWidth="1"/>
+                    <text x="16" y="20.5" textAnchor="middle" fontSize="8" fontWeight="bold" fill="white" fontFamily="Arial, sans-serif">CSV</text>
+                </svg>
+            ),
+        },
+        {
+            value: "json",
+            label: "JSON",
+            svg: (
+                <svg aria-hidden="true" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="5" fill="#5B3F8A"/>
+                    <text x="16" y="15" textAnchor="middle" fontSize="9" fontWeight="bold" fill="white" fontFamily="monospace">{"{}"}</text>
+                    <text x="16" y="24" textAnchor="middle" fontSize="7" fontWeight="bold" fill="white" fontFamily="Arial, sans-serif">JSON</text>
+                </svg>
+            ),
+        },
+    ];
+
+    const handleRadioKeyDown = useCallback((e, currentIndex) => {
+        const count = formatOptions.length;
+        let next = currentIndex;
+
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            e.preventDefault();
+            next = (currentIndex + 1) % count;
+        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            e.preventDefault();
+            next = (currentIndex - 1 + count) % count;
+        } else {
+            return;
+        }
+
+        setFormat(formatOptions[next].value);
+        radioRefs.current[next]?.focus();
+    }, []);
 
     const fetchData = async () => {
         setLoading(true);
         setError(null);
         setStatusMessage("Data wordt opgehaald…");
         try {
-            // Neem queryparams op en lege filters worden weggelaten
             const params = {};
             if (selectedGroup)    params.research_group_id = selectedGroup;
             if (selectedExercise) params.exercise_id       = selectedExercise;
@@ -58,7 +116,7 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
     };
 
 
-    // Elke rij heeft orginele waarden (feeling_before, feeling_after als de percentages (feeling_before_pct, feeling_after_pct
+    // Elke rij heeft orginele waarden
     const buildRows = (data) =>
         data.map((log) => ({
             log_id:                log.log_id,
@@ -80,7 +138,7 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
     const exportCSV = (rows) => {
         if (!rows.length) return;
         const headers = Object.keys(rows[0]);
-        const lines   = [
+        const lines = [
             headers.join(","),
             ...rows.map((r) =>
                 headers.map((h) => `"${String(r[h]).replace(/"/g, '""')}"`).join(",")
@@ -115,44 +173,13 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
             setStatusMessage("Geen data gevonden voor de geselecteerde filters.");
             return;
         }
-        setStatusMessage(`${rows.length} rijen geexporteerd als ${format.toUpperCase()}.`);
+        setStatusMessage(`${rows.length} rijen geëxporteerd als ${format.toUpperCase()}.`);
         format === "csv" ? exportCSV(rows) : exportJSON(rows);
     };
 
     const inputClass =
         "w-full border-2 border-gray-500 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white " +
         "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4A2872]";
-
-    const formatOptions = [
-        {
-            value: "csv",
-            label: "CSV",
-            svg: (
-                // groen csv spreadsheet icoon
-                <svg aria-hidden="true" width="32" height="32" viewBox="0 0 32 32" fill="none">
-                    <rect width="32" height="32" rx="5" fill="#1D6F42"/>
-                    <rect x="5" y="8" width="22" height="16" rx="1" fill="white" fillOpacity="0.12"/>
-                    <line x1="5" y1="13" x2="27" y2="13" stroke="white" strokeOpacity="0.4" strokeWidth="1"/>
-                    <line x1="5" y1="18" x2="27" y2="18" stroke="white" strokeOpacity="0.4" strokeWidth="1"/>
-                    <line x1="12" y1="8" x2="12" y2="24" stroke="white" strokeOpacity="0.4" strokeWidth="1"/>
-                    <line x1="19" y1="8" x2="19" y2="24" stroke="white" strokeOpacity="0.4" strokeWidth="1"/>
-                    <text x="16" y="20.5" textAnchor="middle" fontSize="8" fontWeight="bold" fill="white" fontFamily="Arial, sans-serif">CSV</text>
-                </svg>
-            ),
-        },
-        {
-            value: "json",
-            label: "JSON",
-            //paars json icoon
-            svg: (
-                <svg aria-hidden="true" width="32" height="32" viewBox="0 0 32 32" fill="none">
-                    <rect width="32" height="32" rx="5" fill="#5B3F8A"/>
-                    <text x="16" y="15" textAnchor="middle" fontSize="9" fontWeight="bold" fill="white" fontFamily="monospace">{"{}"}</text>
-                    <text x="16" y="24" textAnchor="middle" fontSize="7" fontWeight="bold" fill="white" fontFamily="Arial, sans-serif">JSON</text>
-                </svg>
-            ),
-        },
-    ];
 
     return (
         <div className="max-w-3xl">
@@ -161,7 +188,6 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
                 {statusMessage}
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">Exporteer data</h2>
             <p className="text-sm text-gray-700 mb-6">
                 Stel in welke gegevens je wilt exporteren. Alle data is anoniem.
             </p>
@@ -212,9 +238,8 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
                 </div>
             </fieldset>
 
-            {/* Bestandsformaat */}
+            {/* Bestandsformaat — radiogroup met roving tabindex (2.1.1) */}
             <div className="mb-6">
-                {/* p met id zodat radiogroup er via aria-labelledby naar kan verwijzen (WCAG 1.3.1) */}
                 <p id={formatGroupId} className="text-sm font-semibold text-gray-900 mb-3">
                     Bestandsformaat
                 </p>
@@ -223,13 +248,16 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
                     aria-labelledby={formatGroupId}
                     className="flex gap-4"
                 >
-                    {formatOptions.map(({ value, label, svg }) => (
+                    {formatOptions.map(({ value, label, svg }, index) => (
                         <button
                             key={value}
+                            ref={(el) => (radioRefs.current[index] = el)}
                             type="button"
                             role="radio"
                             aria-checked={format === value}
+                            tabIndex={format === value ? 0 : -1}
                             onClick={() => setFormat(value)}
+                            onKeyDown={(e) => handleRadioKeyDown(e, index)}
                             className={[
                                 "flex items-center gap-3 px-6 py-4 rounded-xl border-2 font-medium text-sm",
                                 // focus:ring-[#4A2872] = donker paars, >3:1 op wit — voldoet aan WCAG 2.4.11
@@ -247,9 +275,7 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
                 </div>
             </div>
 
-            {/* Foutmelding — role=alert kondigt direct aan bij schermlezer (WCAG 4.1.3)
-                border-red-700 op bg-red-50 = >3:1 UI contrast (WCAG 1.4.11)
-                text-red-900 op bg-red-50 = ~8.5:1 tekstcontrast (WCAG 1.4.3) */}
+            {/* Foutmelding */}
             {error && (
                 <div
                     role="alert"
@@ -259,9 +285,7 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
                 </div>
             )}
 
-            {/* Download knop
-                Wit op #4A2872 = ~8.1:1 (WCAG 1.4.3)
-                aria-disabled + disabled zodat AT en browser beide het begrijpen (WCAG 4.1.2) */}
+            {/* Download knop */}
             <button
                 type="button"
                 onClick={handleDownload}
@@ -293,9 +317,7 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
                 )}
             </button>
 
-            {/* Lege-staat — border-yellow-700 op bg-yellow-50 = >3:1 (WCAG 1.4.11)
-                text-yellow-900 = ~11:1 (WCAG 1.4.3)
-                role=status kondigt aan zonder focus te onderbreken */}
+            {/* Lege staat */}
             {preview && preview.length === 0 && (
                 <div
                     role="status"
@@ -305,20 +327,17 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
                 </div>
             )}
 
-            {/* Preview tabel
-                aria-label op table geeft schermlezer context (WCAG 1.3.1)
-                scope=col koppelt kolomkoppen semantisch aan cellen (WCAG 1.3.1)
-                divide-gray-400 haalt 3:1 rij-scheidingscontrast (WCAG 1.4.11) */}
+            {/* Preview tabel */}
             {preview && preview.length > 0 && (
                 <div className="mt-8">
                     <p className="text-xs text-gray-700 font-medium mb-2" aria-hidden="true">
                         Voorbeeld — eerste {preview.length} rijen van de export:
                     </p>
                     <div className="overflow-x-auto rounded-xl border-2 border-gray-500 shadow-sm text-xs">
-                        <table
-                            className="min-w-full divide-y divide-gray-400"
-                            aria-label={`Exportvoorbeeld: eerste ${preview.length} rijen`}
-                        >
+                        <table className="min-w-full divide-y divide-gray-400">
+                            <caption className="sr-only">
+                                Exportvoorbeeld: eerste {preview.length} rijen van de geselecteerde data
+                            </caption>
                             <thead className="bg-gray-100">
                             <tr>
                                 {Object.keys(preview[0]).map((k) => (
@@ -327,7 +346,7 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
                                         scope="col"
                                         className="px-4 py-2 text-left font-bold text-gray-800 uppercase tracking-wider whitespace-nowrap"
                                     >
-                                        {k}
+                                        {COLUMN_LABELS[k] ?? k}
                                     </th>
                                 ))}
                             </tr>

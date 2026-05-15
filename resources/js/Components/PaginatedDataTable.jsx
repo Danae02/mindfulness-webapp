@@ -1,9 +1,8 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
 import SearchBar from "@/Components/SearchBar.jsx";
 import LoadingIndicator from "@/Components/LoadingIndicator.jsx";
 
-// Zelfde berekening als backend en Feelingsdashboard
 function normalize(value, scale) {
     if (value == null || scale == null || scale <= 1) return null;
     return Math.round(((value - 1) / (scale - 1)) * 100);
@@ -16,7 +15,6 @@ function formatDuration(sec) {
     return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-// Kleine score-badge: groen als hoog, oranje als laag
 function ScoreBadge({ value }) {
     if (value == null) return <span className="text-gray-600">–</span>;
     const color =
@@ -34,20 +32,25 @@ function ScoreBadge({ value }) {
 
 export default function PaginatedDataTable({
                                                linkForPagination,
-                                               researchGroups = [],  // optioneel: voor groepsfilter
-                                               exercises = [],       // optioneel: voor oefening-filter
+                                               researchGroups = [],
+                                               exercises = [],
                                            }) {
-    const [dataPoints, setDataPoints] = useState([]); // Bevat de huidige pagina met data
-    const [currentPage, setCurrentPage] = useState(1); // Huidige pagina
-    const [totalPages, setTotalPages] = useState(0); // Totaal aantal pagina's
+    const [dataPoints, setDataPoints] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
 
-    // Filters
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedGroup, setSelectedGroup] = useState("");
     const [selectedExercise, setSelectedExercise] = useState("");
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
+
+    const [confirmDelete, setConfirmDelete] = useState(null); // { log_id, exercise_name }
+    const [deleteError, setDeleteError] = useState(null);
+
+    // Ref voor aria-live statusmelding (paginawissel, filterresultaat)
+    const statusRef = useRef(null);
 
     const fetchData = useCallback(
         (page) => {
@@ -100,107 +103,171 @@ export default function PaginatedDataTable({
 
     const hasFilters = selectedGroup || selectedExercise || dateFrom || dateTo || searchTerm;
 
+    const handleDeleteConfirm = () => {
+        axios
+            .delete(`${linkForPagination}/${confirmDelete.log_id}`)
+            .then(() => {
+                setDataPoints((prev) => prev.filter((dp) => dp.log_id !== confirmDelete.log_id));
+                setConfirmDelete(null);
+                setDeleteError(null);
+            })
+            .catch(() => setDeleteError("Verwijderen mislukt. Probeer het opnieuw."));
+    };
+
+    const columns = [
+        "Log ID",
+        "Gebruiker ID",
+        "Oefening",
+        "Datum",
+        "Sessieduur",
+        "Voltooid",
+        "Gevoel voor",
+        "Gevoel na",
+        "Verschil",
+        "",
+    ];
+
     return (
         <div>
-            {/* Filter-balk */}
-            <div className="flex flex-wrap gap-3 mb-5 items-end">
-                <div>
-                    <SearchBar searchTerm={searchTerm} onSearch={setSearchTerm} catTerm="oefening" />
-                </div>
-
-                {researchGroups.length > 0 && (
-                    <div>
-                        <label htmlFor="filter-group" className="block text-xs text-gray-600 mb-1">Onderzoeksgroep</label>
-                        <select
-                            id="filter-group"
-                            value={selectedGroup}
-                            onChange={(e) => setSelectedGroup(e.target.value)}
-                            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                        >
-                            <option value="">Alle groepen</option>
-                            {researchGroups.map((g) => (
-                                <option key={g.id} value={g.id}>{g.name}</option>
-                            ))}
-                        </select>
-                    </div>
-                )}
-
-                {exercises.length > 0 && (
-                    <div>
-                        <label htmlFor="filter-exercise" className="block text-xs text-gray-600 mb-1">Oefening</label>
-                        <select
-                            id="filter-exercise"
-                            value={selectedExercise}
-                            onChange={(e) => setSelectedExercise(e.target.value)}
-                            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                        >
-                            <option value="">Alle oefeningen</option>
-                            {exercises.map((ex) => (
-                                <option key={ex.id} value={ex.id}>{ex.exercise_name}</option>
-                            ))}
-                        </select>
-                    </div>
-                )}
-
-                <div>
-                    <label htmlFor="filter-date-from" className="block text-xs text-gray-600 mb-1">Van</label>
-                    <input
-                        id="filter-date-from"
-                        type="date"
-                        value={dateFrom}
-                        onChange={(e) => setDateFrom(e.target.value)}
-                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                    />
-                </div>
-                <div>
-                    <label htmlFor="filter-date-to" className="block text-xs text-gray-600 mb-1">Tot</label>
-                    <input
-                        id="filter-date-to"
-                        type="date"
-                        value={dateTo}
-                        onChange={(e) => setDateTo(e.target.value)}
-                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-                    />
-                </div>
-
-                {hasFilters && (
-                    <button
-                        onClick={clearFilters}
-                        className="text-xs text-purple-600 underline self-end pb-2"
-                    >
-                        Filters wissen
-                    </button>
-                )}
+            <div
+                ref={statusRef}
+                aria-live="polite"
+                aria-atomic="true"
+                className="sr-only"
+            >
+                {loading
+                    ? "Datapunten worden geladen."
+                    : `${filtered.length} datapunten gevonden. Pagina ${currentPage} van ${totalPages}.`}
             </div>
+
+            <fieldset className="mb-5 border-0 p-0 m-0">
+                <legend className="text-sm font-semibold text-gray-700 mb-2">
+                    Filters
+                </legend>
+                <div className="flex flex-wrap gap-3 items-end">
+                    <div>
+                        <SearchBar
+                            searchTerm={searchTerm}
+                            onSearch={setSearchTerm}
+                            catTerm="oefening"
+                        />
+                    </div>
+
+                    {researchGroups.length > 0 && (
+                        <div>
+                            <label
+                                htmlFor="filter-group"
+                                className="block text-xs text-gray-600 mb-1"
+                            >
+                                Onderzoeksgroep
+                            </label>
+                            <select
+                                id="filter-group"
+                                value={selectedGroup}
+                                onChange={(e) => setSelectedGroup(e.target.value)}
+                                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                            >
+                                <option value="">Alle groepen</option>
+                                {researchGroups.map((g) => (
+                                    <option key={g.id} value={g.id}>
+                                        {g.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    {exercises.length > 0 && (
+                        <div>
+                            <label
+                                htmlFor="filter-exercise"
+                                className="block text-xs text-gray-600 mb-1"
+                            >
+                                Oefening
+                            </label>
+                            <select
+                                id="filter-exercise"
+                                value={selectedExercise}
+                                onChange={(e) => setSelectedExercise(e.target.value)}
+                                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                            >
+                                <option value="">Alle oefeningen</option>
+                                {exercises.map((ex) => (
+                                    <option key={ex.id} value={ex.id}>
+                                        {ex.exercise_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    <div>
+                        <label
+                            htmlFor="filter-date-from"
+                            className="block text-xs text-gray-600 mb-1"
+                        >
+                            Van
+                        </label>
+                        <input
+                            id="filter-date-from"
+                            type="date"
+                            value={dateFrom}
+                            onChange={(e) => setDateFrom(e.target.value)}
+                            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            htmlFor="filter-date-to"
+                            className="block text-xs text-gray-600 mb-1"
+                        >
+                            Tot
+                        </label>
+                        <input
+                            id="filter-date-to"
+                            type="date"
+                            value={dateTo}
+                            onChange={(e) => setDateTo(e.target.value)}
+                            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                        />
+                    </div>
+
+                    {hasFilters && (
+                        <button
+                            onClick={clearFilters}
+                            className="text-xs text-purple-600 underline self-end pb-2"
+                        >
+                            Filters wissen
+                        </button>
+                    )}
+                </div>
+            </fieldset>
 
             {loading ? (
                 <LoadingIndicator message="Datapunten laden..." />
             ) : filtered.length === 0 ? (
-                <div className="text-center py-8 text-gray-700">Geen data gevonden</div>
+                <div className="text-center py-8 text-gray-700">
+                    Geen data gevonden
+                </div>
             ) : (
                 <>
                     <div
-                        className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm"
+                        className="overflow-x-auto rounded-xl border-2 border-gray-300 shadow-sm"
                         tabIndex={0}
                         role="region"
                         aria-label="Datapunten tabel"
                     >
                         <table className="min-w-full divide-y divide-gray-200 text-sm">
+                            <caption className="sr-only">
+                                Overzicht van alle datapunten, inclusief gevoelsmetingen en sessieduur
+                            </caption>
                             <thead className="bg-gray-50">
                             <tr>
-                                {[
-                                    "Log ID",
-                                    "Gebruiker ID",
-                                    "Oefening",
-                                    "Datum",
-                                    "Sessieduur",
-                                    "Voltooid",
-                                    "Gevoel voor",
-                                    "Gevoel na",
-                                    "Verschil",
-                                ].map((h) => (
+                                {columns.map((h, i) => (
                                     <th
-                                        key={h}
+                                        key={i}
+                                        scope="col"
                                         className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider whitespace-nowrap"
                                     >
                                         {h}
@@ -210,7 +277,6 @@ export default function PaginatedDataTable({
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-100">
                             {filtered.map((log) => {
-                                // Gebruik opgeslagen _pct velden als beschikbaar, anders normaliseer
                                 const before =
                                     log.feeling_before_pct != null
                                         ? log.feeling_before_pct
@@ -222,10 +288,26 @@ export default function PaginatedDataTable({
                                 const diff =
                                     before != null && after != null ? after - before : null;
 
+                                const diffLabel =
+                                    diff == null
+                                        ? "geen data"
+                                        : diff > 0
+                                            ? `positief, ${diff} punten gestegen`
+                                            : diff < 0
+                                                ? `negatief, ${Math.abs(diff)} punten gedaald`
+                                                : "geen verandering";
+
                                 return (
-                                    <tr key={log.log_id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-4 py-3 text-gray-600 font-mono">{log.log_id}</td>
-                                        <td className="px-4 py-3 text-gray-600">{log.user_id}</td>
+                                    <tr
+                                        key={log.log_id}
+                                        className="hover:bg-gray-50 transition-colors"
+                                    >
+                                        <td className="px-4 py-3 text-gray-600 font-mono">
+                                            {log.log_id}
+                                        </td>
+                                        <td className="px-4 py-3 text-gray-600">
+                                            {log.user_id}
+                                        </td>
                                         <td className="px-4 py-3 font-medium text-gray-900">
                                             {log.exercise?.exercise_name ?? "–"}
                                         </td>
@@ -254,7 +336,9 @@ export default function PaginatedDataTable({
                                         <td className="px-4 py-3">
                                             <ScoreBadge value={after} />
                                         </td>
-                                        <td className="px-4 py-3 font-semibold"
+                                        <td
+                                            className="px-4 py-3 font-semibold"
+                                            aria-label={diffLabel}
                                             style={{
                                                 color:
                                                     diff == null
@@ -264,7 +348,25 @@ export default function PaginatedDataTable({
                                                             : "#b91c1c",
                                             }}
                                         >
-                                            {diff == null ? "–" : (diff >= 0 ? "+" : "") + diff}
+                                            {diff == null
+                                                ? "–"
+                                                : (diff >= 0 ? "+" : "") + diff}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <button
+                                                onClick={() =>
+                                                    setConfirmDelete({
+                                                        log_id: log.log_id,
+                                                        exercise_name:
+                                                            log.exercise?.exercise_name ?? `#${log.log_id}`,
+                                                    })
+                                                }
+                                                className="text-xs font-medium underline"
+                                                style={{ color: "#A5271A" }}
+                                                aria-label={`Verwijder log ${log.log_id}`}
+                                            >
+                                                Verwijderen
+                                            </button>
                                         </td>
                                     </tr>
                                 );
@@ -277,24 +379,98 @@ export default function PaginatedDataTable({
                         <button
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
+                            aria-label="Vorige pagina"
                             className="px-4 py-2 rounded-lg text-sm font-medium border-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             style={{ borderColor: "#6C4092", color: "#6C4092" }}
                         >
-                            ← Vorige
+                            <span aria-hidden="true">← </span>Vorige
                         </button>
-                        <span className="text-sm text-gray-700">
+
+                        <span
+                            className="text-sm text-gray-700"
+                            aria-live="polite"
+                            aria-atomic="true"
+                        >
                             Pagina {currentPage} van {totalPages}
                         </span>
+
                         <button
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages}
+                            aria-label="Volgende pagina"
                             className="px-4 py-2 rounded-lg text-sm font-medium border-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             style={{ borderColor: "#6C4092", color: "#6C4092" }}
                         >
-                            Volgende →
+                            Volgende<span aria-hidden="true"> →</span>
                         </button>
                     </div>
                 </>
+            )}
+
+            {/* Bevestigingsdialoog voor verwijderen */}
+            {confirmDelete && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="confirm-title"
+                >
+                    <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4">
+                        <h2
+                            id="confirm-title"
+                            className="text-lg font-bold text-gray-900 mb-2"
+                        >
+                            Datapunt verwijderen
+                        </h2>
+                        <p className="text-sm text-gray-700 mb-1">
+                            Weet je zeker dat je log{" "}
+                            <span className="font-semibold">#{confirmDelete.log_id}</span>{" "}
+                            (<span className="italic">{confirmDelete.exercise_name}</span>) wilt
+                            verwijderen?
+                        </p>
+                        <p className="text-sm font-medium mb-5 flex items-center gap-2" style={{ color: "#A5271A" }}>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                                className="w-4 h-4 shrink-0"
+                            >
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                <line x1="12" y1="9" x2="12" y2="13" />
+                                <line x1="12" y1="17" x2="12.01" y2="17" />
+                            </svg>
+                            Dit verwijdert het datapunt definitief uit de database.
+                        </p>
+                        {deleteError && (
+                            <p className="text-xs font-medium mb-3" style={{ color: "#A5271A" }}>{deleteError}</p>
+                        )}
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => {
+                                    setConfirmDelete(null);
+                                    setDeleteError(null);
+                                }}
+                                className="px-4 py-2 rounded-lg text-sm border-2 border-gray-400 text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                                Annuleren
+                            </button>
+                            <button
+                                onClick={handleDeleteConfirm}
+                                className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors"
+                                style={{ backgroundColor: "#A5271A" }}
+                                onMouseEnter={e => e.currentTarget.style.backgroundColor = "#8B1F15"}
+                                onMouseLeave={e => e.currentTarget.style.backgroundColor = "#A5271A"}
+                            >
+                                Ja, verwijderen
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

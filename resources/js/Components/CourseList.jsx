@@ -20,19 +20,17 @@ function IntroCard({ exercise }) {
                 href={route("exercise.show", { id: exercise.id })}
                 className="flex items-center gap-4 p-4 bg-white rounded-xl hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
                 style={{ border: "2px solid #7B5EA7", textDecoration: "none" }}
-                aria-label={`Start introductie oefening: ${exercise.exercise_name}. Altijd beschikbaar.`}
-                aria-describedby="intro-label"
             >
-                <div className="flex-1 min-w-0">
-                    <p className="text-base font-bold" style={{ color: "#7B5EA7" }} aria-hidden="true">
+                <span className="sr-only">{`Start introductie-oefening: ${exercise.exercise_name}`}</span>
+                <div className="flex-1 min-w-0" aria-hidden="true">
+                    <p className="text-base font-bold" style={{ color: "#7B5EA7" }}>
                         {exercise.exercise_name}
                     </p>
-                    <p className="text-xs text-gray-500 mt-0.5" aria-hidden="true">
+                    <p className="text-xs text-gray-500 mt-0.5">
                         Altijd beschikbaar · introductie
                     </p>
                 </div>
 
-                {/* Start-knop met aria-hidden want info zit in aria-label */}
                 <span
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-sm font-semibold flex-shrink-0"
                     style={{ backgroundColor: "#7B5EA7" }}
@@ -118,7 +116,14 @@ function CourseModal({ course, onClose }) {
     // Focus trap voor toegankelijkheid
     useEffect(() => {
         const previousFocus = document.activeElement;
-        closeButtonRef.current?.focus();
+
+        const titleElement = modalRef.current?.querySelector('[id="modal-title"]');
+        titleElement?.focus();
+
+        // Maak alles buiten modal inert
+        const htmlElement = document.documentElement;
+        const prevAriaHidden = htmlElement.getAttribute('aria-hidden');
+        htmlElement.setAttribute('aria-hidden', 'true');
 
         const focusableSelectors =
             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -144,6 +149,11 @@ function CourseModal({ course, onClose }) {
         return () => {
             document.removeEventListener("keydown", handleKeyDown);
             previousFocus?.focus();
+            if (prevAriaHidden === null) {
+                htmlElement.removeAttribute('aria-hidden');
+            } else {
+                htmlElement.setAttribute('aria-hidden', prevAriaHidden);
+            }
         };
     }, [onClose]);
 
@@ -158,11 +168,12 @@ function CourseModal({ course, onClose }) {
             <div
                 ref={modalRef}
                 className="bg-white rounded-2xl shadow-xl w-11/12 max-w-2xl max-h-[90vh] overflow-y-auto"
+                role="document"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
                 <div className="flex items-start justify-between p-6 pb-2">
-                    <h2 id="modal-title" className="text-2xl font-bold text-darkGray">
+                    <h2 id="modal-title" className="text-2xl font-bold text-darkGray" tabIndex={-1}>
                         {course.course_name}
                     </h2>
                     <button
@@ -184,150 +195,135 @@ function CourseModal({ course, onClose }) {
                     </p>
                 )}
 
-                {/* Subtitel */}
-                <p className="px-6 pb-4 text-base font-semibold" style={{ color: '#7B5EA7' }}>
-                    Oefeningen in deze cursus
-                </p>
+                {/* Loading state */}
+                {loadingAvail && (
+                    <div
+                        className="flex items-center gap-2 py-6 px-6 text-gray-400 text-sm"
+                        role="status"
+                        aria-live="polite"
+                        aria-busy="true"
+                    >
+                        <svg className="animate-spin h-4 w-4 text-purple-500" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                        Oefeningen laden…
+                    </div>
+                )}
 
                 {/* Oefeningen */}
-                <div className="px-6 pb-6 flex flex-col gap-4">
-                    {loadingAvail ? (
-                        course.exercises.map((exercise) => (
-                            <div
-                                key={exercise.id}
-                                className="rounded-xl p-5 animate-pulse"
-                                style={{ backgroundColor: "#F3F0F8", border: "1.5px solid #E8E0F0", minHeight: "80px" }}
-                                aria-hidden="true"
-                            >
-                                <div className="h-4 bg-purple-100 rounded w-1/2 mb-3" />
-                                <div className="h-3 bg-purple-50 rounded w-1/3" />
-                            </div>
-                        ))
-                    ) : course.exercises.map((exercise) => {
-                        const avail          = availability[exercise.id];
-                        const isAvailable    = avail?.available ?? false;
-                        const availableLabel = avail?.available_label ?? null;
-                        const availableFrom  = avail?.available_from ?? null;
-                        const exerciseIsFav  = isFavorite(exercise.id);
+                <div className="p-6 pt-2">
+                    <div className="space-y-3" role="list" aria-label={`Oefeningen in cursus ${course.course_name}`}>
+                        {course.exercises.map((exercise) => {
+                            const avail = availability[exercise.id] || { available: true };
+                            const exerciseIsFav = isFavorite(exercise.id);
+                            const isDisabled = !avail.available;
 
-                        if (!isAvailable) {
-                            // Niet beschikbare oefening
-                            return (
-                                <div
-                                    key={exercise.id}
-                                    className="rounded-xl p-5"
-                                    style={{
-                                        backgroundColor: "#F8F8F8",
-                                        border: "1.5px solid #E0E0E0",
-                                        opacity: 0.75,
-                                    }}
-                                    aria-label={`${exercise.exercise_name} — nog niet beschikbaar`}
-                                >
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-semibold text-gray-500 text-sm">
+                            if (isDisabled) {
+                                return (
+                                    <div
+                                        key={exercise.id}
+                                        className="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-300"
+                                        style={{ opacity: 0.6 }}
+                                        role="listitem"
+                                    >
+                                        {/* Één template literal = één tekstelement = screenreader leest het één keer */}
+                                        <p className="sr-only">
+                                            {`Oefening ${exercise.exercise_name}: nog niet beschikbaar. ${avail.available_label ? avail.available_label + '. ' : ''}Deze oefening wordt ontgrendeld als je elke dag een oefening doet.`}
+                                        </p>
+                                        <div className="flex-1 min-w-0" aria-hidden="true">
+                                            <p className="text-base font-semibold text-gray-600">
                                                 {exercise.exercise_name}
                                             </p>
-                                            {availableLabel && (
-                                                <p className="text-xs text-gray-400 mt-1">
-                                                    {availableLabel}
-                                                </p>
-                                            )}
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                {avail.available_label || "Nog niet beschikbaar"}
+                                            </p>
                                         </div>
-                                        <LockIcon className="w-5 h-5 text-gray-300 flex-shrink-0 mt-0.5" />
+                                        <LockIcon className="w-5 h-5 text-gray-300 flex-shrink-0" aria-hidden="true" />
                                     </div>
-                                </div>
-                            );
-                        }
+                                );
+                            }
 
-                        // Beschikbare oefening
-                        return (
-                            <div
-                                key={exercise.id}
-                                className="rounded-xl p-5"
-                                style={{ backgroundColor: "#F3F0F8", border: "1.5px solid #C4B5E0" }}
-                            >
-                                <div className="flex items-start justify-between gap-3 mb-3">
+                            return (
+                                <article
+                                    key={exercise.id}
+                                    className="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-300 hover:shadow-md transition-shadow"
+                                    role="listitem"
+                                >
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-sm" style={{ color: "#3B2D6E" }}>
+                                        <p className="text-base font-semibold text-gray-900">
                                             {exercise.exercise_name}
                                         </p>
-                                        {exercise.duration != null && (
-                                            <p className="text-xs text-gray-500 mt-0.5">
-                                                Deze oefening duurt ongeveer {exercise.duration} minuten
+                                        {exercise.duration && (
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                Duur: {exercise.duration} minuten
                                             </p>
                                         )}
                                     </div>
-                                </div>
 
-
-                                <div className="flex gap-3 flex-wrap">
-
-                                    {/*  Start oefening */}
                                     <Link
                                         href={route("exercise.show", { id: exercise.id })}
-                                        className="inline-flex items-center justify-center gap-2 rounded-xl text-white font-semibold text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#5A3F88] focus:ring-offset-2"
-                                        style={{
-                                            backgroundColor: "#7B5EA7",
-                                            paddingTop: "0.625rem",       // 10px → samen met pb = 44px min hoogte
-                                            paddingBottom: "0.625rem",
-                                            paddingLeft: "1.25rem",
-                                            paddingRight: "1.25rem",
-                                            minHeight: "44px",
-                                            minWidth: "160px",
-                                        }}
-                                        aria-label={`Start oefening: ${exercise.exercise_name}`}
+                                        className="inline-flex items-center gap-2 px-3 py-2 bg-[#7B5EA7] text-white text-sm font-semibold rounded-lg hover:bg-[#5a3a7a] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7B5EA7]"
                                     >
-                                        <svg
-                                            width="16"
-                                            height="16"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                            aria-hidden="true"
-                                            focusable="false"
-                                        >
+                                        <span className="sr-only">{`Start oefening: ${exercise.exercise_name}`}</span>
+                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                             <path d="M8 5v14l11-7z" />
                                         </svg>
-                                        Start oefening
+                                        <span aria-hidden="true">Start</span>
                                     </Link>
 
-                                    {/* Favoriet toggle */}
+
+
+
+
                                     {auth.user && (
                                         <button
                                             onClick={() => toggleFavorite(exercise.id)}
-                                            aria-pressed={exerciseIsFav}
+                                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                                            style={{
+                                                backgroundColor: exerciseIsFav ? '#fee2e2' : '#F3F4F6',
+                                                color: exerciseIsFav ? '#dc2626' : '#6B7280',
+                                                focusRingColor: exerciseIsFav ? '#dc2626' : '#7B5EA7'
+                                            }}
                                             aria-label={
                                                 exerciseIsFav
-                                                    ? `Verwijder ${exercise.exercise_name} uit favorieten`
-                                                    : `Voeg ${exercise.exercise_name} toe aan favorieten`
+                                                    ? `Verwijder ${exercise.exercise_name} uit je favoriete oefeningen`
+                                                    : `Voeg ${exercise.exercise_name} toe aan je favoriete oefeningen`
                                             }
-                                            className="inline-flex items-center justify-center gap-2 rounded-xl font-semibold text-sm border-2 transition-all focus:outline-none focus:ring-2 focus:ring-[#5A3F88] focus:ring-offset-2"
-                                            style={{
-                                                backgroundColor: exerciseIsFav ? "#7B5EA7" : "#FFFFFF",
-                                                color:           exerciseIsFav ? "#FFFFFF" : "#7B5EA7",
-                                                borderColor:     "#7B5EA7",
-                                                paddingTop:      "0.625rem",
-                                                paddingBottom:   "0.625rem",
-                                                paddingLeft:     "1.25rem",
-                                                paddingRight:    "1.25rem",
-                                                minHeight:       "44px",
-                                                minWidth:        "160px",
-                                            }}
+                                            aria-pressed={exerciseIsFav}
+                                            title={exerciseIsFav ? "Verwijder uit favorieten" : "Toevoegen aan favorieten"}
                                         >
-                                            <HeartIcon
-                                                filled={exerciseIsFav}
+                                            {/* Hart icoon */}
+                                            <svg
                                                 className="w-4 h-4"
+                                                fill={exerciseIsFav ? "currentColor" : "none"}
+                                                stroke="currentColor"
+                                                strokeWidth={exerciseIsFav ? "0" : "1.5"}
+                                                viewBox="0 0 24 24"
                                                 aria-hidden="true"
-                                            />
-                                            {exerciseIsFav
-                                                ? "Opgeslagen als favoriet"
-                                                : "Toevoegen aan favorieten"}
+                                                focusable="false"
+                                            >
+                                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                            </svg>
+
+                                            <span className="text-sm font-medium" aria-hidden="true">
+            {exerciseIsFav ? "Favoriet" : "Favoriet"}
+        </span>
+
+                                            {/* Extra screenreader-tekst voor context */}
+                                            <span className="sr-only">
+            {exerciseIsFav
+                ? `, ${exercise.exercise_name} is een van je favoriete oefeningen`
+                : `, maak ${exercise.exercise_name} een van je favoriete oefeningen`}
+        </span>
                                         </button>
                                     )}
-                                </div>
-                            </div>
-                        );
-                    })}
+
+
+                                </article>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         </div>
@@ -373,7 +369,12 @@ export default function CourseList() {
 
     if (loading) {
         return (
-            <div className="flex items-center gap-2 py-6 text-gray-400 text-sm">
+            <div
+                className="flex items-center gap-2 py-6 text-gray-400 text-sm"
+                role="status"
+                aria-live="polite"
+                aria-busy="true"
+            >
                 <svg className="animate-spin h-4 w-4 text-purple-500" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
@@ -390,7 +391,7 @@ export default function CourseList() {
     return (
         <>
             <h2 className="text-2xl font-bold text-darkGray mb-4" id="courses-heading">
-                Mijn cursussen
+                Mindfulness oefeningen
             </h2>
 
             {/* Vaste introductie-oefening*/}
@@ -421,8 +422,10 @@ export default function CourseList() {
                                     cursor: "not-allowed",
                                 }}
                                 role="listitem"
-                                aria-label={`Cursus ${course.course_name} — nog niet beschikbaar`}
                             >
+                                <p className="sr-only">
+                                    {`Cursus ${course.course_name}: nog niet beschikbaar. ${course.available_label ? course.available_label + '. ' : ''}Deze cursus wordt ontgrendeld als je elke dag een oefening doet.`}
+                                </p>
                                 <div
                                     className="flex items-center justify-center w-14 h-14 rounded-lg flex-shrink-0"
                                     style={{ backgroundColor: "#F3F4F6", border: "2px solid #D1D5DB" }}
@@ -430,8 +433,7 @@ export default function CourseList() {
                                 >
                                     <LockIcon className="w-7 h-7 text-gray-400" />
                                 </div>
-
-                                <div className="flex-1 min-w-0">
+                                <div className="flex-1 min-w-0" aria-hidden="true">
                                     <p className="text-base font-bold text-gray-600">
                                         {course.course_name}
                                     </p>
@@ -439,8 +441,7 @@ export default function CourseList() {
                                         {course.available_label || "Nog niet beschikbaar"}
                                     </p>
                                 </div>
-
-                                <LockIcon className="w-5 h-5 text-gray-300 flex-shrink-0" />
+                                <LockIcon className="w-5 h-5 text-gray-300 flex-shrink-0" aria-hidden="true" />
                             </div>
                         );
                     }
