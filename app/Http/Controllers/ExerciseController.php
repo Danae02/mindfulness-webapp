@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\CourseService;
 use App\Models\Course;
 use App\Models\Exercise;
 use App\Models\UserExerciseLog;
@@ -13,10 +14,12 @@ use Inertia\Inertia;
 class ExerciseController extends Controller
 {
     private ExerciseAvailabilityService $availabilityService;
+    private CourseService $courseService;
 
-    public function __construct(ExerciseAvailabilityService $availabilityService)
+    public function __construct(ExerciseAvailabilityService $availabilityService, CourseService $courseService)
     {
         $this->availabilityService = $availabilityService;
+        $this->courseService = $courseService;
     }
 
     public function index()
@@ -203,7 +206,7 @@ class ExerciseController extends Controller
         if ($courseId) {
             $course = Course::find($courseId);
             if ($course) {
-                $courseController = new CourseController();
+                $courseController = new CourseController($this->courseService);
                 $availabilityResponse = $courseController->getCourseAvailabilityForUser($courseId, $userId);
                 $availabilityData = json_decode($availabilityResponse->getContent(), true);
 
