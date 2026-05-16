@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import axios from "axios";
 
 export default function AudioFileUploader({
@@ -8,25 +8,10 @@ export default function AudioFileUploader({
                                               onChapterUpdate,
                                               onUploaded,
                                           }) {
-    const [uploading, setUploading]   = useState(false);
-    const [uploaded, setUploaded]     = useState(false);
-    const [question, setQuestion]     = useState("");
-    const [answers, setAnswers]       = useState(["", "", "", "", ""]);
-    const [mode, setMode]             = useState(null);
-    const [dragOver, setDragOver]     = useState(false);
-    const fileInputRef                = useRef(null);
-
-    useEffect(() => {
-        const fetchMode = async () => {
-            try {
-                const response = await axios.get(route("researchsettings.getmode"));
-                setMode(response.data.mode);
-            } catch {
-                setMode(null);
-            }
-        };
-        fetchMode();
-    }, []);
+    const [uploading, setUploading] = useState(false);
+    const [uploaded, setUploaded]   = useState(false);
+    const [dragOver, setDragOver]   = useState(false);
+    const fileInputRef              = useRef(null);
 
     const handleFileChange = (file) => {
         if (file) {
@@ -56,14 +41,6 @@ export default function AudioFileUploader({
             formData.append("audio", chapter.file);
             formData.append("course_id", courseId);
             formData.append("exercise_name", chapter.chapterName);
-
-            // Voeg alleen de vragenlijst toe als de modus niet 'per_session' is
-            if (mode !== "per_session") { // verandering if (chapter.mode !== "per_session")
-                formData.append("form_question", question);
-                answers.forEach((answer) => {
-                    formData.append("form_answers[]", answer);
-                });
-            }
 
             await axios.post(route("exercises.create"), formData, {
                 headers: { "Content-Type": "multipart/form-data" },
@@ -115,6 +92,7 @@ export default function AudioFileUploader({
                 <p className="text-sm text-green-700 font-medium">{chapter.chapterName}</p>
             ) : (
                 <form onSubmit={handleUpload} className="space-y-4">
+                    {/* Naam van de oefening */}
                     <div>
                         <label
                             htmlFor={`chapter-name-${chapterNumber}`}
@@ -140,7 +118,7 @@ export default function AudioFileUploader({
                         <div
                             className="relative rounded-lg border-2 border-dashed transition-all cursor-pointer"
                             style={{
-                                borderColor: dragOver ? "#6C4092" : chapter.file ? "#16A34A" : "#6B7280", // Donkere grijze border
+                                borderColor: dragOver ? "#6C4092" : chapter.file ? "#16A34A" : "#6B7280",
                                 backgroundColor: dragOver ? "#F3EEFF" : chapter.file ? "#F0FDF4" : "#FFFFFF",
                             }}
                             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -178,50 +156,6 @@ export default function AudioFileUploader({
                             />
                         </div>
                     </div>
-
-                    {/* Vraag & antwoorden */}
-                    {mode !== "per_session" && (
-                        <div className="pt-1 space-y-3 border-t border-gray-200">
-                            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide pt-1">Gevoelsvraag</p>
-                            <div>
-                                <label
-                                    htmlFor={`form-question-${chapterNumber}`}
-                                    className="block text-sm font-medium text-gray-700 mb-1"
-                                >
-                                    Vraag
-                                </label>
-                                <input
-                                    type="text"
-                                    id={`form-question-${chapterNumber}`}
-                                    value={question}
-                                    onChange={(e) => setQuestion(e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 bg-white text-gray-900"
-                                    placeholder="Bijvoorbeeld: Hoe moeilijk vond je deze oefening?"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Antwoorden (1–5)
-                                </label>
-                                <div className="space-y-2">
-                                    {answers.map((answer, index) => (
-                                        <input
-                                            key={index}
-                                            type="text"
-                                            value={answer}
-                                            onChange={(e) => {
-                                                const updated = [...answers];
-                                                updated[index] = e.target.value;
-                                                setAnswers(updated);
-                                            }}
-                                            className="w-full px-3 py-2 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 bg-white text-gray-900"
-                                            placeholder={`Antwoord ${index + 1}`}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     <button
                         type="submit"
