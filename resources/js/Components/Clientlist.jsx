@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import LoadingIndicator from "@/Components/LoadingIndicator";
 import AddClientForm from "@/Components/AddClientForm";
 
 // Helpers
@@ -8,7 +9,6 @@ function getInitials(name) {
 }
 
 // Iconen
-
 const IconUsers = (
     <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -16,16 +16,6 @@ const IconUsers = (
 );
 
 // Sub-componenten
-
-function LoadingSpinner({ label = 'Laden…' }) {
-    return (
-        <div className="flex justify-center py-10" role="status" aria-label={label}>
-            <div className="w-8 h-8 border-4 border-[#D4C5E8] border-t-[#7B5EA7] rounded-full animate-spin" aria-hidden="true" />
-            <span className="sr-only">{label}</span>
-        </div>
-    );
-}
-
 function EmptyState({ icon, message }) {
     return (
         <div className="flex flex-col items-center justify-center py-12 text-gray-400" role="status" aria-live="polite">
@@ -115,7 +105,7 @@ export default function ClientList({
 
             <div className="px-6 py-4">
                 {loading ? (
-                    <LoadingSpinner label="Cliënten laden…" />
+                    <LoadingIndicator message="Cliënten laden…" />
                 ) : clients.length === 0 ? (
                     <EmptyState
                         icon={IconUsers}
