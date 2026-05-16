@@ -36,7 +36,10 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::get('/test', fn() => Inertia::render('Test'))->name('test');
 
 // Public Exercise route
-Route::get('/exercise/{id}', [AudioController::class, 'showExercise'])
+//Route::get('/exercise/{id}', [AudioController::class, 'showExercise'])
+//    ->name('exercise.show');
+
+Route::get('/exercise/{id}', [ExerciseController::class, 'showExercise'])
     ->name('exercise.show');
 
 // Authenticated routes

@@ -74,7 +74,8 @@ export default function ExercisePage({
         // Begeleiders mogen altijd doorgaan zonder skipQuestions,
         // maar gevoelsvragen worden alleen getoond als proxyCanAskFeelings true is.
         // Cliënten: skipQuestions als ze vandaag al gedaan hebben.
-        const shouldSkip = !isProxy && (alreadyCompletedToday || !isNewestExercise || proxyFeelingAnsweredToday);
+        const shouldSkip = !isProxy && (alreadyCompletedToday || !isNewestExercise);
+        // const shouldSkip = !isProxy && (alreadyCompletedToday || isNewestExercise === false);
         setSkipQuestions(shouldSkip);
 
         if (shouldSkip) {

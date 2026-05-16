@@ -36,6 +36,16 @@ class ExerciseController extends Controller
 
     public function showExercise($id)
     {
+        if ($id === 'intro') {
+            return Inertia::render('IntroExercisePage', [
+                'exercise' => [
+                    'id'              => 'intro',
+                    'exercise_name'   => 'Introductie mindfulness app',
+                    'audio_file_path' => '/audio/1.mindfulness_app_inleiding.m4a',
+                ],
+            ]);
+        }
+
         $exercise = Exercise::find($id);
 
         if (!$exercise) {
@@ -197,30 +207,53 @@ class ExerciseController extends Controller
     }
 
 
+//    private function checkExerciseAvailability(Exercise $exercise, int $userId): array
+//    {
+//        $exerciseAvailable = true;
+//        $availableLabel = null;
+//
+//        $courseId = $exercise->course_id;
+//        if ($courseId) {
+//            $course = Course::find($courseId);
+//            if ($course) {
+//                $courseController = new CourseController($this->courseService);
+//                $availabilityResponse = $courseController->getCourseAvailabilityForUser($courseId, $userId);
+//                $availabilityData = json_decode($availabilityResponse->getContent(), true);
+//
+//                $exerciseAvailability = collect($availabilityData)
+//                    ->firstWhere('exercise_id', (int) $exercise->id);
+//
+//                if ($exerciseAvailability) {
+//                    $exerciseAvailable = $exerciseAvailability['available'] ?? true;
+//                    $availableLabel = $exerciseAvailability['available_label'] ?? null;
+//                }
+//            }
+//        }
+//
+//        return [$exerciseAvailable, $availableLabel];
+//    }
+
+
     private function checkExerciseAvailability(Exercise $exercise, int $userId): array
     {
-        $exerciseAvailable = true;
-        $availableLabel = null;
-
         $courseId = $exercise->course_id;
-        if ($courseId) {
-            $course = Course::find($courseId);
-            if ($course) {
-                $courseController = new CourseController($this->courseService);
-                $availabilityResponse = $courseController->getCourseAvailabilityForUser($courseId, $userId);
-                $availabilityData = json_decode($availabilityResponse->getContent(), true);
-
-                $exerciseAvailability = collect($availabilityData)
-                    ->firstWhere('exercise_id', (int) $exercise->id);
-
-                if ($exerciseAvailability) {
-                    $exerciseAvailable = $exerciseAvailability['available'] ?? true;
-                    $availableLabel = $exerciseAvailability['available_label'] ?? null;
-                }
-            }
+        if (!$courseId) {
+            return [true, null];
         }
 
-        return [$exerciseAvailable, $availableLabel];
+        $course = Course::find($courseId);
+        if (!$course) {
+            return [true, null];
+        }
+
+        $result = $this->courseService->buildExerciseAvailability($course, $userId);
+
+        $exerciseAvailability = collect($result)->firstWhere('exercise_id', (int) $exercise->id);
+
+        return [
+            $exerciseAvailability['available'] ?? true,
+            $exerciseAvailability['available_label'] ?? null,
+        ];
     }
 
 

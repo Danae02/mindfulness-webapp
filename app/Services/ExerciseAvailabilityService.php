@@ -143,6 +143,7 @@ class ExerciseAvailabilityService
     {
         return UserExerciseLog::where('user_id', $userId)
             ->whereDate('date_time', now()->toDateString())
+            ->where('completed', true)
             ->where(function ($q) {
                 $q->whereNotNull('feeling_before')
                     ->orWhereNotNull('feeling_after');
