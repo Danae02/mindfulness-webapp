@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import AudioFileUploader from "./AudioFileUploader.jsx";
 import axios from "axios";
 
@@ -57,15 +57,39 @@ function StepIndicator({ currentStep }) {
 }
 
 export default function CourseUploader({ onCancel }) {
-    const [step, setStep]             = useState(1);
-    const [courseName, setCourseName] = useState("");
-    const [description, setDescription] = useState("");
-    const [numExercises, setNumExercises] = useState(1);
-    const [chapters, setChapters]         = useState([]);
-    const [courseId, setCourseId]         = useState(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [errors, setErrors]             = useState({});
+    const [step, setStep]                   = useState(1);
+    const [courseName, setCourseName]       = useState("");
+    const [description, setDescription]     = useState("");
+    const [numExercises, setNumExercises]   = useState(1);
+    const [chapters, setChapters]           = useState([]);
+    const [isSubmitting, setIsSubmitting]   = useState(false);
+    const [errors, setErrors]               = useState({});
     const [uploadedIndexes, setUploadedIndexes] = useState(new Set());
+
+    // Cursus wordt pas aangemaakt bij de eerste upload.
+    // courseIdRef slaat het resultaat op zodat het maar één keer gebeurt.
+    const courseIdRef      = useRef(null);
+    const courseCreationPromiseRef = useRef(null);
+
+    const ensureCourseCreated = async () => {
+        // Al aangemaakt: geef het id terug
+        if (courseIdRef.current) return courseIdRef.current;
+
+        // Aanmaak al bezig (race condition bij gelijktijdige uploads): wacht op die promise
+        if (courseCreationPromiseRef.current) return courseCreationPromiseRef.current;
+
+        courseCreationPromiseRef.current = axios
+            .post(route("courses.create"), {
+                course_name: courseName,
+                description: description || null,
+            })
+            .then((response) => {
+                courseIdRef.current = response.data.course_id;
+                return courseIdRef.current;
+            });
+
+        return courseCreationPromiseRef.current;
+    };
 
     const handleExerciseUploaded = (index) => {
         setUploadedIndexes((prev) => new Set([...prev, index]));
@@ -73,7 +97,7 @@ export default function CourseUploader({ onCancel }) {
 
     const hasAtLeastOneUpload = uploadedIndexes.size > 0;
 
-    const handleStep1Submit = async (e) => {
+    const handleStep1Submit = (e) => {
         e.preventDefault();
         const newErrors = {};
 
@@ -89,34 +113,30 @@ export default function CourseUploader({ onCancel }) {
             return;
         }
 
-        setIsSubmitting(true);
-        try {
-            const response = await axios.post(route("courses.create"), {
-                course_name: courseName,
-                description: description || null,
-            });
-
-            setCourseId(response.data.course_id);
-            setChapters(
-                Array.from({ length: numExercises }, () => ({ chapterName: "", file: null }))
-            );
-            setErrors({});
-            setStep(2);
-        } catch (error) {
-            if (error.response?.status === 422) {
-                setErrors({ courseName: error.response.data.message || "De cursusnaam bestaat al." });
-            } else {
-                setErrors({ general: "Er is een fout opgetreden. Probeer het opnieuw." });
-            }
-        } finally {
-            setIsSubmitting(false);
-        }
+        // Nog geen DB-aanroep hier — cursus wordt pas aangemaakt bij eerste upload
+        setChapters(
+            Array.from({ length: numExercises }, () => ({ chapterName: "", file: null }))
+        );
+        setErrors({});
+        setStep(2);
     };
 
     const updateChapter = (index, updatedChapter) => {
         const updated = [...chapters];
         updated[index] = updatedChapter;
         setChapters(updated);
+    };
+
+    const handleReset = () => {
+        setStep(1);
+        setCourseName("");
+        setDescription("");
+        setNumExercises(1);
+        setChapters([]);
+        setErrors({});
+        setUploadedIndexes(new Set());
+        courseIdRef.current = null;
+        courseCreationPromiseRef.current = null;
     };
 
     return (
@@ -222,14 +242,10 @@ export default function CourseUploader({ onCancel }) {
                                 className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 disabled:opacity-60"
                                 style={{ backgroundColor: "#6C4092" }}
                             >
-                                {isSubmitting ? "Bezig..." : (
-                                    <>
-                                        Volgende stap
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </>
-                                )}
+                                Volgende stap
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
                             </button>
                         </div>
                     </form>
@@ -247,7 +263,7 @@ export default function CourseUploader({ onCancel }) {
                             <AudioFileUploader
                                 key={index}
                                 chapterNumber={index + 1}
-                                courseId={courseId}
+                                ensureCourseCreated={ensureCourseCreated}
                                 chapter={chapter}
                                 onChapterUpdate={(updatedChapter) => updateChapter(index, updatedChapter)}
                                 onUploaded={() => handleExerciseUploaded(index)}
@@ -277,16 +293,7 @@ export default function CourseUploader({ onCancel }) {
                             <button
                                 type="button"
                                 disabled={!hasAtLeastOneUpload}
-                                onClick={() => {
-                                    setStep(1);
-                                    setCourseName("");
-                                    setDescription("");
-                                    setNumExercises(1);
-                                    setChapters([]);
-                                    setCourseId(null);
-                                    setErrors({});
-                                    setUploadedIndexes(new Set());
-                                }}
+                                onClick={handleReset}
                                 className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 disabled:opacity-40 disabled:cursor-not-allowed"
                                 style={{ backgroundColor: "#6C4092" }}
                                 aria-disabled={!hasAtLeastOneUpload}

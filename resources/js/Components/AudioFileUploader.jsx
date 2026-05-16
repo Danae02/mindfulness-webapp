@@ -3,7 +3,7 @@ import axios from "axios";
 
 export default function AudioFileUploader({
                                               chapterNumber,
-                                              courseId,
+                                              ensureCourseCreated,
                                               chapter,
                                               onChapterUpdate,
                                               onUploaded,
@@ -37,6 +37,9 @@ export default function AudioFileUploader({
         setUploading(true);
 
         try {
+            // Cursus wordt hier pas aangemaakt als dat nog niet gebeurd is
+            const courseId = await ensureCourseCreated();
+
             const formData = new FormData();
             formData.append("audio", chapter.file);
             formData.append("course_id", courseId);
