@@ -3,48 +3,57 @@ import axios from 'axios';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import { Head } from "@inertiajs/react";
 import AccessibilityButton from "@/Components/AccessibilityButton";
-import ClientList   from "@/Components/ClientList";
+import TeamList from "@/Components/TeamList";
 import ClientDetail from "@/Components/ClientDetail";
 
 export default function DashboardSupervisor() {
-    const [clients,        setClients]        = useState([]);
+    const [clients, setClients] = useState([]);
     const [selectedClient, setSelectedClient] = useState(null);
-    const [clientsLoading, setClientsLoading] = useState(true);
-    const [showAddForm,    setShowAddForm]    = useState(false);
-    const [search,         setSearch]         = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
+    // Fetch clients data once on mount
     useEffect(() => {
+        const fetchClients = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await axios.get(route('users.get.team'));
+                setClients(response.data);
+            } catch (err) {
+                console.error('Fout bij ophalen cliënten:', err);
+                setError('Kon cliënten niet laden');
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchClients();
     }, []);
 
-    const fetchClients = async () => {
-        setClientsLoading(true);
+    // Refresh clients after adding new one
+    const handleAddSuccess = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(route('users.get.team'));
             setClients(response.data);
-        } catch (error) {
-            console.error('Fout bij ophalen cliënten:', error);
+        } catch (err) {
+            console.error('Fout bij refresh:', err);
+            setError('Kon cliënten niet refreshen');
         } finally {
-            setClientsLoading(false);
+            setLoading(false);
         }
-    };
-
-    const handleAddSuccess = () => {
-        setShowAddForm(false);
-        fetchClients();
     };
 
     const handleSelectClient = (client) => {
         setSelectedClient(client);
         setTimeout(() => {
-            document.getElementById('client-detail-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('client-detail-section')?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         }, 100);
     };
-
-    const filteredClients = clients.filter(c =>
-        c.name?.toLowerCase().includes(search.toLowerCase()) ||
-        c.email?.toLowerCase().includes(search.toLowerCase())
-    );
 
     return (
         <AuthenticatedLayout
@@ -63,7 +72,6 @@ export default function DashboardSupervisor() {
 
             <div className="py-8 bg-gray-50 min-h-screen">
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-
                     <div className="mb-6">
                         <h1 className="text-2xl font-bold text-gray-900">De cliënten</h1>
                         <p className="text-sm text-gray-500 mt-1">
@@ -71,20 +79,23 @@ export default function DashboardSupervisor() {
                         </p>
                     </div>
 
-                    <ClientList
-                        clients={filteredClients}
-                        loading={clientsLoading}
-                        search={search}
-                        onSearchChange={setSearch}
-                        showAddForm={showAddForm}
-                        onToggleAddForm={() => setShowAddForm(v => !v)}
-                        onAddSuccess={handleAddSuccess}
+                    {error && (
+                        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+                            {error}
+                        </div>
+                    )}
+
+                    {/* TeamList receives all data via props */}
+                    <TeamList
+                        clients={clients}
+                        loading={loading}
                         selectedClient={selectedClient}
                         onSelectClient={handleSelectClient}
+                        onAddSuccess={handleAddSuccess}
                     />
 
                     {selectedClient && (
-                        <div id="client-detail-section">
+                        <div id="client-detail-section" className="mt-8">
                             <ClientDetail
                                 key={selectedClient.id}
                                 client={selectedClient}
@@ -92,7 +103,6 @@ export default function DashboardSupervisor() {
                             />
                         </div>
                     )}
-
                 </div>
             </div>
         </AuthenticatedLayout>
