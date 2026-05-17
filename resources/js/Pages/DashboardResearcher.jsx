@@ -1,17 +1,70 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import LogDurationToDifference from "@/Components/LogDurationToDifference.jsx";
 import DataExport from "@/Components/DataExport.jsx";
 import Feelingsdashboard from "@/Components/Feelingsdashboard.jsx";
-import { useState } from "react";
 import ListOfAllDataPoints from "@/Components/ListOfAllDataPoints.jsx";
+import LoadingIndicator from "@/Components/LoadingIndicator.jsx";
 
 export default function DashboardResearcher({
-                                                exerciseNames,
-                                                userExerciseLogs,
+                                                exerciseNames = [],
+                                                userExerciseLogs = [],
                                                 researchGroups = [],
                                                 exercises = [],
                                             }) {
     const [view, setView] = useState("gevoelsmetingen");
+
+    // State for SessionChartData
+    const [sessionData, setSessionData] = useState([]);
+    const [sessionLoading, setSessionLoading] = useState(false);
+    const [sessionError, setSessionError] = useState(null);
+
+    // State for LogDurationToDifference
+    const [statistics, setStatistics] = useState([]);
+    const [selectedExercise, setSelectedExercise] = useState(null);
+    const [statsLoading, setStatsLoading] = useState(false);
+    const [statsError, setStatsError] = useState(null);
+
+    // Fetch session data when view changes
+    useEffect(() => {
+        if (view === "logDuration") {
+            const fetchSessionData = async () => {
+                setSessionLoading(true);
+                setSessionError(null);
+                try {
+                    const response = await axios.get(route('exercise-logs.get.duration_sessions'));
+                    setSessionData(response.data);
+                } catch (err) {
+                    console.error('Fout bij ophalen sessiedata:', err);
+                    setSessionError('Kon sessiedata niet laden');
+                }
+                finally {
+                    setSessionLoading(false);
+                }
+            };
+            fetchSessionData();
+        }
+    }, [view]);
+
+    // fetch statistics for a specific exercise
+    const handleExerciseSelect = async (exerciseName) => {
+        setSelectedExercise(exerciseName);
+        setStatsLoading(true);
+        setStatsError(null);
+        try {
+            const response = await axios.get(route('exercise-logs.statistics', {
+                exercise_name: exerciseName
+            }));
+            setStatistics(response.data);
+        } catch (err) {
+            console.error('Fout bij ophalen statistieken:', err);
+            setStatsError('Kon statistieken niet laden');
+            setStatistics([]);
+        } finally {
+            setStatsLoading(false);
+        }
+    };
 
     const menuItems = [
         { key: "gevoelsmetingen",     label: "Gevoelsmetingen" },
@@ -77,7 +130,14 @@ export default function DashboardResearcher({
                             <h2 className="text-lg font-bold mb-4 break-words">
                                 Log van de Duur
                             </h2>
-                            <LogDurationToDifference exerciseNames={exerciseNames} />
+                            <LogDurationToDifference
+                                exerciseNames={exerciseNames}
+                                statistics={statistics}
+                                selectedExercise={selectedExercise}
+                                loading={statsLoading}
+                                error={statsError}
+                                onExerciseSelect={handleExerciseSelect}
+                            />
                         </div>
                     )}
 
