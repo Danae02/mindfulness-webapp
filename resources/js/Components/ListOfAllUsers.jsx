@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import SearchBar from '@/Components/SearchBar.jsx';
 import FilterSwitch from '@/Components/FilterSwitch.jsx';
 import UserDetailModal from "@/Components/UserDetailModal.jsx";
 import LoadingIndicator from "@/Components/LoadingIndicator.jsx";
 
-export default function ListOfAllUsers() {
-    const [users, setUsers] = useState([]); // State om gebruikersdata op te slaan
-    const [loading, setLoading] = useState(true); // Laadstate
-    const [error, setError] = useState(null); // Foutstate
-    const [filtered, setFiltered] = useState(false); // Filterstate
-    const [selectedUser, setSelectedUser] = useState(null); // Geselecteerde gebruiker voor modal
-    const [showModal, setShowModal] = useState(false); // Modal zichtbaarheid
-    const [searchTerm, setSearchTerm] = useState(''); // Zoekterm voor naam filtering
+export default function ListOfAllUsers({
+                                           users = [],
+                                           loading = false,
+                                           error = null,
+                                           filtered = false,
+                                           onFilterChange = () => {},
+                                           searchTerm = '',
+                                           onSearchChange = () => {},
+                                           onUsersRefresh = () => {},
+                                       }) {
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [showModal, setShowModal] = useState(false);
 
     const roleMapping = {
         1: 'Admin',
@@ -21,7 +24,6 @@ export default function ListOfAllUsers() {
         4: 'Onderzoeker',
     };
 
-    // colors for different roles
     const roleColors = {
         1: 'bg-red-100 text-red-800',
         2: 'bg-green-100 text-green-800',
@@ -29,21 +31,18 @@ export default function ListOfAllUsers() {
         4: 'bg-purple-100 text-purple-800',
     };
 
-    // fetch users from backend
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const response = await axios.get(route('users.index'));
-                setUsers(response.data);
-            } catch (err) {
-                setError('Fout bij het ophalen van gebruikers.');
-            } finally {
-                setLoading(false);
-            }
-        };
+    const handleRowClick = (user) => {
+        setSelectedUser(user);
+        setShowModal(true);
+    };
 
-        fetchUsers();
-    }, []);
+    const closeModal = () => {
+        setShowModal(false);
+        setSelectedUser(null);
+    };
+
+    if (loading) return <LoadingIndicator message="Gebruikers laden..." />;
+    if (error) return <div className="text-red-600 p-4">{error}</div>;
 
     // Filter users based on the "is_reviewed" flag
     const filteredUsers = filtered
@@ -55,31 +54,15 @@ export default function ListOfAllUsers() {
         user.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Handle row click to open user modal
-    const handleRowClick = (user) => {
-        setSelectedUser(user);
-        setShowModal(true); // Open modal
-    };
-
-    // Close the modal
-    const closeModal = () => {
-        setShowModal(false);
-        setSelectedUser(null);
-    };
-
-    // Loading or error states
-    if (loading) return <div>Loading users...</div>;
-    if (error) return <div>{error}</div>;
-
     return (
         <div>
             {/* Search and Filter Buttons container */}
             <div className="flex items-center mb-4 space-x-4">
-                <SearchBar searchTerm={searchTerm} onSearch={setSearchTerm} catTerm="naam"/>
-                <FilterSwitch filtered={filtered} onToggle={() => setFiltered(!filtered)} />
+                <SearchBar searchTerm={searchTerm} onSearch={onSearchChange} catTerm="naam"/>
+                <FilterSwitch filtered={filtered} onToggle={() => onFilterChange(!filtered)} />
             </div>
 
-            {/* Better table to displat users */}
+            {/* Better table to display users */}
             <div
                 className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm"
                 tabIndex={0}
@@ -135,7 +118,9 @@ export default function ListOfAllUsers() {
                 <UserDetailModal
                     user={selectedUser}
                     closeModal={closeModal}
-                    setUsers={setUsers}
+                    setUsers={(updatedUsers) => {
+                        onUsersRefresh();
+                    }}
                 />
             )}
         </div>

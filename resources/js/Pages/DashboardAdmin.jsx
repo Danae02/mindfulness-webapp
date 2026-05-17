@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import CourseUploader from "@/Components/CourseUploader.jsx";
 import CourseEditor from "@/Components/CourseEditor.jsx";
@@ -21,13 +22,39 @@ export default function DashboardAdmin() {
     const [view, setView] = useState("courses");
     const [isLoading, setIsLoading] = useState(false);
 
+    // state for ListOfAllUsers
+    const [users, setUsers] = useState([]);
+    const [usersLoading, setUsersLoading] = useState(false);
+    const [usersError, setUsersError] = useState(null);
+    const [filtered, setFiltered] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Fetch users when view changes to listOfAllUsers
+    useEffect(() => {
+        if (view === "listOfAllUsers") {
+            const fetchUsers = async () => {
+                setUsersLoading(true);
+                setUsersError(null);
+                try {
+                    const response = await axios.get(route('users.index'));
+                    setUsers(response.data);
+                } catch (err) {
+                    console.error('Fout bij ophalen gebruikers:', err);
+                    setUsersError('Fout bij het ophalen van gebruikers.');
+                } finally {
+                    setUsersLoading(false);
+                }
+            };
+            fetchUsers();
+        }
+    }, [view]);
+
     const handleViewChange = (newView) => {
         if (newView === view) return;
         setIsLoading(true);
         setView(newView);
         setTimeout(() => setIsLoading(false), 300);
     };
-
     const currentLabel = menuItems.find((m) => m.key === view)?.label ?? "";
 
     return (
@@ -53,7 +80,7 @@ export default function DashboardAdmin() {
                                     <button
                                         onClick={() => handleViewChange(key)}
                                         aria-current={view === key ? "page" : undefined}
-                                        className={`w-full text-left p-2 rounded transition-all duration-200 ${
+                                        className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
                                             view === key
                                                 ? "bg-[#9B6DD4] bg-opacity-20 text-white font-medium"
                                                 : "hover:bg-white hover:bg-opacity-10 text-gray-300"
@@ -68,7 +95,7 @@ export default function DashboardAdmin() {
                     </div>
                 </nav>
 
-                {/* Hoofdinhoud */}
+                {/* Main content */}
                 <main className="flex-1 p-4 md:p-6 overflow-x-auto">
                     {isLoading ? (
                         <LoadingIndicator message="Pagina laden..." />
@@ -107,7 +134,22 @@ export default function DashboardAdmin() {
                             {view === "listOfAllUsers" && (
                                 <div>
                                     <h1 className="text-lg font-bold mb-4">Lijst van alle gebruikers</h1>
-                                    <ListOfAllUsers />
+                                    <ListOfAllUsers
+                                        users={users}
+                                        loading={usersLoading}
+                                        error={usersError}
+                                        filtered={filtered}
+                                        onFilterChange={setFiltered}
+                                        searchTerm={searchTerm}
+                                        onSearchChange={setSearchTerm}
+                                        onUsersRefresh={() => {
+                                            const fetchUsers = async () => {
+                                                const response = await axios.get(route('users.index'));
+                                                setUsers(response.data);
+                                            };
+                                            fetchUsers();
+                                        }}
+                                    />
                                 </div>
                             )}
 
