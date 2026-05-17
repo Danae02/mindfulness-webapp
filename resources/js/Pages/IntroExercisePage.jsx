@@ -28,9 +28,11 @@ export default function IntroExercisePage({ exercise }) {
                         >
                             <p className="text-gray-700 text-sm leading-relaxed">
                                 Welkom! Luister deze introductie om te leren waarom mindfulness oefenen werkt.
-                                <p className="sr-only">Afspeelknop voor de oefening</p>
-                                Druk op de afspeelknop om te starten.
                             </p>
+                            <p className="text-gray-700 text-sm leading-relaxed mt-2">
+                                Druk op de afspeelknop hieronder om te starten.
+                            </p>
+                            <span className="sr-only">Afspeelknop voor de oefening staat hieronder.</span>
                         </div>
 
                         {/* Audiospeler */}

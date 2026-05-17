@@ -5,7 +5,8 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
-    const [progress, setProgress] = useState(0);
+    const [isSeeking, setIsSeeking] = useState(false);
+    const audioTimerRef = useRef(null);
 
     // tijd naar mm:ss
     const formatTime = (seconds) => {
@@ -15,26 +16,29 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
         return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     };
 
-    // Update progress tijdens afspelen
+    const percentage = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+    // versie voor screenreader: ".. minuten en ... seconden"
+    const formatTimeSpoken = (seconds) => {
+        if (isNaN(seconds)) return "0 seconden";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        if (mins === 0) return `${secs} seconden`;
+        if (secs === 0) return `${mins} minuten`;
+        return `${mins} minuten en ${secs} seconden`;
+    };
+
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
 
         const updateProgress = () => {
-            setCurrentTime(audio.currentTime);
-            if (audio.duration) {
-                setProgress((audio.currentTime / audio.duration) * 100);
-            }
+            if (!isSeeking) setCurrentTime(audio.currentTime);
         };
-
-        const setAudioDuration = () => {
-            setDuration(audio.duration);
-        };
-
+        const setAudioDuration = () => setDuration(audio.duration);
         const handleEnded = () => {
             setIsPlaying(false);
             setCurrentTime(0);
-            setProgress(0);
         };
 
         audio.addEventListener("timeupdate", updateProgress);
@@ -46,35 +50,43 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
             audio.removeEventListener("loadedmetadata", setAudioDuration);
             audio.removeEventListener("ended", handleEnded);
         };
+    }, [isSeeking]);
+
+    useEffect(() => {
+        return () => clearTimeout(audioTimerRef.current);
     }, []);
 
     const togglePlayPause = () => {
         if (audioRef.current) {
             if (isPlaying) {
+                // Pauzeren: meteen stoppen
+                clearTimeout(audioTimerRef.current);
                 audioRef.current.pause();
+                setIsPlaying(false);
             } else {
-                audioRef.current.play();
+                // afspelen sr: label/state direct updaten zodat screenreader "Afspelen" uitspreekt, audio start 1.5s later
+                setIsPlaying(true);
+                clearTimeout(audioTimerRef.current);
+                audioTimerRef.current = setTimeout(() => {
+                    audioRef.current?.play();
+                }, 1500);
             }
-            setIsPlaying(!isPlaying);
         }
     };
 
     const handleSeek = (e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const width = rect.width;
-        const percentage = x / width;
-        const newTime = percentage * duration;
-
+        const newTime = parseFloat(e.target.value);
         if (audioRef.current) {
             audioRef.current.currentTime = newTime;
             setCurrentTime(newTime);
-            setProgress(percentage * 100);
         }
     };
 
+    const handleSeekStart = () => setIsSeeking(true);
+    const handleSeekEnd = () => setIsSeeking(false);
+
     return (
-        <div className="w-full">
+        <div className="w-full space-y-4">
             <audio
                 ref={audioRef}
                 src={AudioName}
@@ -82,49 +94,57 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
                 className="hidden"
             />
 
-            {/* Progress balk */}
-            <div className="space-y-3">
-                {/* Tijdsweergave */}
-                <div className="flex justify-between text-sm text-gray-500">
-                    <span>{formatTime(currentTime)}</span>
-                    <span>{formatTime(duration)}</span>
-                </div>
+            {/* Tijdsweergave */}
+            <div className="flex justify-between text-sm text-gray-600" aria-hidden="true">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+            </div>
 
-                <div
-                    className="relative h-2 bg-gray-200 rounded-full cursor-pointer overflow-hidden"
-                    onClick={handleSeek}
+            {/* Slider */}
+            <div className="space-y-2">
+                <input
+                    type="range"
+                    min="0"
+                    max={duration || 0}
+                    value={currentTime}
+                    onChange={handleSeek}
+                    onMouseDown={handleSeekStart}
+                    onMouseUp={handleSeekEnd}
+                    onTouchStart={handleSeekStart}
+                    onTouchEnd={handleSeekEnd}
+                    aria-label="Audio voortgang"
+                    aria-valuetext={`${formatTimeSpoken(currentTime)} van ${formatTimeSpoken(duration)}`}
+                    className="w-full h-2 bg-gray-200 rounded-full cursor-pointer accent-[#7B5EA7]
+                        focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
+                    style={{
+                        background: `linear-gradient(to right, #7B5EA7 0%, #7B5EA7 ${percentage}%, #e5e7eb ${percentage}%, #e5e7eb 100%)`
+                    }}
+                />
+                <p className="sr-only">
+                    Gebruik de pijltjestoetsen om terug of vooruit te gaan.
+                </p>
+            </div>
+
+            {/* Play/Pause knop */}
+            <div className="flex justify-center pt-4">
+                <button
+                    onClick={togglePlayPause}
+                    aria-label={isPlaying ? "Pauzeren" : "Afspelen"}
+                    className="flex items-center justify-center w-16 h-16 rounded-full shadow-lg transition-all duration-200
+                        hover:shadow-xl
+                        focus:outline-none focus:ring-4 focus:ring-[#7B5EA7] focus:ring-offset-2"
+                    style={{ backgroundColor: '#7B5EA7', color: 'white' }}
                 >
-                    <div
-                        className="absolute h-full rounded-full transition-all duration-100"
-                        style={{
-                            width: `${progress}%`,
-                            backgroundColor: '#7B5EA7'
-                        }}
-                    />
-                </div>
-
-                {/* Play/Pause knop*/}
-                <div className="flex justify-center pt-4">
-                    <button
-                        onClick={togglePlayPause}
-                        aria-label={isPlaying ? "Pauzeren" : "Afspelen"}
-                        className="flex items-center justify-center w-16 h-16 rounded-full shadow-lg transition-all duration-200 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#7B5EA7] focus:ring-offset-2"
-                        style={{
-                            backgroundColor: '#7B5EA7',
-                            color: 'white'
-                        }}
-                    >
-                        {isPlaying ? (
-                            <svg className="w-14 h-14" fill="white" viewBox="0 0 24 24">
-                                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                            </svg>
-                        ) : (
-                            <svg className="w-14 h-14" fill="white" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z"/>
-                            </svg>
-                        )}
-                    </button>
-                </div>
+                    {isPlaying ? (
+                        <svg className="w-14 h-14" fill="white" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                        </svg>
+                    ) : (
+                        <svg className="w-14 h-14" fill="white" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    )}
+                </button>
             </div>
         </div>
     );

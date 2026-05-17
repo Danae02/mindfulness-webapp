@@ -10,7 +10,7 @@ function IntroCard({ exercise }) {
     return (
         <div className="mb-2">
             <p
-                className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 px-1"
+                className="text-xs font-semibold uppercase tracking-widest text-gray-600 mb-2 px-1"
                 id="intro-label"
             >
                 Begin hier
@@ -20,13 +20,13 @@ function IntroCard({ exercise }) {
                 className="flex items-center gap-4 p-4 bg-white rounded-xl hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
                 style={{ border: "2px solid #7B5EA7", textDecoration: "none" }}
             >
-                <span className="sr-only">{`Start introductie-oefening: ${exercise.exercise_name}`}</span>
+                <span className="sr-only">{`Introductie-oefening: ${exercise.exercise_name}. Klik om direct naar de oefening te gaan.`}</span>
                 <div className="flex-1 min-w-0" aria-hidden="true">
                     <p className="text-base font-bold" style={{ color: "#7B5EA7" }}>
                         {exercise.exercise_name}
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                        Altijd beschikbaar
+                        Klik om de oefening te starten
                     </p>
                 </div>
                 <span
@@ -89,7 +89,7 @@ export default function CourseList() {
     return (
         <>
             <h2 className="text-2xl font-bold text-darkGray mb-4" id="courses-heading">
-                Mindfulness oefeningen
+                <span lang="en">Mindfulness</span> oefeningen
             </h2>
 
             {introCourse && (
@@ -97,7 +97,7 @@ export default function CourseList() {
             )}
 
             {regularCourses.length > 0 && (
-                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 px-1 mt-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-600 mb-2 px-1 mt-4">
                     Vervolg delen
                 </p>
             )}

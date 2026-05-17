@@ -71,7 +71,7 @@ export default function Favorites() {
                             href={route('dashboard')}
                             className="inline-block mt-6 px-6 py-2 bg-[#7B5EA7] text-white rounded-lg hover:bg-[#6a4e8e] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7B5EA7]"
                         >
-                            Ga naar cursussen
+                            Ga terug naar oefeningen
                         </Link>
                     </div>
                 ) : (

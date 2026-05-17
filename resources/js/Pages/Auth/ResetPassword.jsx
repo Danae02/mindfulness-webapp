@@ -43,7 +43,12 @@ export default function ResetPassword({ token, email }) {
                 <input type="hidden" name="email" value={data.email}/>
 
                 {errors.email && (
-                    <div className="mb-4 text-sm font-medium text-red-600 bg-red-50 p-3 rounded-lg">
+                    <div
+                        className="mb-4 text-sm font-medium text-red-600 bg-red-50 p-3 rounded-lg"
+                        role="alert"
+                        aria-live="assertive"
+                    >
+                        <span className="sr-only">Fout: </span>
                         {errors.email}
                     </div>
                 )}
@@ -55,7 +60,7 @@ export default function ResetPassword({ token, email }) {
                     </p>
                 </div>
 
-                {/* Nieuw wachtwoord veld */}
+                {/* Nieuw wachtwoord */}
                 <div className="mt-4">
                     <div className="flex items-center gap-1 mb-1">
                         <InputLabel htmlFor="password" value="Nieuw wachtwoord"/>
@@ -63,9 +68,13 @@ export default function ResetPassword({ token, email }) {
                         <span className="sr-only">(verplicht veld)</span>
                     </div>
 
+                    <span id="new-password-hint" className="sr-only">
+                        Kies een sterk nieuw wachtwoord
+                    </span>
+
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                 <path fillRule="evenodd"
                                       d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
                                       clipRule="evenodd"/>
@@ -83,14 +92,25 @@ export default function ResetPassword({ token, email }) {
                             onChange={(e) => setData('password', e.target.value)}
                             required
                             aria-required="true"
-                            placeholder="Kies een sterk wachtwoord"
+                            aria-invalid={errors.password ? 'true' : undefined}
+                            aria-describedby={
+                                ['new-password-hint', errors.password ? 'new-password-error' : null]
+                                    .filter(Boolean).join(' ')
+                            }
                         />
                     </div>
 
-                    <InputError message={errors.password} className="mt-2"/>
+                    {errors.password && (
+                        <InputError
+                            id="new-password-error"
+                            message={errors.password}
+                            className="mt-2"
+                            role="alert"
+                        />
+                    )}
                 </div>
 
-                {/* Herhaal wachtwoord veld */}
+                {/* Herhaal wachtwoord */}
                 <div className="mt-4">
                     <div className="flex items-center gap-1 mb-1">
                         <InputLabel htmlFor="password_confirmation" value="Herhaal wachtwoord"/>
@@ -98,9 +118,13 @@ export default function ResetPassword({ token, email }) {
                         <span className="sr-only">(verplicht veld)</span>
                     </div>
 
+                    <span id="new-password-confirm-hint" className="sr-only">
+                        Voer hetzelfde wachtwoord nogmaals in
+                    </span>
+
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                 <path fillRule="evenodd"
                                       d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
                                       clipRule="evenodd"/>
@@ -117,11 +141,22 @@ export default function ResetPassword({ token, email }) {
                             onChange={(e) => setData('password_confirmation', e.target.value)}
                             required
                             aria-required="true"
-                            placeholder="Herhaal je wachtwoord"
+                            aria-invalid={errors.password_confirmation ? 'true' : undefined}
+                            aria-describedby={
+                                ['new-password-confirm-hint', errors.password_confirmation ? 'new-password-confirmation-error' : null]
+                                    .filter(Boolean).join(' ')
+                            }
                         />
                     </div>
 
-                    <InputError message={errors.password_confirmation} className="mt-2"/>
+                    {errors.password_confirmation && (
+                        <InputError
+                            id="new-password-confirmation-error"
+                            message={errors.password_confirmation}
+                            className="mt-2"
+                            role="alert"
+                        />
+                    )}
                 </div>
 
                 <div className="mt-4 text-sm text-gray-500">
@@ -135,8 +170,9 @@ export default function ResetPassword({ token, email }) {
                         type="submit"
                         disabled={processing}
                         className="w-full justify-center py-3 text-base font-semibold bg-[#6c4092] hover:bg-[#5a337a] text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2 disabled:opacity-50"
+                        aria-busy={processing}
                     >
-                        Wachtwoord herstellen
+                        {processing ? 'Bezig met herstellen...' : 'Wachtwoord herstellen'}
                     </button>
                 </div>
 

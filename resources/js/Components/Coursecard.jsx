@@ -9,8 +9,8 @@ export default function CourseCard({ course, onClick, onKeyDown }) {
                 className="flex items-center gap-4 p-4 bg-white rounded-xl"
                 style={{
                     border: "2px solid #D1D5DB",
-                    opacity: 0.65,
                     cursor: "not-allowed",
+                    backgroundColor: "#F9FAFB",
                 }}
                 role="listitem"
             >
@@ -25,10 +25,10 @@ export default function CourseCard({ course, onClick, onKeyDown }) {
                     <LockIcon className="w-7 h-7 text-gray-400" />
                 </div>
                 <div className="flex-1 min-w-0" aria-hidden="true">
-                    <p className="text-base font-bold text-gray-600">
+                    <p className="text-base font-bold text-gray-500">
                         {course.course_name}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-500">
                         {course.available_label || "Nog niet beschikbaar"}
                     </p>
                 </div>
@@ -46,7 +46,7 @@ export default function CourseCard({ course, onClick, onKeyDown }) {
                 onKeyDown={(e) => onKeyDown(e, course)}
                 tabIndex={0}
                 role="button"
-                aria-label={`Open deel: ${course.course_name}, ${course.exercises?.length || 0} oefeningen`}
+                aria-label={`${course.course_name} – ${course.exercises?.length || 0} ${course.exercises?.length === 1 ? 'oefening' : 'oefeningen'}. Klik om de oefeningen te bekijken.`}
             >
                 <div
                     className="flex items-center justify-center w-14 h-14 rounded-lg flex-shrink-0"
@@ -72,13 +72,22 @@ export default function CourseCard({ course, onClick, onKeyDown }) {
                         </p>
                     )}
                     <p className="text-sm text-gray-600 mt-0.5">
-                        {course.exercises?.length || 0} oefeningen
+                        {course.exercises?.length || 0} {course.exercises?.length === 1 ? 'oefening' : 'oefeningen'}
+                    </p>
+                    <p className="text-sm mt-1.5 font-semibold" style={{ color: "#7B5EA7" }}>
+                        Bekijk oefeningen →
                     </p>
                 </div>
 
-                <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <div
+                    className="flex items-center justify-center w-9 h-9 rounded-lg flex-shrink-0"
+                    style={{ backgroundColor: "#7B5EA7" }}
+                    aria-hidden="true"
+                >
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
             </div>
         </div>
     );

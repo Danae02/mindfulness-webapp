@@ -55,10 +55,15 @@ export default function Login({ status, canResetPassword }) {
                     <AccessibilityButton variant="button" />
                 </div>
 
+                {/* E-mailadres */}
                 <div>
                     <div className="flex items-center gap-1 mb-1">
                         <InputLabel htmlFor="email" value="E-mailadres" />
                     </div>
+
+                    <span id="email-hint" className="sr-only">
+                        E-mailadres invoerveld
+                    </span>
 
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -77,12 +82,18 @@ export default function Login({ status, canResetPassword }) {
                             onChange={(e) => setData('email', e.target.value)}
                             required
                             aria-required="true"
+                            aria-invalid={errors.email ? 'true' : undefined}
+                            aria-describedby={
+                                ['email-hint', errors.email ? 'email-error' : null]
+                                    .filter(Boolean).join(' ')
+                            }
                             placeholder="jouw@email.nl"
                         />
                     </div>
 
                     {errors.email && (
                         <InputError
+                            id="email-error"
                             message={errors.email}
                             className="mt-2"
                             role="alert"
@@ -91,10 +102,15 @@ export default function Login({ status, canResetPassword }) {
                     )}
                 </div>
 
+                {/* Wachtwoord */}
                 <div className="mt-3">
                     <div className="flex items-center gap-1 mb-1">
                         <InputLabel htmlFor="password" value="Wachtwoord" />
                     </div>
+
+                    <span id="password-hint" className="sr-only">
+                        Wachtwoord invoerveld
+                    </span>
 
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -113,7 +129,12 @@ export default function Login({ status, canResetPassword }) {
                             onChange={(e) => setData('password', e.target.value)}
                             required
                             aria-required="true"
-                            placeholder="••••••••••"
+                            aria-invalid={errors.password ? 'true' : undefined}
+                            aria-describedby={
+                                ['password-hint', errors.password ? 'password-error' : null]
+                                    .filter(Boolean).join(' ')
+                            }
+                            placeholder="Jouw wachtwoord"
                         />
 
                         <button
@@ -138,6 +159,7 @@ export default function Login({ status, canResetPassword }) {
 
                     {errors.password && (
                         <InputError
+                            id="password-error"
                             message={errors.password}
                             className="mt-2"
                             role="alert"

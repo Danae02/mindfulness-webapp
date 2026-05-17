@@ -54,12 +54,17 @@ export default function Register() {
                     <AccessibilityButton variant="button" />
                 </div>
 
+                {/* Voornaam */}
                 <div>
                     <div className="flex items-center gap-1 mb-1">
                         <InputLabel htmlFor="name" value="Voornaam" />
                         <span className="text-red-600 text-sm font-bold" aria-hidden="true">*</span>
                         <span className="sr-only">(verplicht)</span>
                     </div>
+
+                    <span id="name-hint" className="sr-only">
+                        Voornaam invoerveld
+                    </span>
 
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -86,8 +91,11 @@ export default function Register() {
                             onChange={(e) => setData('name', e.target.value)}
                             required
                             aria-required="true"
-                            aria-invalid={errors.name ? 'true' : 'false'}
-                            aria-describedby={errors.name ? 'name-error' : undefined}
+                            aria-invalid={errors.name ? 'true' : undefined}
+                            aria-describedby={
+                                ['name-hint', errors.name ? 'name-error' : null]
+                                    .filter(Boolean).join(' ')
+                            }
                             placeholder="Jouw voornaam"
                         />
                     </div>
@@ -102,13 +110,17 @@ export default function Register() {
                     )}
                 </div>
 
-                {/* E-mailadres veld */}
+                {/* E-mailadres veld*/}
                 <div className="mt-3">
                     <div className="flex items-center gap-1 mb-1">
                         <InputLabel htmlFor="email" value="E-mailadres" />
                         <span className="text-red-600 text-sm font-bold" aria-hidden="true">*</span>
                         <span className="sr-only">(verplicht)</span>
                     </div>
+
+                    <span id="register-email-hint" className="sr-only">
+                        E-mailadres invoerveld
+                    </span>
 
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -134,8 +146,11 @@ export default function Register() {
                             onChange={(e) => setData('email', e.target.value)}
                             required
                             aria-required="true"
-                            aria-invalid={errors.email ? 'true' : 'false'}
-                            aria-describedby={errors.email ? 'email-error' : undefined}
+                            aria-invalid={errors.email ? 'true' : undefined}
+                            aria-describedby={
+                                ['register-email-hint', errors.email ? 'email-error' : null]
+                                    .filter(Boolean).join(' ')
+                            }
                             placeholder="jouw@email.nl"
                         />
                     </div>
@@ -150,13 +165,17 @@ export default function Register() {
                     )}
                 </div>
 
-                {/* Wachtwoord veld */}
+                {/* Wachtwoord */}
                 <div className="mt-3">
                     <div className="flex items-center gap-1 mb-1">
                         <InputLabel htmlFor="password" value="Wachtwoord" />
                         <span className="text-red-600 text-sm font-bold" aria-hidden="true">*</span>
                         <span className="sr-only">(verplicht)</span>
                     </div>
+
+                    <span id="password-hint" className="sr-only">
+                        Wachtwoord invoerveld
+                    </span>
 
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -181,9 +200,12 @@ export default function Register() {
                             onChange={(e) => setData('password', e.target.value)}
                             required
                             aria-required="true"
-                            aria-invalid={errors.password ? 'true' : 'false'}
-                            aria-describedby={errors.password ? 'password-error' : undefined}
-                            placeholder="••••••••••"
+                            aria-invalid={errors.password ? 'true' : undefined}
+                            aria-describedby={
+                                ['password-hint', errors.password ? 'password-error' : null]
+                                    .filter(Boolean).join(' ')
+                            }
+                            placeholder="Jouw wachtwoord"
                         />
                     </div>
 
@@ -197,7 +219,7 @@ export default function Register() {
                     )}
                 </div>
 
-                {/* Herhaal wachtwoord veld */}
+                {/* Herhaal wachtwoord */}
                 <div className="mt-3">
                     <div className="flex items-center gap-1 mb-1">
                         <InputLabel htmlFor="password_confirmation" value="Herhaal wachtwoord" />
@@ -205,9 +227,12 @@ export default function Register() {
                         <span className="sr-only">(verplicht)</span>
                     </div>
 
+                    <span id="password-confirm-hint" className="sr-only">
+                        Wachtwoord bevestiging invoerveld
+                    </span>
+
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            {/* DECORATIEF ICON - GENEGEERD */}
                             <svg
                                 className="w-5 h-5 text-gray-400"
                                 fill="currentColor"
@@ -228,15 +253,18 @@ export default function Register() {
                             onChange={(e) => setData('password_confirmation', e.target.value)}
                             required
                             aria-required="true"
-                            aria-invalid={errors.password_confirmation ? 'true' : 'false'}
-                            aria-describedby={errors.password_confirmation ? 'password_confirmation-error' : undefined}
-                            placeholder="••••••••••"
+                            aria-invalid={errors.password_confirmation ? 'true' : undefined}
+                            aria-describedby={
+                                ['password-confirm-hint', errors.password_confirmation ? 'password-confirmation-error' : null]
+                                    .filter(Boolean).join(' ')
+                            }
+                            placeholder="Herhaal jouw wachtwoord"
                         />
                     </div>
 
                     {errors.password_confirmation && (
                         <InputError
-                            id="password_confirmation-error"
+                            id="password-confirmation-error"
                             message={errors.password_confirmation}
                             className="mt-2"
                             role="alert"
@@ -250,19 +278,18 @@ export default function Register() {
                     Verplicht veld
                 </div>
 
-                {/* Submit button */}
                 <div className="mt-4">
                     <button
                         type="submit"
                         disabled={processing}
                         className="w-full justify-center py-2.5 text-base font-semibold bg-[#6c4092] hover:bg-[#5a337a] text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2 disabled:opacity-50"
+                        aria-busy={processing}
                     >
-                        Account aanmaken
+                        {processing ? 'Bezig met aanmaken...' : 'Account aanmaken'}
                     </button>
                 </div>
             </form>
 
-            {/* Divider en login link */}
             <div className="mt-4 text-center">
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">

@@ -6,7 +6,7 @@ export default function CompletionScreen({ userName, onBack }) {
         <div className="space-y-6">
             <div className="text-center">
                 <h1 className="text-2xl font-bold text-white px-8 py-6 rounded-lg" style={{ backgroundColor: '#7B5EA7' }}>
-                    Super!
+                    Oefening klaar!
                 </h1>
             </div>
 
@@ -25,6 +25,7 @@ export default function CompletionScreen({ userName, onBack }) {
                 {/* Lees voor knop */}
                 <div className="mb-4">
                     <AudioButton
+                        hidden={true}
                         audioFile="/audio/ElevenLabs_goedgedaanwoordje.mp3"
                         label="Lees voor"
                         aria-label="Lees de felicitatieboodschap voor"

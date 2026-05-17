@@ -51,13 +51,6 @@ export default function ForgotPassword({ status }) {
                     <AccessibilityButton variant="button"/>
                 </div>
 
-                <div className="mb-3 flex justify-center">
-                    <AudioButton
-                        audioFile={audioFilePath}
-                        label="Lees voor"
-                    />
-                </div>
-
                 <div
                     className="mb-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border-2 border-gray-400"
                     role="note"
@@ -69,6 +62,13 @@ export default function ForgotPassword({ status }) {
                     <p className="mt-2 text-xs text-gray-700">
                         Tip: Check je spam-map als je de e-mail niet hebt ontvangen.
                     </p>
+                    <div className="mt-3 flex items-center gap-2">
+                        <span className="text-xs text-gray-500">Laat dit voorlezen:</span>
+                        <AudioButton
+                            audioFile={audioFilePath}
+                            label="Lees voor"
+                        />
+                    </div>
                 </div>
 
                 {status && (
