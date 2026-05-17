@@ -1,207 +1,125 @@
-import React, { useState, useEffect } from "react";
-import ToolTip from "@/Components/ToolTip.jsx";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { Link } from "@inertiajs/react";
+import CourseCard  from "@/Components/CourseCard";
+import ClientCourseModal from "@/Components/ClientCourseModal";
 import LoadingIndicator from "@/Components/LoadingIndicator.jsx";
 
-export default function ResearchSettings({
-                                             settings = null,
-                                             loading = false,
-                                             error = null,
-                                             onSave = async () => {},
-                                         }) {
-    const [mode, setMode] = useState("per_session");
-    const [question, setQuestion] = useState("");
-    const [answers, setAnswers] = useState(Array(5).fill(""));
-    const [isEditing, setIsEditing] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [saveError, setSaveError] = useState(null);
-
-    // Initialize from props when settings loads
-    useEffect(() => {
-        if (settings && Array.isArray(settings)) {
-            const modeSetting = settings.find((setting) => setting.key_name === "mode");
-            if (modeSetting) {
-                setMode(modeSetting.value);
-            }
-
-            const questionSetting = settings.find((setting) => setting.question);
-            if (questionSetting) {
-                setQuestion(questionSetting.question);
-            }
-
-            const answersSetting = settings.find((setting) => setting.answers);
-            if (answersSetting) {
-                try {
-                    const parsedAnswers = typeof answersSetting.answers === 'string'
-                        ? JSON.parse(answersSetting.answers)
-                        : answersSetting.answers;
-                    setAnswers(Array.isArray(parsedAnswers) ? parsedAnswers : Array(5).fill(""));
-                } catch (e) {
-                    setAnswers(Array(5).fill(""));
-                }
-            }
-        }
-    }, [settings]);
-
-    const handleSave = async () => {
-        setSaveError(null);
-        setIsSaving(true);
-
-        const payload = {
-            key_name: "mode",
-            value: mode,
-            question: mode === "per_session" ? question : null,
-            answers: mode === "per_session" ? answers : [],
-        };
-
-        try {
-            await onSave(payload);
-            setIsEditing(false);
-        } catch (err) {
-            console.error("Fout bij het opslaan van de instelling:", err);
-            setSaveError("Er ging iets mis bij het opslaan.");
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    const handleAnswerChange = (index, value) => {
-        setAnswers((prev) => {
-            const updated = [...prev];
-            updated[index] = value;
-            return updated;
-        });
-    };
-
-    if (loading) return <LoadingIndicator message="Instellingen laden..." />;
-    if (error) return <div className="text-red-600 p-4">{error}</div>;
-
+// Vaste introductieoefening is altijd bovenaan en altijd beschikbaar
+function IntroCard({ exercise }) {
     return (
-        <div className="max-w-lg mx-auto p-6 bg-white rounded-xl shadow-card">
-            <h1 className="text-3xl font-heading text-darkGray mb-4">Onderzoeks Instellingen</h1>
-            <p className="text-lg text-darkGray mb-6">
-                Huidge instelling: <strong>{mode === "per_session" ? "Per Sessie" : "Per Oefening"}</strong>
+        <div className="mb-2">
+            <p
+                className="text-xs font-semibold uppercase tracking-widest text-gray-600 mb-2 px-1"
+                id="intro-label"
+            >
+                Begin hier
             </p>
-
-            {saveError && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
-                    {saveError}
-                </div>
-            )}
-
-            {/* Mode Selectie */}
-            <div className="mb-6">
-                <label className="flex items-center">
-                    <span className="mr-2">Mode</span>
-                    <ToolTip>
-                        Kies de modus waarin de functie werkt.
-                        <strong> Per sessie</strong> houdt gegevens bij per sessie,
-                        terwijl <strong>per oefening</strong> de gegevens voor elke oefening opslaat.
-                    </ToolTip>
-                </label>
-                <select
-                    value={mode}
-                    onChange={(e) => setMode(e.target.value)}
-                    disabled={!isEditing}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                >
-                    <option value="per_session">Per Sessie</option>
-                    <option value="per_exercise">Per Oefening</option>
-                </select>
-            </div>
-
-            {/* Vragen en antwoorden alleen tonen als de modus 'per_session' is */}
-            {mode === "per_session" && (
-                <div>
-                    {!isEditing ? (
-                        <div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Vraag</label>
-                                <p className="mt-1 text-gray-900">{question || "Geen vraag ingesteld"}</p>
-                            </div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Antwoorden (1-5)</label>
-                                {answers && answers.length > 0 ? (
-                                    <div className="mt-1 space-y-1">
-                                        {answers.map((answer, index) => (
-                                            <p key={index} className="text-gray-900">
-                                                {index + 1}. {answer || "(leeg)"}
-                                            </p>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="mt-1 text-gray-500">Geen antwoorden ingesteld</p>
-                                )}
-                            </div>
-                            <button
-                                onClick={() => setIsEditing(true)}
-                                className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                            >
-                                Bewerken
-                            </button>
-                        </div>
-                    ) : (
-                        // Bewerkingselementen
-                        <div>
-                            <div className="mb-4">
-                                <label htmlFor="form-question" className="block text-sm font-medium text-gray-700">
-                                    Vraag
-                                </label>
-                                <input
-                                    type="text"
-                                    id="form-question"
-                                    value={question}
-                                    onChange={(e) => setQuestion(e.target.value)}
-                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="Bijvoorbeeld: Hoe moeilijk vond je deze oefening?"
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Antwoorden (1-5)
-                                </label>
-                                <div className="space-y-2">
-                                    {answers.map((answer, index) => (
-                                        <input
-                                            key={index}
-                                            type="text"
-                                            value={answer}
-                                            onChange={(e) => handleAnswerChange(index, e.target.value)}
-                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder={`Antwoord ${index + 1}`}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={handleSave}
-                                    disabled={isSaving}
-                                    className="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    {isSaving ? "Bezig..." : "Opslaan"}
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setIsEditing(false);
-                                        setSaveError(null);
-                                    }}
-                                    className="flex-1 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
-                                >
-                                    Annuleren
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {mode === "per_exercise" && !isEditing && (
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                        In de modus "Per Oefening" worden vragen per oefening beheerd.
+            <Link
+                href={route("exercise.show", { id: exercise.id })}
+                className="flex items-center gap-4 p-4 bg-white rounded-xl hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
+                style={{ border: "2px solid #7B5EA7", textDecoration: "none" }}
+            >
+                <span className="sr-only">{`Introductie-oefening: ${exercise.exercise_name}. Klik om direct naar de oefening te gaan.`}</span>
+                <div className="flex-1 min-w-0" aria-hidden="true">
+                    <p className="text-base font-bold" style={{ color: "#7B5EA7" }}>
+                        {exercise.exercise_name}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                        Klik om de oefening te starten
                     </p>
                 </div>
-            )}
+                <span
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-sm font-semibold flex-shrink-0"
+                    style={{ backgroundColor: "#7B5EA7" }}
+                    aria-hidden="true"
+                >
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M8 5v14l11-7z" />
+                    </svg>
+                    Start
+                </span>
+            </Link>
         </div>
+    );
+}
+
+export default function CourseList() {
+    const [courses,        setCourses]        = useState([]);
+    const [selectedCourse, setSelectedCourse] = useState(null);
+    const [showModal,      setShowModal]      = useState(false);
+    const [loading,        setLoading]        = useState(true);
+
+    useEffect(() => {
+        axios.get(route("courses.get.all"))
+            .then(res => setCourses(res.data))
+            .catch(err => console.error("Failed to fetch courses:", err))
+            .finally(() => setLoading(false));
+    }, []);
+
+    const handleCardClick = async (course) => {
+        if (!course.available) return;
+        try {
+            const response = await axios.get(route("courses.details", { id: course.id }));
+            setSelectedCourse(response.data);
+            setShowModal(true);
+        } catch (error) {
+            console.error("Failed to fetch course details:", error);
+        }
+    };
+
+    const handleKeyDown = (e, course) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleCardClick(course);
+        }
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setSelectedCourse(null);
+    };
+
+    //if (loading) return <LoadingSpinner />;
+    if (loading) return <LoadingIndicator message="Oefeningen laden…" />;
+
+    const introCourse    = courses.find(c => c.is_intro);
+    const regularCourses = courses.filter(c => !c.is_intro);
+
+    return (
+        <>
+            <h2 className="text-2xl font-bold text-darkGray mb-4" id="courses-heading">
+                <span lang="en">Mindfulness</span> oefeningen
+            </h2>
+
+            {introCourse && (
+                <IntroCard exercise={introCourse.exercises[0]} />
+            )}
+
+            {regularCourses.length > 0 && (
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-600 mb-2 px-1 mt-4">
+                    Vervolg delen
+                </p>
+            )}
+
+            {regularCourses.length === 0 && !introCourse && (
+                <p className="text-gray-400 italic text-sm">Nog geen delen beschikbaar.</p>
+            )}
+
+            <div className="flex flex-col gap-3" role="list" aria-labelledby="courses-heading">
+                {regularCourses.map((course) => (
+                    <CourseCard
+                        key={course.id}
+                        course={course}
+                        onClick={handleCardClick}
+                        onKeyDown={handleKeyDown}
+                    />
+                ))}
+            </div>
+
+            {showModal && selectedCourse && (
+                <ClientCourseModal course={selectedCourse} onClose={closeModal} />
+            )}
+        </>
     );
 }
