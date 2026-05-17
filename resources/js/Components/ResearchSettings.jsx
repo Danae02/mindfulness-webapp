@@ -1,35 +1,51 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
 import ToolTip from "@/Components/ToolTip.jsx";
+import LoadingIndicator from "@/Components/LoadingIndicator.jsx";
 
-export default function ResearchSettings() {
-    const [mode, setMode] = useState("per_session"); // Standaard op 'per_session'
-    const [question, setQuestion] = useState(""); // Vraag
-    const [answers, setAnswers] = useState(Array(5).fill("")); // 5 lege antwoorden
-    const [isEditing, setIsEditing] = useState(false); // Voor de bewerkingsmodus
+export default function ResearchSettings({
+                                             settings = null,
+                                             loading = false,
+                                             error = null,
+                                             onSave = async () => {},
+                                         }) {
+    const [mode, setMode] = useState("per_session");
+    const [question, setQuestion] = useState("");
+    const [answers, setAnswers] = useState(Array(5).fill(""));
+    const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveError, setSaveError] = useState(null);
 
+    // Initialize from props when settings loads
     useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const response = await axios.get(route("researchsettings.getallsettings"));
-
-                const modeSetting = response.data.find((setting) => setting.key_name === "mode");
-                if (modeSetting) {
-                    setMode(modeSetting.value);
-                }
-                const questionSetting = response.data.find((setting) => setQuestion(setting.question))
-                const answersSetting = response.data.find((setting) => setAnswers(JSON.parse(setting.answers)));
-
-
-            } catch (err) {
-                console.error("Fout bij het ophalen van de instellingen:", err);
+        if (settings && Array.isArray(settings)) {
+            const modeSetting = settings.find((setting) => setting.key_name === "mode");
+            if (modeSetting) {
+                setMode(modeSetting.value);
             }
-        };
 
-        fetchSettings();
-    }, []);
+            const questionSetting = settings.find((setting) => setting.question);
+            if (questionSetting) {
+                setQuestion(questionSetting.question);
+            }
+
+            const answersSetting = settings.find((setting) => setting.answers);
+            if (answersSetting) {
+                try {
+                    const parsedAnswers = typeof answersSetting.answers === 'string'
+                        ? JSON.parse(answersSetting.answers)
+                        : answersSetting.answers;
+                    setAnswers(Array.isArray(parsedAnswers) ? parsedAnswers : Array(5).fill(""));
+                } catch (e) {
+                    setAnswers(Array(5).fill(""));
+                }
+            }
+        }
+    }, [settings]);
 
     const handleSave = async () => {
+        setSaveError(null);
+        setIsSaving(true);
+
         const payload = {
             key_name: "mode",
             value: mode,
@@ -38,13 +54,13 @@ export default function ResearchSettings() {
         };
 
         try {
-            const response = await axios.post(route("researchsettings.update"), payload);
-            console.log("Instelling succesvol geüpdatet:", response.data);
-            alert("Instelling succesvol opgeslagen!");
-            setIsEditing(false); // Verlaat bewerkingsmodus na opslaan
-        } catch (error) {
-            console.error("Fout bij het opslaan van de instelling:", error.response?.data || error.message);
-            alert("Er ging iets mis bij het opslaan.");
+            await onSave(payload);
+            setIsEditing(false);
+        } catch (err) {
+            console.error("Fout bij het opslaan van de instelling:", err);
+            setSaveError("Er ging iets mis bij het opslaan.");
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -56,12 +72,21 @@ export default function ResearchSettings() {
         });
     };
 
+    if (loading) return <LoadingIndicator message="Instellingen laden..." />;
+    if (error) return <div className="text-red-600 p-4">{error}</div>;
+
     return (
         <div className="max-w-lg mx-auto p-6 bg-white rounded-xl shadow-card">
             <h1 className="text-3xl font-heading text-darkGray mb-4">Onderzoeks Instellingen</h1>
             <p className="text-lg text-darkGray mb-6">
-                Huidige instelling: <strong>{mode === "per_session" ? "Per Sessie" : "Per Oefening"}</strong>
+                Huidge instelling: <strong>{mode === "per_session" ? "Per Sessie" : "Per Oefening"}</strong>
             </p>
+
+            {saveError && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+                    {saveError}
+                </div>
+            )}
 
             {/* Mode Selectie */}
             <div className="mb-6">
@@ -76,7 +101,8 @@ export default function ResearchSettings() {
                 <select
                     value={mode}
                     onChange={(e) => setMode(e.target.value)}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    disabled={!isEditing}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
                     <option value="per_session">Per Sessie</option>
                     <option value="per_exercise">Per Oefening</option>
@@ -90,28 +116,31 @@ export default function ResearchSettings() {
                         <div>
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700">Vraag</label>
-                                <p>{question || "Geen vraag ingesteld"}</p>
+                                <p className="mt-1 text-gray-900">{question || "Geen vraag ingesteld"}</p>
                             </div>
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700">Antwoorden (1-5)</label>
-                                {answers.length > 0 ? (
-                                    answers.map((answer, index) => (
-                                        <p key={index}>Antwoord {index + 1}: {answer}</p>
-                                    ))
+                                {answers && answers.length > 0 ? (
+                                    <div className="mt-1 space-y-1">
+                                        {answers.map((answer, index) => (
+                                            <p key={index} className="text-gray-900">
+                                                {index + 1}. {answer || "(leeg)"}
+                                            </p>
+                                        ))}
+                                    </div>
                                 ) : (
-                                    <p>Geen antwoorden ingesteld</p>
+                                    <p className="mt-1 text-gray-500">Geen antwoorden ingesteld</p>
                                 )}
-
                             </div>
                             <button
-                                onClick={() => setIsEditing(true)} // Zet de bewerkingsmodus aan
-                                className="w-full px-4 py-2 bg-blue-500 text-white rounded"
+                                onClick={() => setIsEditing(true)}
+                                className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                             >
                                 Bewerken
                             </button>
                         </div>
                     ) : (
-                        // Bewerkingselementen tonen
+                        // Bewerkingselementen
                         <div>
                             <div className="mb-4">
                                 <label htmlFor="form-question" className="block text-sm font-medium text-gray-700">
@@ -127,32 +156,50 @@ export default function ResearchSettings() {
                                 />
                             </div>
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Antwoorden (1-5)</label>
-                                {answers.map((answer, index) => (
-                                    <input
-                                        key={index}
-                                        type="text"
-                                        value={answer}
-                                        onChange={(e) => handleAnswerChange(index, e.target.value)}
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder={`Antwoord ${index + 1}`}
-                                    />
-                                ))}
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Antwoorden (1-5)
+                                </label>
+                                <div className="space-y-2">
+                                    {answers.map((answer, index) => (
+                                        <input
+                                            key={index}
+                                            type="text"
+                                            value={answer}
+                                            onChange={(e) => handleAnswerChange(index, e.target.value)}
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder={`Antwoord ${index + 1}`}
+                                        />
+                                    ))}
+                                </div>
                             </div>
-                            <button
-                                onClick={handleSave}
-                                className="w-full px-4 py-2 bg-green-500 text-white rounded"
-                            >
-                                Opslaan
-                            </button>
-                            <button
-                                onClick={() => setIsEditing(false)} // Zet de bewerkingsmodus uit
-                                className="w-full mt-2 px-4 py-2 bg-gray-500 text-white rounded"
-                            >
-                                Annuleren
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleSave}
+                                    disabled={isSaving}
+                                    className="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    {isSaving ? "Bezig..." : "Opslaan"}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsEditing(false);
+                                        setSaveError(null);
+                                    }}
+                                    className="flex-1 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                                >
+                                    Annuleren
+                                </button>
+                            </div>
                         </div>
                     )}
+                </div>
+            )}
+
+            {mode === "per_exercise" && !isEditing && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                        In de modus "Per Oefening" worden vragen per oefening beheerd.
+                    </p>
                 </div>
             )}
         </div>
