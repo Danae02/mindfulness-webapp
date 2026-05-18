@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Services\EmailEncryptionService;
+use App\Services\FindUserByEmailService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -13,7 +13,7 @@ use Inertia\Response;
 
 class PasswordResetLinkController extends Controller
 {
-    public function __construct(private EmailEncryptionService $emailEncryption) {}
+    public function __construct(private FindUserByEmailService $findUserByEmail) {}
 
     /**
      * Display the password reset link request view.
@@ -34,8 +34,7 @@ class PasswordResetLinkController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $emailIndex = $this->emailEncryption->blindIndex($request->email);
-        $user = User::where('email_index', $emailIndex)->first();
+        $user = $this->findUserByEmail->find($request->email);
 
         if (!$user) {
             return back()->withErrors(['email' => 'Er is geen account gevonden met dit e-mailadres.']);

@@ -1,17 +1,6 @@
 import { useState } from "react";
+import { normalizeFeeling, calculateDifference } from "@/Utils/feelingNormalization.js";
 import ScatterChart from "@/Components/ScatterChart.jsx";
-
-function normalizeFeeling(value, scale = 5) {
-    if (value == null || scale <= 1) return null;
-    return Math.round((value - 1) / (scale - 1) * 100);
-}
-
-function calculateDifference(feelingBefore, feelingAfter, scale = 5) {
-    const before = normalizeFeeling(feelingBefore, scale);
-    const after  = normalizeFeeling(feelingAfter, scale);
-    if (before === null || after === null) return null;
-    return after - before;
-}
 
 export default function LogDurationToDifference({
                                                     exerciseNames = [],

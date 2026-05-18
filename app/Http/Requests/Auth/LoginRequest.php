@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
-use App\Services\EmailEncryptionService;
+use App\Services\FindUserByEmailService;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Hash;
@@ -14,7 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
 {
-    public function __construct(private EmailEncryptionService $emailEncryption)
+    public function __construct(private FindUserByEmailService $findUserByEmail)
     {
         parent::__construct();
     }
@@ -49,8 +49,7 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        $emailIndex = $this->emailEncryption->blindIndex($this->email);
-        $user = User::where('email_index', $emailIndex)->first();
+        $user = $this->findUserByEmail->find($this->email);
 
         if (!$user || !Hash::check($this->password, $user->password)) {
             RateLimiter::hit($this->throttleKey());
