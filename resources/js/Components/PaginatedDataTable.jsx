@@ -34,6 +34,7 @@ export default function PaginatedDataTable({
                                                linkForPagination,
                                                researchGroups = [],
                                                exercises = [],
+                                               userRole = null,
                                            }) {
     const [dataPoints, setDataPoints] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -46,11 +47,12 @@ export default function PaginatedDataTable({
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
 
-    const [confirmDelete, setConfirmDelete] = useState(null); // { log_id, exercise_name }
+    const [confirmDelete, setConfirmDelete] = useState(null);
     const [deleteError, setDeleteError] = useState(null);
 
-    // Ref voor aria-live statusmelding (paginawissel, filterresultaat)
     const statusRef = useRef(null);
+
+    const canDelete = userRole === 1;
 
     const fetchData = useCallback(
         (page) => {
@@ -124,7 +126,7 @@ export default function PaginatedDataTable({
         "Gevoel voor",
         "Gevoel na",
         "Verschil",
-        "",
+        ...(canDelete ? [""] : []),
     ];
 
     return (
@@ -192,9 +194,9 @@ export default function PaginatedDataTable({
                                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
                             >
                                 <option value="">Alle oefeningen</option>
-                                {exercises.map((ex) => (
-                                    <option key={ex.id} value={ex.id}>
-                                        {ex.exercise_name}
+                                {exercises.map((e) => (
+                                    <option key={e.id} value={e.id}>
+                                        {e.exercise_name}
                                     </option>
                                 ))}
                             </select>
@@ -202,10 +204,7 @@ export default function PaginatedDataTable({
                     )}
 
                     <div>
-                        <label
-                            htmlFor="filter-date-from"
-                            className="block text-xs text-gray-600 mb-1"
-                        >
+                        <label htmlFor="filter-date-from" className="block text-xs text-gray-600 mb-1">
                             Van
                         </label>
                         <input
@@ -218,10 +217,7 @@ export default function PaginatedDataTable({
                     </div>
 
                     <div>
-                        <label
-                            htmlFor="filter-date-to"
-                            className="block text-xs text-gray-600 mb-1"
-                        >
+                        <label htmlFor="filter-date-to" className="block text-xs text-gray-600 mb-1">
                             Tot
                         </label>
                         <input
@@ -236,7 +232,11 @@ export default function PaginatedDataTable({
                     {hasFilters && (
                         <button
                             onClick={clearFilters}
-                            className="text-xs text-purple-600 underline self-end pb-2"
+                            className="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
+                            style={{
+                                backgroundColor: "#f0f0f0",
+                                color: "#666",
+                            }}
                         >
                             Filters wissen
                         </button>
@@ -246,80 +246,59 @@ export default function PaginatedDataTable({
 
             {loading ? (
                 <LoadingIndicator message="Datapunten laden..." />
-            ) : filtered.length === 0 ? (
-                <div className="text-center py-8 text-gray-700">
-                    Geen data gevonden
-                </div>
             ) : (
                 <>
-                    <div
-                        className="overflow-x-auto rounded-xl border-2 border-gray-300 shadow-sm"
-                        tabIndex={0}
-                        role="region"
-                        aria-label="Datapunten tabel"
-                    >
-                        <table className="min-w-full divide-y divide-gray-200 text-sm">
-                            <caption className="sr-only">
-                                Overzicht van alle datapunten, inclusief gevoelsmetingen en sessieduur
-                            </caption>
-                            <thead className="bg-gray-50">
-                            <tr>
-                                {columns.map((h, i) => (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm border-collapse">
+                            <thead>
+                            <tr className="border-b-2 border-gray-300">
+                                {columns.map((col, idx) => (
                                     <th
-                                        key={i}
-                                        scope="col"
-                                        className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider whitespace-nowrap"
+                                        key={idx}
+                                        className="px-4 py-3 text-left font-semibold text-gray-700"
                                     >
-                                        {h}
+                                        {col}
                                     </th>
                                 ))}
                             </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-100">
-                            {filtered.map((log) => {
-                                const before =
-                                    log.feeling_before_pct != null
-                                        ? log.feeling_before_pct
-                                        : normalize(log.feeling_before, log.feeling_scale ?? 5);
-                                const after =
-                                    log.feeling_after_pct != null
-                                        ? log.feeling_after_pct
-                                        : normalize(log.feeling_after, log.feeling_scale ?? 5);
-                                const diff =
-                                    before != null && after != null ? after - before : null;
-
-                                const diffLabel =
-                                    diff == null
-                                        ? "geen data"
-                                        : diff > 0
-                                            ? `positief, ${diff} punten gestegen`
-                                            : diff < 0
-                                                ? `negatief, ${Math.abs(diff)} punten gedaald`
-                                                : "geen verandering";
-
-                                return (
-                                    <tr
-                                        key={log.log_id}
-                                        className="hover:bg-gray-50 transition-colors"
+                            <tbody>
+                            {filtered.length === 0 ? (
+                                <tr>
+                                    <td
+                                        colSpan={columns.length}
+                                        className="px-4 py-6 text-center text-gray-500 italic"
                                     >
-                                        <td className="px-4 py-3 text-gray-600 font-mono">
-                                            {log.log_id}
-                                        </td>
-                                        <td className="px-4 py-3 text-gray-600">
-                                            {log.user_id}
-                                        </td>
-                                        <td className="px-4 py-3 font-medium text-gray-900">
-                                            {log.exercise?.exercise_name ?? "–"}
-                                        </td>
-                                        <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
-                                            {log.date_time
-                                                ? new Date(log.date_time).toLocaleDateString("nl-NL")
-                                                : "–"}
-                                        </td>
-                                        <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
-                                            {formatDuration(log.session_duration)}
-                                        </td>
-                                        <td className="px-4 py-3">
+                                        Geen datapunten gevonden.
+                                    </td>
+                                </tr>
+                            ) : (
+                                filtered.map((log) => {
+                                    const before = normalize(log.feeling_before, log.feeling_scale);
+                                    const after = normalize(log.feeling_after, log.feeling_scale);
+                                    const diff = before !== null && after !== null ? after - before : null;
+                                    const diffLabel = diff === null ? "geen data" : `${diff >= 0 ? "+" : ""}${diff}`;
+
+                                    return (
+                                        <tr key={log.log_id} className="border-b border-gray-200 hover:bg-gray-50">
+                                            <td className="px-4 py-3 font-mono text-gray-700">
+                                                #{log.log_id}
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-600">
+                                                {log.user_id}
+                                            </td>
+                                            <td className="px-4 py-3 font-medium text-gray-900">
+                                                {log.exercise?.exercise_name ?? "–"}
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
+                                                {log.date_time
+                                                    ? new Date(log.date_time).toLocaleDateString("nl-NL")
+                                                    : "–"}
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
+                                                {formatDuration(log.session_duration)}
+                                            </td>
+                                            <td className="px-4 py-3">
                                                 <span
                                                     className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
                                                         log.completed
@@ -329,48 +308,51 @@ export default function PaginatedDataTable({
                                                 >
                                                     {log.completed ? "Ja" : "Nee"}
                                                 </span>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <ScoreBadge value={before} />
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <ScoreBadge value={after} />
-                                        </td>
-                                        <td
-                                            className="px-4 py-3 font-semibold"
-                                            aria-label={diffLabel}
-                                            style={{
-                                                color:
-                                                    diff == null
-                                                        ? "#4b5563"
-                                                        : diff >= 0
-                                                            ? "#15803d"
-                                                            : "#b91c1c",
-                                            }}
-                                        >
-                                            {diff == null
-                                                ? "–"
-                                                : (diff >= 0 ? "+" : "") + diff}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <button
-                                                onClick={() =>
-                                                    setConfirmDelete({
-                                                        log_id: log.log_id,
-                                                        exercise_name:
-                                                            log.exercise?.exercise_name ?? `#${log.log_id}`,
-                                                    })
-                                                }
-                                                className="text-xs font-medium underline"
-                                                style={{ color: "#A5271A" }}
-                                                aria-label={`Verwijder log ${log.log_id}`}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <ScoreBadge value={before} />
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <ScoreBadge value={after} />
+                                            </td>
+                                            <td
+                                                className="px-4 py-3 font-semibold"
+                                                aria-label={diffLabel}
+                                                style={{
+                                                    color:
+                                                        diff == null
+                                                            ? "#4b5563"
+                                                            : diff >= 0
+                                                                ? "#15803d"
+                                                                : "#b91c1c",
+                                                }}
                                             >
-                                                Verwijderen
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
+                                                {diff == null
+                                                    ? "–"
+                                                    : (diff >= 0 ? "+" : "") + diff}
+                                            </td>
+                                            {canDelete && (
+                                                <td className="px-4 py-3">
+                                                    <button
+                                                        onClick={() =>
+                                                            setConfirmDelete({
+                                                                log_id: log.log_id,
+                                                                exercise_name:
+                                                                    log.exercise?.exercise_name ?? `#${log.log_id}`,
+                                                            })
+                                                        }
+                                                        className="text-xs font-medium underline"
+                                                        style={{ color: "#A5271A" }}
+                                                        aria-label={`Verwijder log ${log.log_id}`}
+                                                    >
+                                                        Verwijderen
+                                                    </button>
+                                                </td>
+                                            )}
+                                        </tr>
+                                    );
+                                })
+                            )}
                             </tbody>
                         </table>
                     </div>
@@ -407,8 +389,7 @@ export default function PaginatedDataTable({
                 </>
             )}
 
-            {/* Bevestigingsdialoog voor verwijderen */}
-            {confirmDelete && (
+            {confirmDelete && canDelete && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
                     role="dialog"
