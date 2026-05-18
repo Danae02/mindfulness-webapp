@@ -100,10 +100,28 @@ function AnswerRow({ index, answer, onChange, showNumber = true }) {
     );
 }
 
+const ScaleNotice = () => (
+    <div className="flex items-start gap-2 rounded-lg px-3 py-2 mb-3 text-xs"
+         style={{ backgroundColor: "#f0e8ff", border: "1px solid #c9b8e8" }}>
+        <svg className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+             stroke="#6C4092" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <p style={{ color: "#4A2B6D" }}>
+            <strong>De volgorde bepaalt de waarde:</strong> antwoord 1 (bovenaan) wordt altijd
+            opgeslagen als de laagste waarde <strong>(slechtst)</strong> en het laatste antwoord
+            als de hoogste waarde <strong>(best)</strong>.
+        </p>
+    </div>
+);
+
 function AnswersEditor({ answerCount, answers, onAnswerChange }) {
     if (answerCount !== 5) {
         return (
             <div className="space-y-2">
+                <ScaleNotice />
                 {Array.from({ length: answerCount }).map((_, i) => (
                     <div key={i} className="p-3 border border-gray-200 rounded-lg bg-gray-50">
                         <AnswerRow index={i} answer={answers[i]} onChange={onAnswerChange} />
@@ -144,6 +162,7 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
 
     return (
         <div className="space-y-3">
+            <ScaleNotice />
             <div className="p-3 border border-gray-200 rounded-lg bg-gray-50">
                 <AnswerRow index={0} answer={answers[0]} onChange={onAnswerChange} />
                 {answers[0]?.icon?.src && (

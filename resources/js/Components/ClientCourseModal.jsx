@@ -138,8 +138,8 @@ export default function CourseModal({ course, onClose }) {
                     </p>
                 )}
 
-                {/* Loading state */}
-                {loadingAvail && (
+                {/* pas renderen als availability bekend is */}
+                {loadingAvail ? (
                     <div
                         className="flex items-center gap-2 py-6 px-6 text-gray-400 text-sm"
                         role="status"
@@ -152,22 +152,21 @@ export default function CourseModal({ course, onClose }) {
                         </svg>
                         Oefeningen laden…
                     </div>
-                )}
-
-                {/* Oefeningen */}
-                <div className="p-6 pt-2">
-                    <div className="space-y-3" role="list" aria-label={`Oefeningen in deel ${course.course_name}`}>
-                        {course.exercises.map((exercise) => (
-                            <ExerciseRow
-                                key={exercise.id}
-                                exercise={exercise}
-                                availability={availability}
-                                isFavorite={isFavorite}
-                                onToggleFavorite={toggleFavorite}
-                            />
-                        ))}
+                ) : (
+                    <div className="p-6 pt-2">
+                        <div className="space-y-3" role="list" aria-label={`Oefeningen in deel ${course.course_name}`}>
+                            {course.exercises.map((exercise) => (
+                                <ExerciseRow
+                                    key={exercise.id}
+                                    exercise={exercise}
+                                    availability={availability}
+                                    isFavorite={isFavorite}
+                                    onToggleFavorite={toggleFavorite}
+                                />
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );
