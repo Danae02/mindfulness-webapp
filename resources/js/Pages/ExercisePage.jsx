@@ -17,17 +17,15 @@ function formatDuration(minutes) {
 
 export default function ExercisePage({
                                          exercise,
-                                         available,
-                                         availableLabel,
-                                         alreadyCompletedToday,
-                                         forUserId,
-                                         isProxyMode,
-                                         researchMode,
-                                         researchQuestion,
-                                         researchAnswers,
-                                         isNewestExercise,
-                                         proxyFeelingAnsweredToday,
+                                         availability = {},
+                                         research = {},
+                                         proxy = {},
                                      }) {
+    // Destructure grouped props
+    const { available, availableLabel, alreadyCompletedToday, isNewestExercise } = availability;
+    const { mode: researchMode, question: researchQuestion, answers: researchAnswers } = research;
+    const { forUserId, isProxyMode, feelingAnsweredToday: proxyFeelingAnsweredToday } = proxy;
+
     const [isCompleted,       setIsCompleted]       = useState(false);
     const [showStartQuestion, setShowStartQuestion] = useState(true);
     const [showEndQuestion,   setShowEndQuestion]   = useState(false);

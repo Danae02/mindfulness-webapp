@@ -55,30 +55,30 @@ class ExerciseController extends Controller
             abort(404, 'Exercise not found');
         }
 
-        $exerciseData              = $exercise->toArray();
-        $exerciseAvailable         = true;
-        $availableLabel            = null;
-        $alreadyCompletedToday     = false;
-        $researchMode              = null;
-        $researchQuestion          = null;
-        $researchAnswers           = null;
-        $forUserId                 = null;
-        $isProxyMode               = false;
-        $isNewestExercise          = false;
+        $exerciseData = $exercise->toArray();
+        $available = true;
+        $availableLabel = null;
+        $alreadyCompletedToday = false;
+        $isNewestExercise = false;
+        $researchMode = null;
+        $researchQuestion = null;
+        $researchAnswers = null;
+        $forUserId = null;
+        $isProxyMode = false;
         $proxyFeelingAnsweredToday = false;
 
         if (auth()->check()) {
-            $userId     = auth()->id();
+            $userId = auth()->id();
             $rawForUser = request('for_user_id') ?? request('for_user');
 
             if ($rawForUser) {
-                $forUserId   = (int) $rawForUser;
+                $forUserId = (int) $rawForUser;
                 $isProxyMode = true;
             }
 
             $userForAvailability = $isProxyMode ? $forUserId : $userId;
 
-            [$exerciseAvailable, $availableLabel] = $this->checkExerciseAvailability(
+            [$available, $availableLabel] = $this->checkExerciseAvailability(
                 $exercise, $userForAvailability
             );
 
@@ -98,17 +98,23 @@ class ExerciseController extends Controller
         }
 
         return Inertia::render('ExercisePage', [
-            'exercise'                  => $exerciseData,
-            'available'                 => $exerciseAvailable,
-            'availableLabel'            => $availableLabel,
-            'alreadyCompletedToday'     => $alreadyCompletedToday,
-            'forUserId'                 => $forUserId,
-            'isProxyMode'               => $isProxyMode,
-            'researchMode'              => $researchMode,
-            'researchQuestion'          => $researchQuestion,
-            'researchAnswers'           => $researchAnswers,
-            'isNewestExercise'          => $isNewestExercise,
-            'proxyFeelingAnsweredToday' => $proxyFeelingAnsweredToday,
+            'exercise' => $exerciseData,
+            'availability' => [
+                'available'            => $available,
+                'availableLabel'       => $availableLabel,
+                'alreadyCompletedToday' => $alreadyCompletedToday,
+                'isNewestExercise'     => $isNewestExercise,
+            ],
+            'research' => [
+                'mode'    => $researchMode,
+                'question' => $researchQuestion,
+                'answers' => $researchAnswers,
+            ],
+            'proxy' => [
+                'forUserId'           => $forUserId,
+                'isProxyMode'         => $isProxyMode,
+                'feelingAnsweredToday' => $proxyFeelingAnsweredToday,
+            ],
         ]);
     }
 
@@ -119,7 +125,7 @@ class ExerciseController extends Controller
             return response()->json(['available' => true, 'available_label' => null]);
         }
 
-        $userId     = auth()->id();
+        $userId = auth()->id();
         $rawForUser = request('for_user_id') ?? request('for_user');
         $targetUser = $rawForUser ? (int) $rawForUser : $userId;
 
