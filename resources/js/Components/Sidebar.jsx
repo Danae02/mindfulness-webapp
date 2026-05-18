@@ -1,128 +1,68 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
-export default function Sidebar({ setView, currentView }) {
+export default function Sidebar({
+                                    menuItems = [],
+                                    currentView = null,
+                                    onViewChange = () => {},
+                                    title = "Menu"
+                                }) {
+    const [focusedIndex, setFocusedIndex] = useState(0);
+    const buttonRefs = useRef([]);
 
-    const handleViewChange = (view) => {
-        setView(view);
+    const handleViewChange = (viewKey) => {
+        onViewChange(viewKey);
+    };
+
+    const handleKeyDown = (e, index) => {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextIndex = (index + 1) % menuItems.length;
+            setFocusedIndex(nextIndex);
+            buttonRefs.current[nextIndex]?.focus();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevIndex = (index - 1 + menuItems.length) % menuItems.length;
+            setFocusedIndex(prevIndex);
+            buttonRefs.current[prevIndex]?.focus();
+        } else if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleViewChange(menuItems[index].key);
+        }
     };
 
     return (
-        <div className="w-full md:w-1/4 bg-[#312C50] text-white md:min-h-screen">
+        <nav
+            aria-label={title}
+            className="w-full md:w-64 bg-[#312C50] text-white md:min-h-screen"
+        >
             <div className="p-4">
-                <h3 className="text-lg font-semibold break-words">Admin Menu</h3>
-                <ul className="mt-4 space-y-2">
-                    <li>
-                        <button
-                            onClick={() => handleViewChange("courses")}
-                            className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
-                                currentView === "courses"
-                                    ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
-                                    : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
-                            }`}
-                            style={{
-                                ...(currentView === "courses" && {
-                                    boxShadow: 'inset 3px 0 0 #9B6DD4'
-                                })
-                            }}
-                        >
-                            <span className="break-words">Alle cursussen</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button
-                            onClick={() => handleViewChange("addCourse")}
-                            className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
-                                currentView === "addCourse"
-                                    ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
-                                    : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
-                            }`}
-                            style={{
-                                ...(currentView === "addCourse" && {
-                                    boxShadow: 'inset 3px 0 0 #9B6DD4'
-                                })
-                            }}
-                        >
-                            <span className="break-words">Cursus toevoegen</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button
-                            onClick={() => handleViewChange("allDatapoints")}
-                            className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
-                                currentView === "allDatapoints"
-                                    ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
-                                    : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
-                            }`}
-                            style={{
-                                ...(currentView === "allDatapoints" && {
-                                    boxShadow: 'inset 3px 0 0 #9B6DD4'
-                                })
-                            }}
-                        >
-                            <span className="break-words">Lijst van alle datapunten</span>
-                        </button>
-                    </li>
-                    {/*<li>*/}
-                    {/*    <button*/}
-                    {/*        onClick={() => setView("logDuration")}*/}
-                    {/*        className="w-full text-left p-2 hover:bg-gray-700 rounded"*/}
-                    {/*    >*/}
-                    {/*        Grafieken van de duur*/}
-                    {/*    </button>*/}
-                    {/*</li>*/}
-                    <li>
-                        <button
-                            onClick={() => handleViewChange("listOfAllUsers")}
-                            className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
-                                currentView === "listOfAllUsers"
-                                    ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
-                                    : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
-                            }`}
-                            style={{
-                                ...(currentView === "listOfAllUsers" && {
-                                    boxShadow: 'inset 3px 0 0 #9B6DD4'
-                                })
-                            }}
-                        >
-                            <span className="break-words">Lijst van alle gebruikers</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button
-                            onClick={() => handleViewChange("researchSettings")}
-                            className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
-                                currentView === "researchSettings"
-                                    ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
-                                    : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
-                            }`}
-                            style={{
-                                ...(currentView === "researchSettings" && {
-                                    boxShadow: 'inset 3px 0 0 #9B6DD4'
-                                })
-                            }}
-                        >
-                            <span className="break-words">Gevoelsvragen beheren</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button
-                            onClick={() => handleViewChange("backup")}
-                            className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
-                                currentView === "backup"
-                                    ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
-                                    : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
-                            }`}
-                            style={{
-                                ...(currentView === "backup" && {
-                                    boxShadow: 'inset 3px 0 0 #9B6DD4'
-                                })
-                            }}
-                        >
-                            <span className="break-words">Backup en herstel</span>
-                        </button>
-                    </li>
+                <p className="text-lg font-semibold break-words">{title}</p>
+                <ul role="menu" className="mt-4 space-y-2">
+                    {menuItems.map(({ key, label }, index) => (
+                        <li role="none" key={key}>
+                            <button
+                                ref={(el) => buttonRefs.current[index] = el}
+                                role="menuitem"
+                                tabIndex={focusedIndex === index ? 0 : -1}
+                                onKeyDown={(e) => handleKeyDown(e, index)}
+                                onClick={() => {
+                                    setFocusedIndex(index);
+                                    handleViewChange(key);
+                                }}
+                                aria-current={currentView === key ? "page" : undefined}
+                                className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
+                                    currentView === key
+                                        ? 'bg-[#9B6DD4] bg-opacity-20 text-white font-medium'
+                                        : 'hover:bg-white hover:bg-opacity-10 text-gray-300'
+                                }`}
+                                style={currentView === key ? { boxShadow: "inset 3px 0 0 #9B6DD4" } : {}}
+                            >
+                                <span className="break-words">{label}</span>
+                            </button>
+                        </li>
+                    ))}
                 </ul>
             </div>
-        </div>
+        </nav>
     );
 }

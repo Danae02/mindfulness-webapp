@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
+import Sidebar from "@/Components/Sidebar.jsx";
 import CourseUploader from "@/Components/CourseUploader.jsx";
 import CourseEditor from "@/Components/CourseEditor.jsx";
 import ListOfAllDataPoints from "@/Components/ListOfAllDataPoints.jsx";
@@ -55,7 +56,6 @@ export default function DashboardAdmin() {
         setView(newView);
         setTimeout(() => setIsLoading(false), 300);
     };
-    const currentLabel = menuItems.find((m) => m.key === view)?.label ?? "";
 
     return (
         <AuthenticatedLayout
@@ -67,33 +67,12 @@ export default function DashboardAdmin() {
         >
             <div className="flex flex-col md:flex-row">
 
-                {/* Sidebar */}
-                <nav
-                    aria-label="Adminmenu"
-                    className="w-full md:w-64 bg-[#312C50] text-white md:min-h-screen"
-                >
-                    <div className="p-4">
-                        <p className="text-lg font-semibold break-words">Admin Menu</p>
-                        <ul className="mt-4 space-y-2">
-                            {menuItems.map(({ key, label }) => (
-                                <li key={key}>
-                                    <button
-                                        onClick={() => handleViewChange(key)}
-                                        aria-current={view === key ? "page" : undefined}
-                                        className={`w-full text-left p-2 rounded transition-all duration-200 relative ${
-                                            view === key
-                                                ? "bg-[#9B6DD4] bg-opacity-20 text-white font-medium"
-                                                : "hover:bg-white hover:bg-opacity-10 text-gray-300"
-                                        }`}
-                                        style={view === key ? { boxShadow: "inset 3px 0 0 #9B6DD4" } : {}}
-                                    >
-                                        <span className="break-words">{label}</span>
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </nav>
+                <Sidebar
+                    menuItems={menuItems}
+                    currentView={view}
+                    onViewChange={handleViewChange}
+                    title="Admin Menu"
+                />
 
                 {/* Main content */}
                 <main className="flex-1 p-4 md:p-6 overflow-x-auto">
