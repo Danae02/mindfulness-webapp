@@ -12,94 +12,94 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-//    public function index()
-//    {
-//        $role = Auth::user()->role_id;
-//        $exercises = Exercise::all();
-//        $exerciseNames = $exercises->pluck('exercise_name')->toArray();
-//        $userId = Auth::id();
-//
-//        $exerciseCountLastWeek = UserExerciseLog::where('user_id', $userId)
-//            ->where('date_time', '>=', now()->subWeek())
-//            ->count();
-//
-//
-//        if ($role === 1) {
-//            return Inertia::render('DashboardAdmin', []);
-//        }
-//        elseif ($role === 2) {
-//            return Inertia::render('DashboardViewer', [
-//                'exerciseCountLastWeek' => $exerciseCountLastWeek,
-//                'exercises' => $exercises
-//            ]);
-//        } elseif($role === 3) {
-//            return Inertia::render('DashboardSupervisor', []);
-//        } elseif($role === 4) {
-//            return Inertia::render('DashboardResearcher', [
-//                'exerciseNames' => $exerciseNames,
-//            ]);
-//        }
-//        return Inertia::render('Dashboard', []);
-//    }
+    private ExerciseAvailabilityService $availabilityService;
+
+    public function __construct(ExerciseAvailabilityService $availabilityService)
+    {
+        $this->availabilityService = $availabilityService;
+    }
 
     public function index()
     {
         $role   = Auth::user()->role_id;
         $userId = Auth::id();
 
-        $researchSetting = ResearchSettings::where('key_name', 'mode')->first();
-        $showSurvey      = $researchSetting && $researchSetting->value === 'per_session';
+        return match ($role) {
+            1 => $this->getDashboardAdmin(),
+            2 => $this->getDashboardViewer($userId),
+            3 => $this->getDashboardSupervisor(),
+            4 => $this->getDashboardResearcher(),
+            default => Inertia::render('Dashboard', []),
+        };
+    }
 
-        $exercises             = Exercise::all();
+    private function getDashboardAdmin()
+    {
+        return Inertia::render('DashboardAdmin', [
+            'researchGroups' => $this->getResearchGroups(),
+            'exercises'      => $this->getExercisesForAdmin(),
+        ]);
+    }
+
+    private function getDashboardViewer(int $userId)
+    {
+        $researchSetting = ResearchSettings::where('key_name', 'mode')->first();
+        $showSurvey      = $researchSetting?->value === 'per_session';
+
+        $exercises = Exercise::all();
         $exerciseCountLastWeek = UserExerciseLog::where('user_id', $userId)
             ->where('date_time', '>=', now()->subWeek())
             ->count();
 
-        if ($role === 1) {
-            return Inertia::render('DashboardAdmin', [
-                'researchGroups' => ResearchGroup::select('id', 'name')->orderBy('name')->get(),
-                'exercises'      => $exercises->map(fn($e) => ['id' => $e->id, 'exercise_name' => $e->exercise_name])->values(),
-            ]);
-        } elseif ($role === 2) {
-            // Gebruik de service om de juiste volgende oefening te bepalen, rekening houdend met beschikbaarheid en de +1 dag regel
-            $availabilityService = new ExerciseAvailabilityService();
-            $nextExercise        = $availabilityService->getNextExerciseForUser($userId);
+        $nextExercise = $this->availabilityService->getNextExerciseForUser($userId);
+        $completedTodayIds = UserExerciseLog::where('user_id', $userId)
+            ->whereDate('date_time', today())
+            ->where('completed', true)
+            ->pluck('exercise_id')
+            ->values();
 
-            // Haal op welke oefeningen de gebruiker vandaag al heeft afgerond
-            $completedTodayIds = UserExerciseLog::where('user_id', $userId)
-                ->whereDate('date_time', today())
-                ->where('completed', true)
-                ->pluck('exercise_id')
-                ->values();
-
-            return Inertia::render('DashboardViewer', [
-                'exerciseCountLastWeek' => $exerciseCountLastWeek,
-                'exercises'             => $exercises,
-                'showSurvey'            => $showSurvey,
-                'nextExercise'          => $nextExercise ?
-                    ['id'            => $nextExercise->id,
-                    'exercise_name' => $nextExercise->exercise_name, ] : null,
-                'completedTodayIds'     => $completedTodayIds,
-            ]);
-        } elseif ($role === 3) {
-            return Inertia::render('DashboardSupervisor', []);
-        } elseif ($role === 4) {
-            return Inertia::render('DashboardResearcher', [
-                'exerciseNames'  => $exercises->pluck('exercise_name')->toArray(),
-                'exercises'      => $exercises->map(fn($e) => ['id' => $e->id, 'exercise_name' => $e->exercise_name])->values(),
-                'researchGroups' => ResearchGroup::select('id', 'name')->orderBy('name')->get(),
-            ]);
-        }
-
-        return Inertia::render('Dashboard', []);
+        return Inertia::render('DashboardViewer', [
+            'exerciseCountLastWeek' => $exerciseCountLastWeek,
+            'exercises'             => $exercises,
+            'showSurvey'            => $showSurvey,
+            'nextExercise'          => $nextExercise ? [
+                'id'              => $nextExercise->id,
+                'exercise_name'   => $nextExercise->exercise_name,
+            ] : null,
+            'completedTodayIds'     => $completedTodayIds,
+        ]);
     }
 
-    public function medianDataForResearchers()
+    private function getDashboardSupervisor()
     {
-        $exerciseLogs = UserExerciseLog::all();
+        return Inertia::render('DashboardSupervisor', []);
+    }
 
-        dd($exerciseLogs->where('exercise_id', 1)->where("completed", 1)->count());
+    private function getDashboardResearcher()
+    {
+        $exercises = Exercise::all();
 
-//        return $timesOneExerciseCompleted;
+        return Inertia::render('DashboardResearcher', [
+            'exerciseNames'  => $exercises->pluck('exercise_name')->toArray(),
+            'exercises'      => $this->getExercisesForAdmin(),
+            'researchGroups' => $this->getResearchGroups(),
+        ]);
+    }
+
+    private function getResearchGroups()
+    {
+        return ResearchGroup::select('id', 'name')
+            ->orderBy('name')
+            ->get();
+    }
+
+    private function getExercisesForAdmin()
+    {
+        return Exercise::all()
+            ->map(fn($e) => [
+                'id'              => $e->id,
+                'exercise_name'   => $e->exercise_name,
+            ])
+            ->values();
     }
 }
