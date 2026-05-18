@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\CourseService;
+use App\Services\ResearchQuestionService;
 use App\Models\Course;
 use App\Models\Exercise;
 use App\Models\UserExerciseLog;
 use App\Models\ResearchSettings;
+use App\Models\User;
 use App\Services\ExerciseAvailabilityService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,12 +15,14 @@ use Inertia\Inertia;
 class ExerciseController extends Controller
 {
     private ExerciseAvailabilityService $availabilityService;
-    private CourseService $courseService;
+    private ResearchQuestionService $researchQuestionService;
 
-    public function __construct(ExerciseAvailabilityService $availabilityService, CourseService $courseService)
-    {
-        $this->availabilityService = $availabilityService;
-        $this->courseService = $courseService;
+    public function __construct(
+        ExerciseAvailabilityService $availabilityService,
+        ResearchQuestionService $researchQuestionService
+    ) {
+        $this->availabilityService     = $availabilityService;
+        $this->researchQuestionService = $researchQuestionService;
     }
 
     public function index()
@@ -52,24 +55,24 @@ class ExerciseController extends Controller
             abort(404, 'Exercise not found');
         }
 
-        $exerciseData = $exercise->toArray();
-        $exerciseAvailable = true;
-        $availableLabel = null;
-        $alreadyCompletedToday = false;
-        $researchMode = null;
-        $researchQuestion = null;
-        $researchAnswers = null;
-        $forUserId = null;
-        $isProxyMode = false;
-        $isNewestExercise = false;
+        $exerciseData              = $exercise->toArray();
+        $exerciseAvailable         = true;
+        $availableLabel            = null;
+        $alreadyCompletedToday     = false;
+        $researchMode              = null;
+        $researchQuestion          = null;
+        $researchAnswers           = null;
+        $forUserId                 = null;
+        $isProxyMode               = false;
+        $isNewestExercise          = false;
         $proxyFeelingAnsweredToday = false;
 
         if (auth()->check()) {
-            $userId = auth()->id();
+            $userId     = auth()->id();
             $rawForUser = request('for_user_id') ?? request('for_user');
 
             if ($rawForUser) {
-                $forUserId = (int) $rawForUser;
+                $forUserId   = (int) $rawForUser;
                 $isProxyMode = true;
             }
 
@@ -89,7 +92,9 @@ class ExerciseController extends Controller
                 $userForAvailability
             );
 
-            [$researchMode, $researchQuestion, $researchAnswers] = $this->getResearchSettings();
+            $userForQuestion = User::find($userForAvailability);
+            [$researchMode, $researchQuestion, $researchAnswers] =
+                $this->getResearchSettingsForUser($userForQuestion);
         }
 
         return Inertia::render('ExercisePage', [
@@ -114,12 +119,11 @@ class ExerciseController extends Controller
             return response()->json(['available' => true, 'available_label' => null]);
         }
 
-        $userId = auth()->id();
+        $userId     = auth()->id();
         $rawForUser = request('for_user_id') ?? request('for_user');
         $targetUser = $rawForUser ? (int) $rawForUser : $userId;
 
         [$available, $availableLabel] = $this->checkExerciseAvailability($exercise, $targetUser);
-
         $alreadyCompletedToday = $this->hasCompletedTodayCheck($id, $targetUser);
 
         return response()->json([
@@ -170,9 +174,8 @@ class ExerciseController extends Controller
         ]);
 
         $currentUser = auth()->user();
-        $logUserId = $validated['user_id'];
+        $logUserId   = $validated['user_id'];
 
-        // Autorisatiecheck
         if ($currentUser->role_id === 2) {
             if ($logUserId !== $currentUser->id) {
                 return response()->json(['error' => 'Je kunt alleen voor jezelf oefeningen loggen'], 403);
@@ -206,34 +209,6 @@ class ExerciseController extends Controller
         return response()->json(['message' => 'Exercise deleted successfully']);
     }
 
-
-//    private function checkExerciseAvailability(Exercise $exercise, int $userId): array
-//    {
-//        $exerciseAvailable = true;
-//        $availableLabel = null;
-//
-//        $courseId = $exercise->course_id;
-//        if ($courseId) {
-//            $course = Course::find($courseId);
-//            if ($course) {
-//                $courseController = new CourseController($this->courseService);
-//                $availabilityResponse = $courseController->getCourseAvailabilityForUser($courseId, $userId);
-//                $availabilityData = json_decode($availabilityResponse->getContent(), true);
-//
-//                $exerciseAvailability = collect($availabilityData)
-//                    ->firstWhere('exercise_id', (int) $exercise->id);
-//
-//                if ($exerciseAvailability) {
-//                    $exerciseAvailable = $exerciseAvailability['available'] ?? true;
-//                    $availableLabel = $exerciseAvailability['available_label'] ?? null;
-//                }
-//            }
-//        }
-//
-//        return [$exerciseAvailable, $availableLabel];
-//    }
-
-
     private function checkExerciseAvailability(Exercise $exercise, int $userId): array
     {
         $courseId = $exercise->course_id;
@@ -246,8 +221,7 @@ class ExerciseController extends Controller
             return [true, null];
         }
 
-        $result = $this->courseService->buildExerciseAvailability($course, $userId);
-
+        $result = $this->availabilityService->buildExerciseAvailability($course, $userId);
         $exerciseAvailability = collect($result)->firstWhere('exercise_id', (int) $exercise->id);
 
         return [
@@ -255,7 +229,6 @@ class ExerciseController extends Controller
             $exerciseAvailability['available_label'] ?? null,
         ];
     }
-
 
     private function hasCompletedTodayCheck(int $exerciseId, int $userId): bool
     {
@@ -266,22 +239,19 @@ class ExerciseController extends Controller
             ->exists();
     }
 
-
-    private function getResearchSettings(): array
+    private function getResearchSettingsForUser(?User $user): array
     {
-        $researchMode = null;
-        $researchQuestion = null;
-        $researchAnswers = null;
-
         $researchSetting = ResearchSettings::where('key_name', 'mode')->first();
-        if ($researchSetting) {
-            $researchMode = $researchSetting->value;
+        $researchMode    = $researchSetting?->value;
 
-            if ($researchSetting->question && $researchSetting->answers) {
-                $researchQuestion = $researchSetting->question;
-                $researchAnswers = $researchSetting->answers;
-            }
+        if (!$user) {
+            return [$researchMode, null, null];
         }
+
+        $activeQuestion = $this->researchQuestionService->getActiveQuestion($user);
+
+        $researchQuestion = $activeQuestion['question'] ?: null;
+        $researchAnswers  = !empty($activeQuestion['answers']) ? $activeQuestion['answers'] : null;
 
         return [$researchMode, $researchQuestion, $researchAnswers];
     }

@@ -3,29 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
-use App\Services\CourseService;
+use App\Services\ExerciseAvailabilityService;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
-    private CourseService $courseService;
+    private ExerciseAvailabilityService $availabilityService;
 
-    public function __construct(CourseService $courseService)
+    public function __construct(ExerciseAvailabilityService $availabilityService)
     {
-        $this->courseService = $courseService;
+        $this->availabilityService = $availabilityService;
     }
 
     public function getAllCourses()
     {
         $courses = Course::with('exercises')->orderBy('id')->get();
-        $intro   = $this->courseService->getIntroCourse();
+        $intro   = $this->availabilityService->getIntroCourse();
 
         if (!auth()->check()) {
             return response()->json(array_merge([$intro], $courses->values()->all()));
         }
 
         $userId          = auth()->id();
-        $availabilityMap = $this->courseService->buildCourseAvailabilityMap($userId);
+        $availabilityMap = $this->availabilityService->buildCourseAvailabilityMap($userId);
 
         $result = $courses->map(function ($course) use ($availabilityMap) {
             $available = $availabilityMap[$course->id] ?? false;
@@ -35,7 +35,6 @@ class CourseController extends Controller
                 'available_label' => $available ? null : 'Nog niet beschikbaar',
             ]);
         });
-
         return response()->json(array_merge([$intro], $result->values()->all()));
     }
 
@@ -110,9 +109,8 @@ class CourseController extends Controller
         if (!$course) {
             return response()->json(['message' => 'Course not found.'], 404);
         }
-
         $userId = auth()->id();
-        $result = $this->courseService->buildExerciseAvailability($course, $userId);
+        $result = $this->availabilityService->buildExerciseAvailability($course, $userId);
 
         return response()->json($result);
     }
@@ -128,8 +126,7 @@ class CourseController extends Controller
         if (!$course) {
             return response()->json(['message' => 'Course not found.'], 404);
         }
-
-        $result = $this->courseService->buildExerciseAvailability($course, $userId);
+        $result = $this->availabilityService->buildExerciseAvailability($course, $userId);
 
         return response()->json($result);
     }
@@ -139,8 +136,7 @@ class CourseController extends Controller
         if (!in_array(auth()->user()->role_id, [1, 3, 4])) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
-        $result = $this->courseService->getClientProgress($userId);
+        $result = $this->availabilityService->getClientProgress($userId);
 
         return response()->json($result);
     }

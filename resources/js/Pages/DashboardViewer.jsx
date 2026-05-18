@@ -12,7 +12,6 @@ export default function DashboardViewer({ exerciseCountLastWeek, nextExercise, c
     const [coursesLoading, setCoursesLoading] = useState(true);
     const [coursesError, setCoursesError] = useState(null);
 
-    // Fetch courses data
     useEffect(() => {
         const fetchCourses = async () => {
             setCoursesLoading(true);
@@ -21,27 +20,24 @@ export default function DashboardViewer({ exerciseCountLastWeek, nextExercise, c
                 const response = await axios.get(route('courses.get.all'));
                 setCourses(response.data);
             } catch (err) {
-                console.error('Fout bij ophalen cursussen:', err);
+                console.error('Fout:', err);
                 setCoursesError('Kon cursussen niet laden');
             } finally {
                 setCoursesLoading(false);
             }
         };
-
         fetchCourses();
     }, []);
+
+    const handleFetchCourseDetails = async (courseId) => {
+        const response = await axios.get(route('courses.details', { id: courseId }));
+        return response.data;
+    };
 
     return (
         <AuthenticatedLayout
             topBar={
-                <div
-                    className="w-full py-3 border-t-2 border-b-2"
-                    style={{
-                        backgroundColor: '#F0E8FF',
-                        borderTopColor: '#000000',
-                        borderBottomColor: '#000000'
-                    }}
-                >
+                <div className="w-full py-3 border-t-2 border-b-2" style={{ backgroundColor: '#F0E8FF', borderTopColor: '#000000', borderBottomColor: '#000000' }}>
                     <div className="flex justify-end px-4 sm:px-6 lg:px-8">
                         <AccessibilityButton variant="plain" />
                     </div>
@@ -50,48 +46,20 @@ export default function DashboardViewer({ exerciseCountLastWeek, nextExercise, c
         >
             <Head title="Dashboard Viewer" />
 
-            {/* Profieloverzicht */}
             <section className="pt-4 pb-8 bg-lightGray">
                 <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div
-                        className="w-full bg-white rounded-xl p-8"
-                        style={{
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                            border: '1px solid #5F5F5F'
-                        }}
-                    >
+                    <div className="w-full bg-white rounded-xl p-8" style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', border: '1px solid #5F5F5F' }}>
                         <ProfileOverview exerciseCountLastWeek={exerciseCountLastWeek} />
                     </div>
                 </div>
             </section>
 
-            {/* Lijst van cursussen */}
             <section className="pb-12 bg-lightGray">
                 <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div
-                        className="w-full bg-white rounded-xl p-8"
-                        style={{
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                            border: '1px solid #5F5F5F'
-                        }}
-                    >
-                        <NextExerciseBanner
-                            nextExercise={nextExercise}
-                            completedTodayIds={completedTodayIds}
-                        />
-
-                        {coursesError && (
-                            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
-                                {coursesError}
-                            </div>
-                        )}
-
-                        {/* CourseList receives data via props */}
-                        <CourseList
-                            courses={courses}
-                            loading={coursesLoading}
-                            error={coursesError}
-                        />
+                    <div className="w-full bg-white rounded-xl p-8" style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', border: '1px solid #5F5F5F' }}>
+                        <NextExerciseBanner nextExercise={nextExercise} completedTodayIds={completedTodayIds} />
+                        {coursesError && <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">{coursesError}</div>}
+                        <CourseList courses={courses} loading={coursesLoading} error={coursesError} onFetchCourseDetails={handleFetchCourseDetails} />
                     </div>
                 </div>
             </section>
