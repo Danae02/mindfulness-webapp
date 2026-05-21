@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Checkbox from '@/Components/Checkbox';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
@@ -25,6 +25,13 @@ export default function Login({ status, canResetPassword }) {
     };
 
     const successMessage = flash?.status || status;
+    const statusRef = useRef(null);
+
+    useEffect(() => {
+        if (successMessage && statusRef.current) {
+            statusRef.current.focus();
+        }
+    }, []);
 
     return (
         <GuestLayout>
@@ -40,16 +47,18 @@ export default function Login({ status, canResetPassword }) {
                 <AccessibilityButton variant="button" />
             </div>
 
-            {successMessage && (
-                <div
-                    className="mb-4 text-sm font-medium text-green-600 bg-green-50 p-3 rounded-lg"
-                    role="status"
-                    aria-live="polite"
-                    aria-atomic="true"
-                >
-                    {successMessage}
-                </div>
-            )}
+            <div
+                ref={statusRef}
+                tabIndex={-1}
+                aria-live="polite"
+                aria-atomic="true"
+                className={`mb-4 text-sm font-medium text-green-600 rounded-lg transition-all focus:outline-none ${successMessage ? 'bg-green-50 p-3' : ''}`}
+            >
+                {successMessage ?? ''}
+                {successMessage && (
+                    <span className="sr-only">, je bent nu weer op de inlogpagina.</span>
+                )}
+            </div>
 
             <form onSubmit={submit}>
                 {/* E-mailadres */}
