@@ -45,8 +45,7 @@ export default function ProfileOverview({ exerciseCountLastWeek }) {
                 >
                     <span className="sr-only">Mijn favoriete oefeningen bekijken</span>
                     <svg
-                        width="22"
-                        height="22"
+                        className="w-6 h-6"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                         aria-hidden="true"
