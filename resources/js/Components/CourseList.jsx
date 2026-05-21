@@ -99,7 +99,7 @@ export default function CourseList({
             )}
 
             {regularCourses.length === 0 && !introCourse && (
-                <p className="text-gray-400 italic text-sm">Nog geen delen beschikbaar.</p>
+                <p className="text-gray-400 italic text-sm">Nog geen delen te doen.</p>
             )}
 
             {error && (
@@ -111,9 +111,9 @@ export default function CourseList({
             {/* Screenreader samenvatting vóór de lijst */}
             {totalCourses > 0 && (
                 <p className="sr-only" aria-live="polite">
-                    {`Er zijn ${totalCourses} vervolg delen: ${availableCourses} beschikbaar${
+                    {`Er zijn ${totalCourses} vervolg delen: ${availableCourses} te doen${
                         lockedCourses > 0
-                            ? ` en ${lockedCourses} nog vergrendeld. Doe elke dag een oefening om vergrendelde delen te ontgrendelen.`
+                            ? ` en ${lockedCourses} nog niet open. Doe elke dag een oefening, dan komen er meer bij.`
                             : '.'
                     }`}
                 </p>

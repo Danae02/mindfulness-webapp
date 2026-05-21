@@ -124,7 +124,7 @@ class ExerciseAvailabilityService
                 'exercise_id'     => $exercise->id,
                 'available'       => false,
                 'available_from'  => null,
-                'available_label' => 'Voltooi eerst de vorige cursus',
+                'available_label' => 'Maak eerst de vorige cursus',
             ])->values()->all();
         }
 
@@ -310,7 +310,7 @@ class ExerciseAvailabilityService
             return [
                 'available'       => false,
                 'available_from'  => null,
-                'available_label' => 'Voltooi eerst de vorige cursus',
+                'available_label' => 'Maak eerst de vorige cursus',
             ];
         }
 
@@ -338,7 +338,7 @@ class ExerciseAvailabilityService
             return [
                 'available'       => false,
                 'available_from'  => null,
-                'available_label' => 'Voltooi eerst de vorige oefening',
+                'available_label' => 'Maak eerst de vorige oefening',
             ];
         }
 

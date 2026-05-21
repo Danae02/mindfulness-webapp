@@ -202,7 +202,7 @@ class ExerciseController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Oefening voltooid en opgeslagen',
+            'message' => 'Oefening klaar en opgeslagen',
             'log'     => $log,
         ], 201);
     }

@@ -165,7 +165,7 @@ export default function CourseModal({ course, onClose }) {
                         <p className="sr-only" aria-live="polite">
                             {`Dit deel bevat ${totalExercises} oefeningen: ${availableExercises} beschikbaar${
                                 lockedExercises > 0
-                                    ? ` en ${lockedExercises} nog vergrendeld. Doe elke dag een oefening om vergrendelde oefeningen te ontgrendelen.`
+                                    ? ` en ${lockedExercises} nog niet te doen. Doe elke dag een oefening, dan komen er meer bij.`
                                     : '.'
                             }`}
                         </p>

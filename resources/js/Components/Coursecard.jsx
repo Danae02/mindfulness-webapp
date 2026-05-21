@@ -16,7 +16,7 @@ export default function CourseCard({ course, onClick, onKeyDown }) {
                     course.available_label
                         ? course.available_label + '.'
                         : 'Nog niet beschikbaar.'
-                } Doe elke dag een oefening om dit deel te ontgrendelen.`}
+                } Doe elke dag een oefening om verder te kunnen gaan.`}
             >
                 {/* Alle visuele inhoud verbergen voor screenreader — aria-label op <li> doet het werk */}
                 <div

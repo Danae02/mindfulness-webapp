@@ -17,7 +17,7 @@ export default function ExerciseRow({ exercise, availability, isFavorite, onTogg
                 style={{opacity: 0.6}}
             >
                 <p className="sr-only">
-                    {`Oefening: ${exercise.exercise_name}. Vergrendeld. ${avail.available_label ? `${avail.available_label}. ` : ''}Doe vandaag een oefening om deze te ontgrendelen.`}
+                    {`Oefening: ${exercise.exercise_name}. Vergrendeld. ${avail.available_label ? `${avail.available_label}. ` : ''}Doe vandaag een oefening om deze morgen te kunnen doen.`}
                 </p>
                 <div className="flex-1 min-w-0">
                     <p className="text-base font-semibold text-gray-600" aria-hidden="true">

@@ -7,7 +7,7 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
         return (
             <section
                 role="region"
-                aria-label="Status dagelijkse oefening: alle oefeningen voltooid"
+                aria-label="Status dagelijkse oefening: alle oefeningen zijn gedaan"
                 className="rounded-2xl px-6 py-5 mb-5"
                 style={{ backgroundColor: "#FEF3E8", border: "3px solid #B85B06" }}
             >
@@ -26,7 +26,7 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
         return (
             <section
                 role="region"
-                aria-label="Status dagelijkse oefening: vandaag voltooid"
+                aria-label="Status dagelijkse oefening: vandaag gedaan"
                 className="rounded-2xl px-6 py-5 mb-5"
                 style={{ backgroundColor: "#FEF3E8", border: "2px solid #B85B06" }}
             >

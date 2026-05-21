@@ -39,7 +39,7 @@ export default function CompletionScreen({ userName, onBack }) {
 
                 {/* Beschrijving */}
                 <p className="text-base text-gray-700 leading-relaxed max-w-xs">
-                    Je hebt de oefening voltooid. Kom morgen terug voor de volgende oefening of herhaal oude oefeningen.
+                    Je hebt de oefening gedaan. Kom morgen terug voor de volgende oefening of herhaal oude oefeningen.
                 </p>
             </div>
 

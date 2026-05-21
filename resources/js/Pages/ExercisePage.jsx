@@ -153,7 +153,7 @@ export default function ExercisePage({
                             </svg>
                             <h3 className="text-lg font-semibold text-gray-800">Oefening nog niet beschikbaar</h3>
                             <p className="text-gray-600">
-                                {availableLabel || 'Voltooi eerst de vorige oefeningen.'}
+                                {availableLabel || 'Maak eerst de vorige oefening.'}
                             </p>
                             {isProxy && (
                                 <p className="text-sm text-purple-600 bg-purple-50 p-3 rounded-lg">
@@ -362,7 +362,7 @@ export default function ExercisePage({
                         {/* Terugknop na voltooiing */}
                         {isCompleted && !showEndQuestion && !showCompletion && (
                             <div className="text-center space-y-4 border-t pt-6">
-                                <p className="text-green-600 font-semibold">✓ Oefening voltooid!</p>
+                                <p className="text-green-600 font-semibold">✓ Oefening klaar!</p>
                                 <button
                                     onClick={handleBack}
                                     className="w-full py-3 px-4 bg-[#7B5EA7] text-white font-semibold rounded-xl shadow hover:bg-[#6a4e8e] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200"
