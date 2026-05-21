@@ -34,7 +34,7 @@ export default function ExerciseRow({ exercise, availability, isFavorite, onTogg
                 </div>
                 <div className="flex-shrink-0">
                     <LockIcon
-                        className="w-5 h-5 text-gray-400"
+                        className="w-7 h-7 text-gray-400"
                         aria-hidden="true"
                     />
                 </div>
@@ -69,37 +69,17 @@ export default function ExerciseRow({ exercise, availability, isFavorite, onTogg
                 )}
             </div>
 
-            {/* Start button */}
-            <Link
-                href={route("exercise.show", { id: exercise.id })}
-                className="inline-flex items-center gap-2 px-3 py-2 bg-[#7B5EA7] text-white text-sm font-semibold
-                    rounded-lg hover:bg-[#5a3a7a]
-                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7B5EA7]
-                    transition-colors duration-150"
-                aria-label={`Start oefening: ${exercise.exercise_name}`}
-            >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M8 5v14l11-7z" />
-                </svg>
-                <span aria-hidden="true">Start</span>
-            </Link>
-
-            {/* Favorite button */}
+            {/* Favorite button — comes first so screenreader/tab order matches visual priority */}
             {auth.user && (
                 <button
                     onClick={() => onToggleFavorite(exercise.id)}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg transition-colors
+                    className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-colors
                         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7B5EA7]"
                     style={{
                         backgroundColor: exerciseIsFav ? '#fee2e2' : '#F3F4F6',
                         color: exerciseIsFav ? '#dc2626' : '#4B5563',
                         border: exerciseIsFav ? '2.5px solid #dc2626' : '2.5px solid #9CA3AF',
                     }}
-                    aria-label={
-                        exerciseIsFav
-                            ? `Verwijder ${exercise.exercise_name} uit favoriete oefeningen`
-                            : `Voeg ${exercise.exercise_name} toe aan favoriete oefeningen`
-                    }
                     aria-pressed={exerciseIsFav}
                     title={exerciseIsFav ? "Verwijder uit favorieten" : "Toevoegen aan favorieten"}
                 >
@@ -114,11 +94,32 @@ export default function ExerciseRow({ exercise, availability, isFavorite, onTogg
                     >
                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                     </svg>
-                    <span className="text-sm font-medium" aria-hidden="true">
-                        {exerciseIsFav ? "Favoriet" : "Favoriet"}
+                    <span className="sr-only">
+                        {exerciseIsFav
+                            ? "Hartjes icoon: verwijder uit favorietenlijst"
+                            : "Hartjes icoon: voeg toe aan favorietenlijst"}
+                    </span>
+                    <span className="text-sm font-semibold" aria-hidden="true">
+                        Favoriet
                     </span>
                 </button>
             )}
+
+            {/* Start button */}
+            <Link
+                href={route("exercise.show", { id: exercise.id })}
+                className="inline-flex items-center gap-2 px-3 py-2 bg-[#7B5EA7] text-white text-sm font-semibold
+                    rounded-lg hover:bg-[#5a3a7a]
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7B5EA7]
+                    transition-colors duration-150"
+                style={{ border: '2.5px solid transparent' }}
+                aria-label={`Start oefening: ${exercise.exercise_name}`}
+            >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M8 5v14l11-7z" />
+                </svg>
+                <span aria-hidden="true">Start</span>
+            </Link>
         </article>
     );
 }
