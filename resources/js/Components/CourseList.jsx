@@ -7,7 +7,7 @@ import LoadingIndicator from "@/Components/LoadingIndicator.jsx";
 // Vaste introductieoefening, altijd bovenaan en altijd beschikbaar
 function IntroCard({ exercise }) {
     return (
-        <div className="mb-2">
+        <div className="mb-4">
             <p className="text-xs font-semibold uppercase tracking-widest text-gray-600 mb-2 px-1" id="intro-label">
                 Begin hier
             </p>
@@ -15,16 +15,29 @@ function IntroCard({ exercise }) {
                 href={route("exercise.show", { id: exercise.id })}
                 className="flex items-center gap-4 p-4 bg-white rounded-xl hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
                 style={{ border: "2px solid #7B5EA7", textDecoration: "none" }}
+                aria-label={`Introductie-oefening: ${exercise.exercise_name}. Klik om te starten.`}
             >
-                <span className="sr-only">{`Introductie-oefening: ${exercise.exercise_name}.`}</span>
                 <div className="flex-1 min-w-0" aria-hidden="true">
                     <p className="text-base font-bold" style={{ color: "#7B5EA7" }}>
                         {exercise.exercise_name}
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5">Klik om te starten</p>
                 </div>
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-sm font-semibold flex-shrink-0" style={{ backgroundColor: "#7B5EA7" }} aria-hidden="true">
-                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <span
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-sm font-semibold flex-shrink-0"
+                    style={{ backgroundColor: "#7B5EA7" }}
+                    aria-hidden="true"
+                >
+                    <svg
+                        className="w-3.5 h-3.5"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                        style={{
+                            transform: 'scale(var(--icon-scale, 1))',
+                            transformOrigin: 'center',
+                            transition: 'transform 0.2s ease'
+                        }}
+                    >
                         <path d="M8 5v14l11-7z" />
                     </svg>
                     Start
@@ -41,7 +54,7 @@ export default function CourseList({
                                        onFetchCourseDetails = async () => {}
                                    }) {
     const [selectedCourse, setSelectedCourse] = useState(null);
-    const [showModal, setShowModal] = useState(false);
+    const [showModal, setShowModal]           = useState(false);
 
     const handleCardClick = async (course) => {
         if (!course.available) return;
@@ -60,10 +73,16 @@ export default function CourseList({
             handleCardClick(course);
         }
     };
+
     if (loading) return <LoadingIndicator message="Oefeningen laden…" />;
 
-    const introCourse = courses.find(c => c.is_intro);
+    const introCourse    = courses.find(c => c.is_intro);
     const regularCourses = courses.filter(c => !c.is_intro);
+
+    // Telling voor screenreader samenvatting
+    const totalCourses     = regularCourses.length;
+    const lockedCourses    = regularCourses.filter(c => c.available === false).length;
+    const availableCourses = totalCourses - lockedCourses;
 
     return (
         <>
@@ -83,9 +102,24 @@ export default function CourseList({
                 <p className="text-gray-400 italic text-sm">Nog geen delen beschikbaar.</p>
             )}
 
-            {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 mb-4">{error}</div>}
+            {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 mb-4">
+                    {error}
+                </div>
+            )}
 
-            <div className="flex flex-col gap-3" role="list" aria-labelledby="courses-heading">
+            {/* Screenreader samenvatting vóór de lijst */}
+            {totalCourses > 0 && (
+                <p className="sr-only" aria-live="polite">
+                    {`Er zijn ${totalCourses} vervolg delen: ${availableCourses} beschikbaar${
+                        lockedCourses > 0
+                            ? ` en ${lockedCourses} nog vergrendeld. Doe elke dag een oefening om vergrendelde delen te ontgrendelen.`
+                            : '.'
+                    }`}
+                </p>
+            )}
+
+            <ul className="flex flex-col gap-3" aria-labelledby="courses-heading">
                 {regularCourses.map((course) => (
                     <CourseCard
                         key={course.id}
@@ -94,7 +128,7 @@ export default function CourseList({
                         onKeyDown={handleKeyDown}
                     />
                 ))}
-            </div>
+            </ul>
 
             {showModal && selectedCourse && (
                 <ClientCourseModal course={selectedCourse} onClose={() => setShowModal(false)} />

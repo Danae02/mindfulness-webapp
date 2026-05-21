@@ -58,6 +58,13 @@ export default function CourseModal({ course, onClose }) {
 
     const isFavorite = (exerciseId) => favorites.includes(exerciseId);
 
+    // Telling voor screenreader samenvatting
+    const totalExercises     = course.exercises.length;
+    const lockedExercises    = course.exercises.filter(
+        ex => availability[ex.id] && !availability[ex.id].available
+    ).length;
+    const availableExercises = totalExercises - lockedExercises;
+
     // Focus trap voor toegankelijkheid
     useEffect(() => {
         const previousFocus = document.activeElement;
@@ -138,7 +145,7 @@ export default function CourseModal({ course, onClose }) {
                     </p>
                 )}
 
-                {/* pas renderen als availability bekend is */}
+                {/* Pas renderen als availability bekend is */}
                 {loadingAvail ? (
                     <div
                         className="flex items-center gap-2 py-6 px-6 text-gray-400 text-sm"
@@ -154,6 +161,15 @@ export default function CourseModal({ course, onClose }) {
                     </div>
                 ) : (
                     <div className="p-6 pt-2">
+
+                        <p className="sr-only" aria-live="polite">
+                            {`Dit deel bevat ${totalExercises} oefeningen: ${availableExercises} beschikbaar${
+                                lockedExercises > 0
+                                    ? ` en ${lockedExercises} nog vergrendeld. Doe elke dag een oefening om vergrendelde oefeningen te ontgrendelen.`
+                                    : '.'
+                            }`}
+                        </p>
+
                         <div className="space-y-3" role="list" aria-label={`Oefeningen in deel ${course.course_name}`}>
                             {course.exercises.map((exercise) => (
                                 <ExerciseRow

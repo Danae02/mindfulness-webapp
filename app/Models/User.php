@@ -126,3 +126,136 @@ class User extends Authenticatable
     }
 
 }
+//
+//
+//namespace App\Models;
+//
+//use App\Services\EmailEncryptionService;
+//use Illuminate\Database\Eloquent\Factories\HasFactory;
+//use Illuminate\Foundation\Auth\User as Authenticatable;
+//use Illuminate\Notifications\Notifiable;
+//
+//class User extends Authenticatable
+//{
+//    /** @use HasFactory<\Database\Factories\UserFactory> */
+//    use HasFactory, Notifiable;
+//
+//    /**
+//     * The attributes that are mass assignable.
+//     *
+//     * @var array<int, string>
+//     */
+//    protected $fillable = [
+//        'name',
+//        'email',
+//        'email_index',
+//        'password',
+//        'role_id',
+//        'is_reviewed',
+//        'research_group_id',
+//    ];
+//
+//    /**
+//     * The attributes that should be hidden for serialization.
+//     *
+//     * @var array<int, string>
+//     */
+//    protected $hidden = [
+//        'password',
+//        'remember_token',
+//        'email_index'
+//    ];
+//
+//    /**
+//     * Get the attributes that should be cast.
+//     *
+//     * @return array<string, string>
+//     */
+//    protected function casts(): array
+//    {
+//        return [
+//            'email_verified_at' => 'datetime',
+//            'password' => 'hashed',
+//            'is_reviewed' => 'boolean',
+//        ];
+//    }
+//
+//    /**
+//     * Automatically encrypt email when setting.
+//     */
+//    public function setEmailAttribute(string $email): void
+//    {
+//        $svc = app(EmailEncryptionService::class);
+//        $this->attributes['email'] = $svc->encrypt($email);
+//        $this->attributes['email_index'] = $svc->blindIndex($email);
+//    }
+//
+//    /**
+//     * Automatically decrypt email when retrieving.
+//     */
+//    public function getEmailAttribute(string $value): string
+//    {
+//        return app(EmailEncryptionService::class)->decrypt($value);
+//    }
+//
+//    /**
+//     * Set default role to 'viewer' (role_id = 2) on creation.
+//     */
+//    protected static function booted()
+//    {
+//        static::creating(function ($user) {
+//            if (is_null($user->role_id)) {
+//                $user->role_id = 2; // Default to 'viewer'
+//            }
+//        });
+//    }
+//
+//    /**
+//     * Get the role associated with this user.
+//     */
+//    public function role()
+//    {
+//        return $this->belongsTo(Role::class);
+//    }
+//
+//    /**
+//     * Get all sessions for this user.
+//     */
+//    public function sessions()
+//    {
+//        return $this->hasMany(Session::class);
+//    }
+//
+//    /**
+//     * Get all exercise logs for this user.
+//     */
+//    public function logs()
+//    {
+//        return $this->hasMany(UserExerciseLog::class);
+//    }
+//
+//    /**
+//     * Get all favorites for this user.
+//     */
+//    public function favorites()
+//    {
+//        return $this->hasMany(Favorite::class);
+//    }
+//
+//    /**
+//     * Get all exercises marked as favorite by this user.
+//     * Many-to-many relation via favorites table.
+//     */
+//    public function favoriteExercises()
+//    {
+//        return $this->belongsToMany(Exercise::class, 'favorites');
+//    }
+//
+//    /**
+//     * Get the research group this user belongs to (nullable).
+//     */
+//    public function researchGroup()
+//    {
+//        return $this->belongsTo(ResearchGroup::class, 'research_group_id');
+//    }
+//}

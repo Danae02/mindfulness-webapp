@@ -14,7 +14,7 @@ class ExerciseAvailabilityService
     {
         return [
             'id'              => 'intro',
-            'exercise_name'   => 'Introductie mindfulness app',
+            'exercise_name'   => 'Begin uitleg mindfulness app',
             'audio_file_path' => '/audio/1.mindfulness_app_inleiding.m4a',
             'duration'        => null,
             'form_question'   => null,

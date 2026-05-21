@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Role;
-use App\Models\Team;
 use App\Models\User;
 use App\Models\Exercise;
 use App\Models\UserExerciseLog;
@@ -25,7 +24,6 @@ class DatabaseSeeder extends Seeder
             DB::table('favorites')->truncate();
             DB::table('exercises')->truncate();
             DB::table('users')->truncate();
-            DB::table('teams')->truncate();
             DB::table('roles')->truncate();
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
@@ -34,20 +32,6 @@ class DatabaseSeeder extends Seeder
 
             foreach ($roles as $role) {
                 Role::create($role);
-            }
-
-            // Seed Teams
-            $teams = [
-                ['name' => 'Team Alpha'],
-                ['name' => 'Team Beta']
-            ];
-            foreach ($teams as $team) {
-                Team::create($team);
-            }
-
-            // Debug $teams
-            if (Team::count() === 0) {
-                throw new \Exception('No teams found. Ensure teams are seeded properly.');
             }
 
             // Seed Exercises
@@ -69,26 +53,21 @@ class DatabaseSeeder extends Seeder
             // Create admin
             User::factory()->create([
                 'role_id' => $adminRoleId,
-                'team_id' => Team::inRandomOrder()->first()->id,
                 'email' => 'admin@example.com',
                 'name' => 'Admin User',
             ]);
 
-
-
             // Create researcher
             User::factory()->create([
                 'role_id' => $researcherRoleId,
-                'team_id' => Team::inRandomOrder()->first()->id,
                 'email' => 'researcher@example.com',
                 'name' => 'Researcher User',
             ]);
 
-            // Create viewers (zonder favorieten)
+            // Create viewers
             User::factory(9)->create()->each(function ($viewer) use ($viewerRoleId, $exercises) {
                 $viewer->update([
                     'role_id' => $viewerRoleId,
-                    'team_id' => Team::inRandomOrder()->first()->id,
                 ]);
 
                 // Create logs for each viewer
@@ -103,7 +82,6 @@ class DatabaseSeeder extends Seeder
 
             echo "Seeding completed successfully!\n";
             echo "Created: " . Role::count() . " roles\n";
-            echo "Created: " . Team::count() . " teams\n";
             echo "Created: " . Exercise::count() . " exercises\n";
             echo "Created: " . User::count() . " users\n";
             echo "Created: " . Favorite::count() . " favorites\n";

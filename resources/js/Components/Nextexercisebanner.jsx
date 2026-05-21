@@ -9,14 +9,8 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
                 role="region"
                 aria-label="Status dagelijkse oefening: alle oefeningen voltooid"
                 className="rounded-2xl px-6 py-5 mb-5"
-                style={{ backgroundColor: "#FEF3E8", border: "2px solid #B85B06" }}
+                style={{ backgroundColor: "#FEF3E8", border: "3px solid #B85B06" }}
             >
-                <p
-                    className="text-xs font-semibold uppercase tracking-wider mb-0.5"
-                    style={{ color: "#B85B06" }}
-                >
-                    Klaar
-                </p>
                 <p className="text-lg font-semibold mb-1" style={{ color: "#4A2400" }}>
                     Je hebt de oefening van vandaag gedaan!
                 </p>

@@ -19,19 +19,26 @@ export default function Login({ status, canResetPassword }) {
 
     const submit = (e) => {
         e.preventDefault();
-
         post(route('login'), {
             onFinish: () => reset('password'),
         });
     };
 
-    // Status kan komen als directe prop (ForgotPassword redirect)
-    // of als flash.status (ResetPassword redirect via middleware)
     const successMessage = flash?.status || status;
 
     return (
         <GuestLayout>
             <Head title="Log in" />
+
+            <div className="mb-3 text-center">
+                <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                    Inlogpagina
+                </h1>
+            </div>
+
+            <div className="mb-3 flex justify-center">
+                <AccessibilityButton variant="button" />
+            </div>
 
             {successMessage && (
                 <div
@@ -45,25 +52,9 @@ export default function Login({ status, canResetPassword }) {
             )}
 
             <form onSubmit={submit}>
-                <div className="mb-3 text-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                        Inlogpagina
-                    </h1>
-                </div>
-
-                <div className="mb-3 flex justify-center">
-                    <AccessibilityButton variant="button" />
-                </div>
-
                 {/* E-mailadres */}
                 <div>
-                    <div className="flex items-center gap-1 mb-1">
-                        <InputLabel htmlFor="email" value="E-mailadres" />
-                    </div>
-
-                    <span id="email-hint" className="sr-only">
-                        E-mailadres invoerveld
-                    </span>
+                    <InputLabel htmlFor="email" value="E-mailadres" />
 
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -81,12 +72,8 @@ export default function Login({ status, canResetPassword }) {
                             isFocused={true}
                             onChange={(e) => setData('email', e.target.value)}
                             required
-                            aria-required="true"
                             aria-invalid={errors.email ? 'true' : undefined}
-                            aria-describedby={
-                                ['email-hint', errors.email ? 'email-error' : null]
-                                    .filter(Boolean).join(' ')
-                            }
+                            aria-describedby={errors.email ? 'email-error' : undefined}
                             placeholder="jouw@email.nl"
                         />
                     </div>
@@ -104,13 +91,7 @@ export default function Login({ status, canResetPassword }) {
 
                 {/* Wachtwoord */}
                 <div className="mt-3">
-                    <div className="flex items-center gap-1 mb-1">
-                        <InputLabel htmlFor="password" value="Wachtwoord" />
-                    </div>
-
-                    <span id="password-hint" className="sr-only">
-                        Wachtwoord invoerveld
-                    </span>
+                    <InputLabel htmlFor="password" value="Wachtwoord" />
 
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -128,21 +109,17 @@ export default function Login({ status, canResetPassword }) {
                             autoComplete="current-password"
                             onChange={(e) => setData('password', e.target.value)}
                             required
-                            aria-required="true"
                             aria-invalid={errors.password ? 'true' : undefined}
-                            aria-describedby={
-                                ['password-hint', errors.password ? 'password-error' : null]
-                                    .filter(Boolean).join(' ')
-                            }
+                            aria-describedby={errors.password ? 'password-error' : undefined}
                             placeholder="Jouw wachtwoord"
                         />
 
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none focus:ring-2 focus:ring-primary rounded-md"
-                            aria-label={showPassword ? 'Verberg wachtwoord' : 'Toon wachtwoord'}
-                            aria-pressed={showPassword}
+                            aria-hidden="true"
+                            tabIndex="-1"
+                            className="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none rounded-md"
                         >
                             {showPassword ? (
                                 <svg aria-hidden="true" className="w-5 h-5 text-gray-500 hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,6 +145,7 @@ export default function Login({ status, canResetPassword }) {
                     )}
                 </div>
 
+                {/* Wachtwoord vergeten */}
                 <div className="mt-2">
                     {canResetPassword && (
                         <Link
@@ -188,35 +166,35 @@ export default function Login({ status, canResetPassword }) {
                     )}
                 </div>
 
+                {/* Onthoud mij */}
                 <div className="mt-2 block">
                     <label className="flex items-center">
                         <Checkbox
                             name="remember"
                             checked={data.remember}
                             onChange={(e) => setData('remember', e.target.checked)}
-                            aria-describedby="remember-help"
                         />
                         <span className="ms-2 text-sm text-gray-600">
-                            Onthoud mij
+                            Onthoud mij op deze computer
                         </span>
                     </label>
-                    <span id="remember-help" className="sr-only">
-                        Volgende keer automatisch inloggen op deze computer
-                    </span>
                 </div>
 
+                {/* Inloggen knop */}
                 <div className="mt-3">
                     <button
                         type="submit"
                         disabled={processing}
                         className="w-full justify-center py-2.5 text-base font-semibold bg-[#6c4092] hover:bg-[#5a337a] text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2 disabled:opacity-50"
-                        aria-busy={processing}
                     >
-                        {processing ? 'Bezig met inloggen...' : 'Inloggen'}
+                        <span aria-live="polite" aria-atomic="true">
+                            {processing ? 'Bezig met inloggen...' : 'Inloggen'}
+                        </span>
                     </button>
                 </div>
             </form>
 
+            {/* Account aanmaken */}
             <div className="mt-4 text-center">
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
