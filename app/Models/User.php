@@ -23,7 +23,6 @@ class User extends Authenticatable
         'email_index',
         'password',
         'role_id',
-        'team_id',
         'is_reviewed',
         'research_group_id',
     ];

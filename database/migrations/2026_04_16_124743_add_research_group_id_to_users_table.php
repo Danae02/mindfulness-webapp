@@ -16,8 +16,7 @@ return new class extends Migration
             $table->foreignId('research_group_id')
                 ->nullable()
                 ->constrained('research_groups')
-                ->nullOnDelete()
-                ->after('team_id');
+                ->nullOnDelete();
         });
     }
 

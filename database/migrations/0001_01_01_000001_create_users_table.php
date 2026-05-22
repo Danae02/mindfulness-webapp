@@ -18,7 +18,6 @@ return new class extends Migration
 //            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
-            $table->foreignId('team_id')->nullable()->constrained('teams')->onDelete('set null'); // Voor supervisors in teams
             $table->json('preferences')->nullable();
             $table->timestamp('last_login')->nullable();
 //            $table->rememberToken();
