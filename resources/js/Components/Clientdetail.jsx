@@ -75,7 +75,7 @@ function TabVoortgang({ progress, loading }) {
                             />
                         </div>
                         {!course.available && (
-                            <p className="text-xs text-gray-400 mt-1">Nog niet beschikbaar voor deze cliënt</p>
+                            <p className="text-xs text-gray-400 mt-1">Nog niet open voor deze cliënt</p>
                         )}
                     </div>
 
@@ -205,14 +205,14 @@ function TabOefeningen({ clientId, favorites, loading, onStartExercise, onToggle
     };
 
     if (coursesLoading) return <LoadingSpinner label="Oefeningen laden…" />;
-    if (!courses.length) return <EmptyState icon={Icons.music} message="Geen cursussen beschikbaar." />;
+    if (!courses.length) return <EmptyState icon={Icons.music} message="Geen cursussen te doen." />;
 
     const isFav = (id) => favorites.some(f => f.id === id);
 
     return (
         <div className="space-y-3">
             <p className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                De slotjes tonen de beschikbaarheid voor <strong>deze cliënt</strong>. Je kunt altijd een beschikbare oefening samen doen, inclusief gevoelsvragen.
+                De slotjes tonen de beschikbaarheid voor <strong>deze cliënt</strong>. Je kunt altijd een open oefening samen doen, inclusief gevoelsvragen.
             </p>
 
             {courses.map((course) => {
@@ -302,10 +302,10 @@ function TabOefeningen({ clientId, favorites, loading, onStartExercise, onToggle
                                                         ) : (
                                                             <span
                                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed"
-                                                                aria-label={`Oefening ${ex.exercise_name} is nog niet beschikbaar voor deze cliënt`}
+                                                                aria-label={`Oefening ${ex.exercise_name} is nog niet open voor deze cliënt`}
                                                             >
                                                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                                                                Vergrendeld
+                                                                Nog niet open
                                                             </span>
                                                         )}
                                                     </div>
