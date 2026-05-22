@@ -5,12 +5,23 @@ import { Head } from "@inertiajs/react";
 import AccessibilityButton from "@/Components/AccessibilityButton";
 import TeamList from "@/Components/TeamList";
 import ClientDetail from "@/Components/ClientDetail";
+import MindfulnessIntroModal from "@/Components/MindfulnessIntroModal";
+import MindfulnessInfoBlock from "@/Components/MindfulnessInfoBlock";
 
 export default function DashboardSupervisor() {
     const [clients, setClients] = useState([]);
     const [selectedClient, setSelectedClient] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showIntroModal, setShowIntroModal] = useState(false);
+
+    // Show modal only on first visit
+    useEffect(() => {
+        const seen = localStorage.getItem('mindfulness-intro-seen');
+        if (!seen) {
+            setShowIntroModal(true);
+        }
+    }, []);
 
     // Fetch clients data once on mount
     useEffect(() => {
@@ -70,6 +81,11 @@ export default function DashboardSupervisor() {
         >
             <Head title="Supervisor Dashboard" />
 
+            {/* First-visit onboarding modal */}
+            {showIntroModal && (
+                <MindfulnessIntroModal onClose={() => setShowIntroModal(false)} />
+            )}
+
             <div className="py-8 bg-gray-50 min-h-screen">
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                     <div className="mb-6">
@@ -78,6 +94,9 @@ export default function DashboardSupervisor() {
                             Bekijk voortgang, beheer favorieten en doe oefeningen samen met jouw cliënten.
                         </p>
                     </div>
+
+                    {/* Persistent collapsible info block — always accessible after modal */}
+                    <MindfulnessInfoBlock />
 
                     {error && (
                         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
