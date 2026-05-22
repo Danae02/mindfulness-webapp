@@ -282,7 +282,7 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
             <p id={`${namePrefix}-hint`} className="sr-only">
                 Kies een van drie opties. Gebruik de pijltjestoetsen (omhoog of omlaag)
                 om te navigeren. Druk op Enter of Spatie om te selecteren.
-                Als je "Neutraal" kiest, ga je direct verder.
+                {`Als je "${answers[2]?.text || answers[2]}" kiest, ga je direct verder naar de audio oefening. Bij de andere twee antwoorden krijg je nog een extra optie.`}
             </p>
             <fieldset
                 role="group"
