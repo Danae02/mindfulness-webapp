@@ -136,8 +136,9 @@ class CourseController extends Controller
         if (!in_array(auth()->user()->role_id, [1, 3, 4])) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+        $intro  = $this->availabilityService->getIntroCourse();
         $result = $this->availabilityService->getClientProgress($userId);
 
-        return response()->json($result);
+        return response()->json(array_merge([$intro], $result));
     }
 }
