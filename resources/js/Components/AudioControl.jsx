@@ -6,6 +6,7 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [isSeeking, setIsSeeking] = useState(false);
+    const [announcement, setAnnouncement] = useState("");
     const audioTimerRef = useRef(null);
 
     // tijd naar mm:ss
@@ -37,8 +38,12 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
         };
         const setAudioDuration = () => setDuration(audio.duration);
         const handleEnded = () => {
-            setIsPlaying(false);
             setCurrentTime(0);
+            setAnnouncement("De oefening is afgelopen.");
+            setTimeout(() => {
+                setIsPlaying(false);
+                setTimeout(() => setAnnouncement(""), 3000);
+            }, 150);
         };
 
         audio.addEventListener("timeupdate", updateProgress);
@@ -66,6 +71,7 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
             } else {
                 // afspelen sr: label/state direct updaten zodat screenreader "Afspelen" uitspreekt, audio start 1.5s later
                 setIsPlaying(true);
+                setAnnouncement("");
                 clearTimeout(audioTimerRef.current);
                 audioTimerRef.current = setTimeout(() => {
                     audioRef.current?.play();
@@ -93,6 +99,14 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
                 preload="metadata"
                 className="hidden"
             />
+            
+            <div
+                aria-live="polite"
+                aria-atomic="true"
+                className="sr-only"
+            >
+                {announcement}
+            </div>
 
             {/* Tijdsweergave */}
             <div className="flex justify-between text-sm text-gray-600" aria-hidden="true">
