@@ -131,6 +131,22 @@ export default function TeamList({
                         <h2 id="add-client-modal-title" className="text-lg font-bold mb-4 text-center" style={{ color: '#3D2A6E' }}>
                             Cliënt registreren
                         </h2>
+
+                        <div
+                            className="mb-6 p-4 rounded-lg"
+                            style={{
+                                backgroundColor: '#F5F0FF',
+                                border: '3px solid #4A2B7A'
+                            }}
+                        >
+                            <p className="text-sm" style={{ color: '#1F0F3D' }}>
+                                <span className="font-semibold">Let op:</span> Als je op deze manier een account aanmaakt, kan de gebruiker <span className="font-semibold">niet zelfstandig inloggen</span>. Hiervoor is een e-mailadres nodig.
+                            </p>
+                            <p className="text-sm mt-2" style={{ color: '#1F0F3D' }}>
+                                Als de gebruiker <span className="font-semibold">zelfstandig wil kunnen inloggen</span>, maak dan samen via de inlog pagina een account aan. Op die manier kan je ook nog samen oefeningen doen.
+                            </p>
+                        </div>
+
                         <RegisterUserAsSupervisor
                             onSuccess={() => {
                                 setShowModal(false);
