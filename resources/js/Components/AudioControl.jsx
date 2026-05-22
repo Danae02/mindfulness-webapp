@@ -99,7 +99,7 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
                 preload="metadata"
                 className="hidden"
             />
-            
+
             <div
                 aria-live="polite"
                 aria-atomic="true"
