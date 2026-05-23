@@ -21,15 +21,14 @@ class AudioController extends Controller
 
     public function getAudio($filename): StreamedResponse
     {
-//        $filePath = "/storage/audio/$filename";
+        // Correct path: storage/app/public/audio/
+        $filePath = 'audio/' . $filename;
 
-        $filePath = storage_path('app/storage/public/audio/');
-
-        if (!Storage::exists($filePath)) {
-            abort(404, "Audiofile not found");
+        if (!Storage::disk('public')->exists($filePath)) {
+            abort(404, "Audiofile not found at: " . storage_path('app/public/' . $filePath));
         }
 
-        return Storage::download($filePath);
+        return Storage::disk('public')->download($filePath);
     }
 
     //Toont de ExercisePage voor een oefening.Ondersteunt de vaste introductie-oefening via id='intro'.
@@ -41,7 +40,7 @@ class AudioController extends Controller
                 'exercise' => [
                     'id'              => 'intro',
                     'exercise_name'   => 'Introductie mindfulness app',
-                    'audio_file_path' => '/audio/1.mindfulness_app_inleiding.m4a',
+                    'audio_file_path' => '/storage/audio/1.mindfulness_app_inleiding.m4a',
                 ],
             ]);
         }
@@ -108,10 +107,16 @@ class AudioController extends Controller
         }
 
         $filename = time() . '_' . $file->getClientOriginalName();
+
+        // Opslaan in storage/app/public/audio/ via de 'public' disk
         $filePath = $file->storeAs('audio', $filename, 'public');
+
+        // URL genereert: /storage/audio/filename.mp3
+        // Dit werkt omdat php artisan storage:link een symlink maakt
         $audioUrl = asset('storage/audio/' . $filename);
 
         // Bereken de audioduur via getID3
+        // Correcte path: storage/app/public/audio/
         $durationSeconds = $this->getAudioDurationSeconds(
             storage_path('app/public/audio/' . $filename)
         );

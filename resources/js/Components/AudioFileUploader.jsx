@@ -39,6 +39,7 @@ export default function AudioFileUploader({
         try {
             // Cursus wordt hier pas aangemaakt als dat nog niet gebeurd is
             const courseId = await ensureCourseCreated();
+            console.log("course_id:", courseId);
 
             const formData = new FormData();
             formData.append("audio", chapter.file);
@@ -53,6 +54,7 @@ export default function AudioFileUploader({
             onUploaded?.();
         } catch (error) {
             console.error("Upload failed:", error);
+            console.error("Response data:", error.response?.data);
             alert(`Fout bij uploaden van oefening ${chapterNumber}.`);
         } finally {
             setUploading(false);
