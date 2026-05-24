@@ -184,7 +184,7 @@ export default function CourseUploader({ onCancel }) {
 
             {/* Stap 1 */}
             {step === 1 && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-400 p-8">
                     <h2 className="text-xl font-bold text-gray-900 mb-1">Nieuwe cursus aanmaken</h2>
                     <p className="text-sm text-gray-600 mb-6">Stap 1 van de 2</p>
 
@@ -293,7 +293,7 @@ export default function CourseUploader({ onCancel }) {
 
             {/* Stap 2 */}
             {step === 2 && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-400 p-8">
                     <h2 className="text-xl font-bold text-gray-900 mb-1">Oefeningen uploaden</h2>
                     <p className="text-sm text-gray-600 mb-6">Stap 2 van de 2</p>
 

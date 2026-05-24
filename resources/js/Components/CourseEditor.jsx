@@ -20,7 +20,7 @@ function ExerciseEditForm({ exercise, onSave, onCancel }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="mt-3 space-y-3 pt-3 border-t border-gray-100">
+        <form onSubmit={handleSubmit} className="mt-3 space-y-3 pt-3 border-t border-gray-300">
             <div>
                 <label htmlFor={`exercise-name-${exercise.id}`} className="block text-xs font-semibold text-gray-700 mb-1">
                     Naam oefening
@@ -104,7 +104,7 @@ function CourseEditForm({ course, onSave, onCancel }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4 pt-4 border-t border-gray-100">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4 pt-4 border-t border-gray-300">
             <div>
                 <label htmlFor="course-name-edit" className="block text-sm font-semibold text-gray-700 mb-1">
                     Naam van de cursus
@@ -324,7 +324,7 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                                     <div
                                         key={exercise.id}
                                         role="listitem"
-                                        className="rounded-xl border border-gray-200 p-4"
+                                        className="rounded-xl border border-gray-400 p-4"
                                     >
                                         <p className="font-bold text-gray-900 mb-1">{exercise.exercise_name}</p>
 
@@ -379,7 +379,7 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                     )}
 
                     {!editingCourse && !localCourse.is_intro && (
-                        <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100">
+                        <div className="flex gap-3 mt-6 pt-4 border-t border-gray-300">
                             {!confirmDelete ? (
                                 <button
                                     onClick={() => setConfirmDelete(true)}
@@ -491,7 +491,7 @@ export default function CourseEditor({ onAddCourse }) {
     }
 
     return (
-        <div>
+        <div className="bg-white rounded-xl p-4" style={{ border: "1px solid #5F5F5F", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)" }}>
             {courses.length === 0 && (
                 <p className="text-sm text-gray-600 italic py-4">Nog geen cursussen aangemaakt.</p>
             )}
@@ -507,11 +507,12 @@ export default function CourseEditor({ onAddCourse }) {
                                 key={course.id}
                                 role="listitem"
                                 aria-label={`${course.course_name} — standaard introductie, niet bewerkbaar`}
-                                className="w-full bg-gray-50 rounded-xl border-2 border-gray-300 px-5 py-4 cursor-default"
+                                className="w-full rounded-xl border-2 px-5 py-4 cursor-default opacity-75"
+                                style={{ backgroundColor: '#F5F3F8', borderColor: '#9B8AB0' }}
                             >
                                 <div className="flex items-center justify-between mb-1">
                                     <p className="font-bold text-gray-800 text-base">{course.course_name}</p>
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold text-gray-700 bg-gray-200 border border-gray-400">
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold text-gray-600 bg-gray-200 border border-gray-400">
                                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                             <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
                                         </svg>
@@ -542,7 +543,7 @@ export default function CourseEditor({ onAddCourse }) {
                             role="listitem"
                             onClick={() => handleCourseClick(course.id)}
                             aria-label={`Open cursus: ${course.course_name}, ${exerciseCount} oefening${exerciseCount !== 1 ? "en" : ""}`}
-                            className="w-full text-left bg-white rounded-xl border-2 border-gray-300 px-5 py-4 hover:border-purple-600 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-2"
+                            className="w-full text-left bg-white rounded-xl border-2 border-[#6C4092] px-5 py-4 hover:bg-purple-50 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-2"
                         >
                             <p className="font-bold text-gray-900 text-base mb-1">{course.course_name}</p>
 

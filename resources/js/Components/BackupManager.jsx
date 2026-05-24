@@ -89,10 +89,10 @@ export default function BackupManager() {
     };
 
     return (
-        <div className="space-y-8 max-w-2xl">
+        <div className="space-y-8 max-w-2xl mx-auto">
             {/* backup downloaden  */}
-            <section className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+            <section className="bg-white rounded-2xl border border-gray-500 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-300 flex items-center gap-3">
                     <div>
                         <h4 className="font-semibold text-gray-800">Backup downloaden</h4>
                         <p className="text-sm text-gray-600">
@@ -143,8 +143,8 @@ export default function BackupManager() {
             </section>
 
             {/* backup herstellen/terugzetten */}
-            <section className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+            <section className="bg-white rounded-2xl border border-gray-500 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-300 flex items-center gap-3">
                     <div>
                         <h4 className="font-semibold text-gray-800">Backup terugzetten</h4>
                         <p className="text-sm text-gray-600">
@@ -251,7 +251,10 @@ export default function BackupManager() {
                         <button
                             onClick={handleRestore}
                             disabled={!selectedFile || isRestoring}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-white transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 disabled:opacity-40 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-700"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 disabled:cursor-not-allowed border-2"
+                            style={selectedFile
+                                ? { backgroundColor: "#6C4092", color: "#ffffff", borderColor: "#6C4092" }
+                                : { backgroundColor: "#ffffff", color: "#6C4092", borderColor: "#6C4092" }}
                         >
                             {isRestoring ? (
                                 <>
@@ -344,7 +347,7 @@ function DownloadIcon() {
 function RestoreIcon() {
     return (
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582M20 20v-5h-.581M5.635 15A9 9 0 1018.364 8.636" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 3v12" />
         </svg>
     );
 }

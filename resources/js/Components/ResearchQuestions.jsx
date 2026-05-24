@@ -5,7 +5,7 @@ import EmoticonPicker from "@/Components/EmoticonPicker";
 
 function SectionCard({ title, children }) {
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-purple-100 p-4 sm:p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm border-2 border-[#6C4092] p-4 sm:p-6 mb-6">
             <h2 className="text-xl font-semibold text-purple-900 mb-4">{title}</h2>
             {children}
         </div>
@@ -13,26 +13,33 @@ function SectionCard({ title, children }) {
 }
 
 function PurpleButton({ onClick, disabled, children, variant = "primary" }) {
+    const [hovered, setHovered] = React.useState(false);
     const base = "px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed";
     const styles = {
         primary: `${base} text-white`,
-        secondary: `${base} bg-transparent border-2 font-semibold`,
+        secondary: `${base} bg-transparent border-2 font-semibold transition-colors`,
         danger: `${base} text-white`,
     };
+
+    const getStyle = () => {
+        if (variant === "primary")  return { backgroundColor: "#6C4092" };
+        if (variant === "danger")   return { backgroundColor: "#a5271a" };
+        if (variant === "secondary") {
+            return hovered
+                ? { backgroundColor: "#6C4092", borderColor: "#6C4092", color: "#ffffff" }
+                : { borderColor: "#6C4092", color: "#6C4092" };
+        }
+        return {};
+    };
+
     return (
         <button
             onClick={onClick}
             disabled={disabled}
             className={styles[variant]}
-            style={
-                variant === "primary"
-                    ? { backgroundColor: "#6C4092" }
-                    : variant === "secondary"
-                        ? { borderColor: "#6C4092", color: "#6C4092" }
-                        : variant === "danger"
-                            ? { backgroundColor: "#a5271a" }
-                            : {}
-            }
+            style={getStyle()}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
         >
             {children}
         </button>

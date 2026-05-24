@@ -130,7 +130,7 @@ export default function PaginatedDataTable({
     ];
 
     return (
-        <div>
+        <div className="bg-white rounded-xl p-4" style={{ border: '1px solid #5F5F5F', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
             <div
                 ref={statusRef}
                 aria-live="polite"
@@ -167,7 +167,7 @@ export default function PaginatedDataTable({
                                 id="filter-group"
                                 value={selectedGroup}
                                 onChange={(e) => setSelectedGroup(e.target.value)}
-                                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                className="border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
                             >
                                 <option value="">Alle groepen</option>
                                 {researchGroups.map((g) => (
@@ -191,7 +191,7 @@ export default function PaginatedDataTable({
                                 id="filter-exercise"
                                 value={selectedExercise}
                                 onChange={(e) => setSelectedExercise(e.target.value)}
-                                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                className="border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
                             >
                                 <option value="">Alle oefeningen</option>
                                 {exercises.map((e) => (
@@ -212,7 +212,7 @@ export default function PaginatedDataTable({
                             type="date"
                             value={dateFrom}
                             onChange={(e) => setDateFrom(e.target.value)}
-                            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                            className="border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
                         />
                     </div>
 
@@ -225,7 +225,7 @@ export default function PaginatedDataTable({
                             type="date"
                             value={dateTo}
                             onChange={(e) => setDateTo(e.target.value)}
-                            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                            className="border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
                         />
                     </div>
 

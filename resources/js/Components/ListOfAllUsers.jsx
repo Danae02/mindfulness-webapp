@@ -57,14 +57,14 @@ export default function ListOfAllUsers({
     return (
         <div>
             {/* Search and Filter Buttons container */}
-            <div className="flex items-center mb-4 space-x-4">
+            <div className="flex items-end mb-4 gap-6">
                 <SearchBar searchTerm={searchTerm} onSearch={onSearchChange} catTerm="naam"/>
                 <FilterSwitch filtered={filtered} onToggle={() => onFilterChange(!filtered)} />
             </div>
 
             {/* Better table to display users */}
             <div
-                className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm"
+                className="overflow-x-auto rounded-xl border border-gray-500 shadow-sm"
                 tabIndex={0}
                 role="region"
                 aria-label="Gebruikerslijst"
