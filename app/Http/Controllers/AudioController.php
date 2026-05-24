@@ -8,44 +8,45 @@ use App\Models\UserExerciseLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AudioController extends Controller
 {
 
-    // CRUD voor Exercises
     public function getAllAudios()
     {
         return response()->json(Exercise::all());
     }
 
-    public function getAudio($filename): StreamedResponse
+
+    public function getAudio($filename)
     {
         // Correct path: storage/app/public/audio/
-        $filePath = 'audio/' . $filename;
+        $filePath = storage_path('app/public/audio/' . $filename);
 
-        if (!Storage::disk('public')->exists($filePath)) {
-            abort(404, "Audiofile not found at: " . storage_path('app/public/' . $filePath));
+        if (!file_exists($filePath)) {
+            abort(404, 'Audiobestand niet gevonden: ' . $filePath);
         }
 
-        return Storage::disk('public')->download($filePath);
+        return response()->file($filePath);
     }
 
-    //Toont de ExercisePage voor een oefening.Ondersteunt de vaste introductie-oefening via id='intro'.
+    private function audioUrl(string $filename): string
+    {
+        return route('audio.serve', ['filename' => basename($filename)]);
+    }
+
     public function showExercise($id)
     {
-        // Introductie-oefening (hardcoded, geen DB)
         if ($id === 'intro') {
             return Inertia::render('IntroExercisePage', [
                 'exercise' => [
                     'id'              => 'intro',
                     'exercise_name'   => 'Introductie mindfulness app',
-                    'audio_file_path' => '/storage/audio/1.mindfulness_app_inleiding.m4a',
+                    'audio_file_path' => $this->audioUrl('1.mindfulness_app_inleiding.m4a'),
                 ],
             ]);
         }
 
-        // Gewone oefening uit DB
         $exercise = Exercise::find($id);
 
         if (!$exercise) {
@@ -74,8 +75,13 @@ class AudioController extends Controller
             $answers  = $setting->answers ?? null;
         }
 
+        $exerciseData = $exercise->toArray();
+
+        // Herschrijf de audio-URL naar /audio/{filename} zodat het door Laravel gaat
+        $exerciseData['audio_file_path'] = $this->audioUrl($exercise->audio_file_path);
+
         return Inertia::render('ExercisePage', [
-            'exercise'              => array_merge($exercise->toArray(), [
+            'exercise'              => array_merge($exerciseData, [
                 'duration' => $exercise->duration_minutes,
             ]),
             'researchMode'          => 'per_exercise',
@@ -108,12 +114,10 @@ class AudioController extends Controller
 
         $filename = time() . '_' . $file->getClientOriginalName();
 
-        // Opslaan in storage/app/public/audio/ via de 'public' disk
-        $filePath = $file->storeAs('audio', $filename, 'public');
+        $file->storeAs('audio', $filename, 'public');
 
-        // URL genereert: /storage/audio/filename.mp3
-        // Dit werkt omdat php artisan storage:link een symlink maakt
-        $audioUrl = asset('storage/audio/' . $filename);
+        // Sla de /audio/ route-URL op (niet de asset URL) zodat seeking altijd werkt
+        $audioUrl = $this->audioUrl($filename);
 
         // Bereken de audioduur via getID3
         // Correcte path: storage/app/public/audio/

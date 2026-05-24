@@ -5,7 +5,8 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
-    const [isSeeking, setIsSeeking] = useState(false);
+    const isSeekingRef = useRef(false);
+    const intendedTimeRef = useRef(0);
     const [announcement, setAnnouncement] = useState("");
     const audioTimerRef = useRef(null);
 
@@ -34,10 +35,14 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
         if (!audio) return;
 
         const updateProgress = () => {
-            if (!isSeeking) setCurrentTime(audio.currentTime);
+            if (!isSeekingRef.current) {
+                intendedTimeRef.current = audio.currentTime;
+                setCurrentTime(audio.currentTime);
+            }
         };
         const setAudioDuration = () => setDuration(audio.duration);
         const handleEnded = () => {
+            intendedTimeRef.current = 0;
             setCurrentTime(0);
             setAnnouncement("De oefening is afgelopen.");
             setTimeout(() => {
@@ -55,7 +60,7 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
             audio.removeEventListener("loadedmetadata", setAudioDuration);
             audio.removeEventListener("ended", handleEnded);
         };
-    }, [isSeeking]);
+    }, []);
 
     useEffect(() => {
         return () => clearTimeout(audioTimerRef.current);
@@ -64,17 +69,19 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
     const togglePlayPause = () => {
         if (audioRef.current) {
             if (isPlaying) {
-                // Pauzeren: meteen stoppen
                 clearTimeout(audioTimerRef.current);
                 audioRef.current.pause();
                 setIsPlaying(false);
             } else {
-                // afspelen sr: label/state direct updaten zodat screenreader "Afspelen" uitspreekt, audio start 1.5s later
+                const timeToSeek = intendedTimeRef.current;
                 setIsPlaying(true);
                 setAnnouncement("");
                 clearTimeout(audioTimerRef.current);
                 audioTimerRef.current = setTimeout(() => {
-                    audioRef.current?.play();
+                    if (audioRef.current) {
+                        audioRef.current.currentTime = timeToSeek;
+                        audioRef.current.play();
+                    }
                 }, 1500);
             }
         }
@@ -82,28 +89,29 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
 
     const handleSeek = (e) => {
         const newTime = parseFloat(e.target.value);
+        intendedTimeRef.current = newTime;
         if (audioRef.current) {
             audioRef.current.currentTime = newTime;
             setCurrentTime(newTime);
         }
     };
 
-    const handleSeekStart = () => setIsSeeking(true);
-    const handleSeekEnd = () => setIsSeeking(false);
+    const handleSeekStart = () => { isSeekingRef.current = true; };
+    const handleSeekEnd   = () => { isSeekingRef.current = false; };
 
     return (
         <div className="w-full space-y-4">
             <audio
                 ref={audioRef}
                 src={AudioName}
-                preload="metadata"
+                preload="auto"
                 className="hidden"
             />
 
             <div
                 aria-live="polite"
-                aria-atomic="true"
-                className="sr-only"
+                 aria-atomic="true"
+                 className="sr-only"
             >
                 {announcement}
             </div>

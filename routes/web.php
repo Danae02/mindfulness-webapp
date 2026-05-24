@@ -42,6 +42,12 @@ Route::get('/test', fn() => Inertia::render('Test'))->name('test');
 Route::get('/exercise/{id}', [ExerciseController::class, 'showExercise'])
     ->name('exercise.show');
 
+Route::get('/audio/{filename}', [AudioController::class, 'getAudio'])
+    ->name('audio.serve');
+
+Route::get('/storage/audio/{filename}', [AudioController::class, 'getAudio'])
+    ->name('audio.get');
+
 // Authenticated routes
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -155,13 +161,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/questions/default', [ResearchGroupController::class, 'saveDefaultQuestion'])->name('questions.default.save');
     });
 });
-
-// Public audio file route
-Route::get('/storage/audio/{filename}', [AudioController::class, 'getAudio'])
-    ->name('audio.get');
-
-
-
 
 // Authentication routes
 require __DIR__ . '/auth.php';

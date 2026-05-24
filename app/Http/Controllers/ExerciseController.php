@@ -56,6 +56,7 @@ class ExerciseController extends Controller
         }
 
         $exerciseData = $exercise->toArray();
+        $exerciseData['audio_file_path'] = '/audio/' . basename($exercise->audio_file_path);
         $available = true;
         $availableLabel = null;
         $alreadyCompletedToday = false;
@@ -100,20 +101,20 @@ class ExerciseController extends Controller
         return Inertia::render('ExercisePage', [
             'exercise' => $exerciseData,
             'availability' => [
-                'available'            => $available,
-                'availableLabel'       => $availableLabel,
+                'available'             => $available,
+                'availableLabel'        => $availableLabel,
                 'alreadyCompletedToday' => $alreadyCompletedToday,
-                'isNewestExercise'     => $isNewestExercise,
+                'isNewestExercise'      => $isNewestExercise,
             ],
             'research' => [
-                'mode'    => $researchMode,
+                'mode'     => $researchMode,
                 'question' => $researchQuestion,
-                'answers' => $researchAnswers,
+                'answers'  => $researchAnswers,
             ],
             'proxy' => [
-                'forUserId'           => $forUserId,
-                'isProxyMode'         => $isProxyMode,
-                'feelingAnsweredToday' => $proxyFeelingAnsweredToday,
+                'forUserId'            => $forUserId,
+                'isProxyMode'          => $isProxyMode,
+                'feelingAnsweredToday'  => $proxyFeelingAnsweredToday,
             ],
         ]);
     }
