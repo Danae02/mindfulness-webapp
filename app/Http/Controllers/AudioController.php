@@ -144,13 +144,57 @@ class AudioController extends Controller
         ]);
     }
 
+    public function updateAudio(Request $request, $id)
+    {
+        $request->validate([
+            'audio'          => 'required|file|max:10240',
+            'exercise_name'  => 'required|string|max:255',
+            'form_question'  => 'nullable|string',
+            'form_answers'   => 'nullable|array',
+        ]);
+
+        $exercise = Exercise::findOrFail($id);
+
+        if (!$request->hasFile('audio')) {
+            return response()->json(['error' => 'No file uploaded.'], 400);
+        }
+
+        $file = $request->file('audio');
+
+        if (!$file->isValid()) {
+            return response()->json(['error' => 'Invalid file.'], 400);
+        }
+
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $file->storeAs('audio', $filename, 'public');
+        $audioUrl = $this->audioUrl($filename);
+
+        $durationSeconds = $this->getAudioDurationSeconds(
+            storage_path('app/public/audio/' . $filename)
+        );
+
+        $totalSeconds = $durationSeconds !== null ? $durationSeconds + 60 : null;
+
+        $exercise->update([
+            'exercise_name'    => $request->input('exercise_name'),
+            'audio_file_path'  => $audioUrl,
+            'form_question'    => $request->input('form_question'),
+            'form_answers'     => $request->input('form_answers'),
+            'duration_seconds' => $totalSeconds,
+        ]);
+
+        return response()->json([
+            'message'  => 'Exercise updated successfully!',
+            'exercise' => $exercise,
+        ]);
+    }
+
     private function getAudioDurationSeconds(string $absolutePath): ?int
     {
         if (!file_exists($absolutePath)) {
             return null;
         }
 
-        // getID3 staat standaard in laravel via composer require james-heinrich/getid3
         if (!class_exists(\getID3::class)) {
             return null;
         }

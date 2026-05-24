@@ -153,14 +153,51 @@ class ExerciseController extends Controller
 
     public function updateExercise(Request $request, $id)
     {
-        $request->validate([
-            'exercise_name'   => 'nullable|string|max:255',
-            'description'     => 'nullable|string',
-            'audio_file_path' => 'nullable|string',
-        ]);
-
         $exercise = Exercise::findOrFail($id);
-        $exercise->update($request->only(['exercise_name', 'description', 'audio_file_path']));
+
+        // Als audio meegestuurd wordt, handle dat
+        if ($request->hasFile('audio')) {
+            $request->validate([
+                'audio'          => 'required|file|max:10240',
+                'exercise_name'  => 'required|string|max:255',
+                'form_question'  => 'nullable|string',
+                'form_answers'   => 'nullable|array',
+            ]);
+
+            $file = $request->file('audio');
+
+            if (!$file->isValid()) {
+                return response()->json(['error' => 'Invalid file.'], 400);
+            }
+
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('audio', $filename, 'public');
+
+            $audioUrl = route('audio.serve', ['filename' => basename($filename)]);
+
+            $durationSeconds = $this->getAudioDurationSeconds(
+                storage_path('app/public/audio/' . $filename)
+            );
+
+            $totalSeconds = $durationSeconds !== null ? $durationSeconds + 60 : null;
+
+            $exercise->update([
+                'exercise_name'    => $request->input('exercise_name'),
+                'audio_file_path'  => $audioUrl,
+                'form_question'    => $request->input('form_question'),
+                'form_answers'     => $request->input('form_answers'),
+                'duration_seconds' => $totalSeconds,
+            ]);
+        } else {
+            // update zonder audio
+            $request->validate([
+                'exercise_name'   => 'nullable|string|max:255',
+                'description'     => 'nullable|string',
+                'form_question'   => 'nullable|string',
+                'form_answers'    => 'nullable|array',
+            ]);
+            $exercise->update($request->only(['exercise_name', 'description', 'form_question', 'form_answers']));
+        }
 
         return response()->json([
             'message'  => 'Exercise updated successfully!',
@@ -262,137 +299,27 @@ class ExerciseController extends Controller
 
         return [$researchMode, $researchQuestion, $researchAnswers];
     }
+
+    private function getAudioDurationSeconds(string $absolutePath): ?int
+    {
+        if (!file_exists($absolutePath)) {
+            return null;
+        }
+
+        if (!class_exists(\getID3::class)) {
+            return null;
+        }
+
+        try {
+            $getID3   = new \getID3();
+            $fileInfo = $getID3->analyze($absolutePath);
+
+            if (isset($fileInfo['playtime_seconds'])) {
+                return (int) ceil($fileInfo['playtime_seconds']);
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('getID3 kon duur niet lezen: ' . $e->getMessage());
+        }
+        return null;
+    }
 }
-//
-//
-//namespace App\Models;
-//
-//use App\Services\EmailEncryptionService;
-//use Illuminate\Database\Eloquent\Factories\HasFactory;
-//use Illuminate\Foundation\Auth\User as Authenticatable;
-//use Illuminate\Notifications\Notifiable;
-//
-//class User extends Authenticatable
-//{
-//    /** @use HasFactory<\Database\Factories\UserFactory> */
-//    use HasFactory, Notifiable;
-//
-//    /**
-//     * The attributes that are mass assignable.
-//     *
-//     * @var array<int, string>
-//     */
-//    protected $fillable = [
-//        'name',
-//        'email',
-//        'email_index',
-//        'password',
-//        'role_id',
-//        'is_reviewed',
-//        'research_group_id',
-//    ];
-//
-//    /**
-//     * The attributes that should be hidden for serialization.
-//     *
-//     * @var array<int, string>
-//     */
-//    protected $hidden = [
-//        'password',
-//        'remember_token',
-//        'email_index'
-//    ];
-//
-//    /**
-//     * Get the attributes that should be cast.
-//     *
-//     * @return array<string, string>
-//     */
-//    protected function casts(): array
-//    {
-//        return [
-//            'email_verified_at' => 'datetime',
-//            'password' => 'hashed',
-//            'is_reviewed' => 'boolean',
-//        ];
-//    }
-//
-//    /**
-//     * Automatically encrypt email when setting.
-//     */
-//    public function setEmailAttribute(string $email): void
-//    {
-//        $svc = app(EmailEncryptionService::class);
-//        $this->attributes['email'] = $svc->encrypt($email);
-//        $this->attributes['email_index'] = $svc->blindIndex($email);
-//    }
-//
-//    /**
-//     * Automatically decrypt email when retrieving.
-//     */
-//    public function getEmailAttribute(string $value): string
-//    {
-//        return app(EmailEncryptionService::class)->decrypt($value);
-//    }
-//
-//    /**
-//     * Set default role to 'viewer' (role_id = 2) on creation.
-//     */
-//    protected static function booted()
-//    {
-//        static::creating(function ($user) {
-//            if (is_null($user->role_id)) {
-//                $user->role_id = 2; // Default to 'viewer'
-//            }
-//        });
-//    }
-//
-//    /**
-//     * Get the role associated with this user.
-//     */
-//    public function role()
-//    {
-//        return $this->belongsTo(Role::class);
-//    }
-//
-//    /**
-//     * Get all sessions for this user.
-//     */
-//    public function sessions()
-//    {
-//        return $this->hasMany(Session::class);
-//    }
-//
-//    /**
-//     * Get all exercise logs for this user.
-//     */
-//    public function logs()
-//    {
-//        return $this->hasMany(UserExerciseLog::class);
-//    }
-//
-//    /**
-//     * Get all favorites for this user.
-//     */
-//    public function favorites()
-//    {
-//        return $this->hasMany(Favorite::class);
-//    }
-//
-//    /**
-//     * Get all exercises marked as favorite by this user.
-//     * Many-to-many relation via favorites table.
-//     */
-//    public function favoriteExercises()
-//    {
-//        return $this->belongsToMany(Exercise::class, 'favorites');
-//    }
-//
-//    /**
-//     * Get the research group this user belongs to (nullable).
-//     */
-//    public function researchGroup()
-//    {
-//        return $this->belongsTo(ResearchGroup::class, 'research_group_id');
-//    }
-//}

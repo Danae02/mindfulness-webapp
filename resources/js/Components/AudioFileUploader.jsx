@@ -7,6 +7,7 @@ export default function AudioFileUploader({
                                               chapter,
                                               onChapterUpdate,
                                               onUploaded,
+                                              exerciseId,
                                           }) {
     const [uploading, setUploading] = useState(false);
     const [uploaded, setUploaded]   = useState(false);
@@ -37,18 +38,26 @@ export default function AudioFileUploader({
         setUploading(true);
 
         try {
-            // Cursus wordt hier pas aangemaakt als dat nog niet gebeurd is
-            const courseId = await ensureCourseCreated();
-            console.log("course_id:", courseId);
-
             const formData = new FormData();
             formData.append("audio", chapter.file);
-            formData.append("course_id", courseId);
             formData.append("exercise_name", chapter.chapterName);
 
-            await axios.post(route("exercises.create"), formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+            // update bestaande oefening
+            if (exerciseId) {
+                await axios.put(route("exercises.update", exerciseId), formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+            } else {
+                // maak nieuwe oefening
+                const courseId = await ensureCourseCreated();
+                console.log("course_id:", courseId);
+
+                formData.append("course_id", courseId);
+
+                await axios.post(route("exercises.create"), formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+            }
 
             setUploaded(true);
             onUploaded?.();
@@ -88,7 +97,7 @@ export default function AudioFileUploader({
                 </h3>
                 {uploaded && (
                     <span className="ml-auto text-xs font-medium text-white bg-green-600 px-2 py-0.5 rounded-full">
-                        Geüpload!
+                        {exerciseId ? "Bijgewerkt!" : "Geüpload!"}
                     </span>
                 )}
             </div>
@@ -174,9 +183,9 @@ export default function AudioFileUploader({
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                                 </svg>
-                                Uploaden...
+                                {exerciseId ? "Bijwerken..." : "Uploaden..."}
                             </span>
-                        ) : `Oefening ${chapterNumber} uploaden`}
+                        ) : exerciseId ? `Oefening ${chapterNumber} bijwerken` : `Oefening ${chapterNumber} uploaden`}
                     </button>
                 </form>
             )}
