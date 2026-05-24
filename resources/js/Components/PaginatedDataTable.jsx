@@ -248,7 +248,7 @@ export default function PaginatedDataTable({
                 <LoadingIndicator message="Datapunten laden..." />
             ) : (
                 <>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Datapunten tabel">
                         <table className="w-full text-sm border-collapse">
                             <thead>
                             <tr className="border-b-2 border-gray-300">

@@ -65,7 +65,7 @@ function groupByWeek(logs) {
 
 function StatCard({ label, value, sub }) {
     return (
-        <div className="bg-white border border-gray-700 rounded-xl px-5 py-4 min-w-[120px]">
+        <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 min-w-[120px]">
             <p className="text-xs text-gray-600 mb-1">{label}</p>
             <p className="text-2xl font-bold text-gray-900">{value ?? "–"}</p>
             {sub && <p className="text-xs text-gray-600 mt-0.5">{sub}</p>}
@@ -77,7 +77,7 @@ function StatCard({ label, value, sub }) {
 function CustomTooltip({ active, payload, label }) {
     if (!active || !payload?.length) return null;
     return (
-        <div className="bg-white border border-gray-700 rounded-xl shadow-lg px-4 py-3 text-sm">
+        <div className="bg-white border border-purple-100 rounded-xl shadow-lg px-4 py-3 text-sm">
             <p className="font-semibold text-gray-700 mb-1">{label}</p>
             {payload.map((p) => (
                 <p key={p.name} style={{ color: p.color }}>
@@ -185,14 +185,10 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
 
     return (
         <div className="space-y-6">
-            {/* Titel */}
-            <div>
-                <h2 className="text-2xl font-bold text-gray-900">Gevoelsmetingen</h2>
-                {/* text-gray-700 ipv text-gray-500: contrast was 4.39 op bg-gray-100, nu voldoende */}
-                <p className="text-sm text-gray-700 mt-0.5">
-                    Genormaliseerde scores (0–100) — 3-schaal en 5-schaal zijn vergelijkbaar
-                </p>
-            </div>
+            {/* Subtitel alleen */}
+            <p className="text-sm text-gray-700 -mt-2">
+                Genormaliseerde scores (0–100) — 3-schaal en 5-schaal zijn vergelijkbaar
+            </p>
 
             <div className="flex flex-wrap gap-2">
                 <TabButton
@@ -218,26 +214,19 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
                     <label htmlFor="filter-exercise" className="block text-xs text-gray-700 mb-1">
                         Oefening
                     </label>
-                    <div className="relative">
-                        <select
-                            id="filter-exercise"
-                            value={selectedExercise}
-                            onChange={(e) => setSelectedExercise(e.target.value)}
-                            className="border border-gray-700 rounded-lg px-3 py-1.5 pr-8 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-400 appearance-none w-full"
-                        >
-                            <option value="">Alle oefeningen</option>
-                            {exercises.map((ex) => (
-                                <option key={ex.id} value={ex.id}>
-                                    {ex.exercise_name}
-                                </option>
-                            ))}
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
-                            <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-                    </div>
+                    <select
+                        id="filter-exercise"
+                        value={selectedExercise}
+                        onChange={(e) => setSelectedExercise(e.target.value)}
+                        className="border border-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    >
+                        <option value="">Alle oefeningen</option>
+                        {exercises.map((ex) => (
+                            <option key={ex.id} value={ex.id}>
+                                {ex.exercise_name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
                 <div>
                     <label htmlFor="filter-date-from" className="block text-xs text-gray-700 mb-1">
@@ -248,7 +237,7 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
                         type="date"
                         value={dateFrom}
                         onChange={(e) => setDateFrom(e.target.value)}
-                        className="border border-gray-700 rounded-lg px-3 py-1.5 pr-8 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-400 appearance-none"
+                        className="border border-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
                     />
                 </div>
                 <div>
@@ -260,7 +249,7 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
                         type="date"
                         value={dateTo}
                         onChange={(e) => setDateTo(e.target.value)}
-                        className="border border-gray-700 rounded-lg px-3 py-1.5 pr-8 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-400 appearance-none"
+                        className="border border-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
                     />
                 </div>
                 {(selectedExercise || dateFrom || dateTo) && (
@@ -314,7 +303,7 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
 
                     {/* diagram */}
                     {weekData.length > 0 ? (
-                        <div className="bg-white border border-gray-700 rounded-2xl p-6">
+                        <div className="bg-white border border-gray-200 rounded-2xl p-6">
                             <h3 className="text-base font-semibold text-gray-800 mb-1">
                                 Gevoel voor en na oefening
                             </h3>
@@ -357,14 +346,14 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
                             </ResponsiveContainer>
                         </div>
                     ) : (
-                        <div className="bg-white border border-gray-700 rounded-2xl p-8 text-center text-gray-400 italic">
+                        <div className="bg-white border border-gray-100 rounded-2xl p-8 text-center text-gray-400 italic">
                             Geen data gevonden voor deze selectie.
                         </div>
                     )}
 
                     {/* Verbetering-tabel per week */}
                     {weekData.length > 0 && (
-                        <div className="bg-white border border-gray-700 rounded-2xl p-6">
+                        <div className="bg-white border border-gray-200 rounded-2xl p-6">
                             <h3 className="text-base font-semibold text-gray-800 mb-4">
                                 Verschil (na − voor) per week
                             </h3>
