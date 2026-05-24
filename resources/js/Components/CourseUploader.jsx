@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import AudioFileUploader from "./AudioFileUploader.jsx";
 import axios from "axios";
 
@@ -65,17 +65,16 @@ export default function CourseUploader({ onCancel }) {
     const [isSubmitting, setIsSubmitting]   = useState(false);
     const [errors, setErrors]               = useState({});
     const [uploadedIndexes, setUploadedIndexes] = useState(new Set());
+    const [message, setMessage]             = useState(null);
+    const [messageType, setMessageType]     = useState(null);
 
-    // Cursus wordt pas aangemaakt bij de eerste upload.
-    // courseIdRef slaat het resultaat op zodat het maar één keer gebeurt.
     const courseIdRef      = useRef(null);
     const courseCreationPromiseRef = useRef(null);
+    const messageTimeoutRef = useRef(null);
 
     const ensureCourseCreated = async () => {
-        // Al aangemaakt: geef het id terug
         if (courseIdRef.current) return courseIdRef.current;
 
-        // Aanmaak al bezig (race condition bij gelijktijdige uploads): wacht op die promise
         if (courseCreationPromiseRef.current) return courseCreationPromiseRef.current;
 
         courseCreationPromiseRef.current = axios
@@ -113,7 +112,6 @@ export default function CourseUploader({ onCancel }) {
             return;
         }
 
-        // Nog geen DB-aanroep hier — cursus wordt pas aangemaakt bij eerste upload
         setChapters(
             Array.from({ length: numExercises }, () => ({ chapterName: "", file: null }))
         );
@@ -127,6 +125,20 @@ export default function CourseUploader({ onCancel }) {
         setChapters(updated);
     };
 
+    const showMessage = (text, type = 'success', duration = 5000) => {
+        setMessage(text);
+        setMessageType(type);
+
+        if (messageTimeoutRef.current) {
+            clearTimeout(messageTimeoutRef.current);
+        }
+
+        messageTimeoutRef.current = setTimeout(() => {
+            setMessage(null);
+            setMessageType(null);
+        }, duration);
+    };
+
     const handleReset = () => {
         setStep(1);
         setCourseName("");
@@ -137,11 +149,38 @@ export default function CourseUploader({ onCancel }) {
         setUploadedIndexes(new Set());
         courseIdRef.current = null;
         courseCreationPromiseRef.current = null;
+
+        // Toon melding
+        showMessage("De cursus succesvol aangemaakt!", 'success', 5000);
     };
+    const handleError = (errorMessage) => {
+        showMessage("✗ " + errorMessage, 'error', 5000);
+    };
+    useEffect(() => {
+        return () => {
+            if (messageTimeoutRef.current) {
+                clearTimeout(messageTimeoutRef.current);
+            }
+        };
+    }, []);
 
     return (
         <div className="max-w-2xl mx-auto">
             <StepIndicator currentStep={step} />
+
+            {/* Success/Error Message */}
+            {message && (
+                <div
+                    className={`mb-6 px-4 py-3 rounded-lg border transition-all ${
+                        messageType === 'success'
+                            ? 'bg-green-50 border-green-200 text-green-700'
+                            : 'bg-red-50 border-red-200 text-red-700'
+                    }`}
+                    role="alert"
+                >
+                    <p className="text-sm font-medium">{message}</p>
+                </div>
+            )}
 
             {/* Stap 1 */}
             {step === 1 && (
@@ -267,6 +306,7 @@ export default function CourseUploader({ onCancel }) {
                                 chapter={chapter}
                                 onChapterUpdate={(updatedChapter) => updateChapter(index, updatedChapter)}
                                 onUploaded={() => handleExerciseUploaded(index)}
+                                onError={(msg) => handleError(msg)}
                             />
                         ))}
                     </div>
