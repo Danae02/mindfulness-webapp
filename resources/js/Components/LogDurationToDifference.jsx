@@ -36,7 +36,7 @@ export default function LogDurationToDifference({
     return (
         <div className="flex gap-4">
             {/* Linkerkant: lijst van oefeningen */}
-            <div className="w-1/3 p-4 bg-white rounded-lg shadow-lg">
+            <div className="w-1/3 p-4 bg-white rounded-xl"  style={{ border: "1px solid #5F5F5F", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Oefeningen:</h3>
                 {loading ? (
                     <p className="text-gray-500">Laden...</p>
@@ -62,7 +62,7 @@ export default function LogDurationToDifference({
             </div>
 
             {/* Rechterkant: grafiek */}
-            <div className="flex-1 p-4 bg-white rounded-lg shadow-lg">
+            <div className="flex-1 p-4 bg-white rounded-xl" style={{ border: "1px solid #5F5F5F", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
                 {displayLoading ? (
                     <p className="text-gray-500">Laden...</p>
                 ) : error ? (

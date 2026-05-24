@@ -182,7 +182,7 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
         "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4A2872]";
 
     return (
-        <div className="max-w-3xl">
+        <div className="max-w-3xl bg-white rounded-xl p-6" style={{ border: "1px solid #5F5F5F", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)" }}>
             {/* Schermlezer live-regio voor statusmeldingen */}
             <div id={statusId} aria-live="polite" aria-atomic="true" className="sr-only">
                 {statusMessage}
