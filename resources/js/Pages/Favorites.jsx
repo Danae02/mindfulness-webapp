@@ -55,7 +55,7 @@ export default function Favorites() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <h1 className="text-3xl font-bold text-darkGray mb-2">Mijn favorieten</h1>
                 <p className="text-gray-500 mb-8">
-                    Hier vind je al je favoriete oefeningen die je hebt opgeslagen.
+                    Hier vind je de oefeningen die je hebt opgeslagen omdat je ze fijn vond.
                 </p>
 
                 {favorites.length === 0 ? (

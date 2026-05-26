@@ -19,12 +19,12 @@ export default function ExercisePage({
                                          exercise,
                                          availability = {},
                                          research = {},
-                                         proxy = {},
+                                         supervisorMode = {},
                                      }) {
     // Destructure grouped props
     const { available, availableLabel, alreadyCompletedToday, isNewestExercise } = availability;
     const { mode: researchMode, question: researchQuestion, answers: researchAnswers } = research;
-    const { forUserId, isProxyMode, feelingAnsweredToday: proxyFeelingAnsweredToday } = proxy;
+    const { forUserId, isSupervisorMode, feelingAnsweredToday: supervisorFeelingAnsweredToday } = supervisorMode;
 
     const [isCompleted,       setIsCompleted]       = useState(false);
     const [showStartQuestion, setShowStartQuestion] = useState(true);
@@ -39,9 +39,9 @@ export default function ExercisePage({
     const user = usePage().props.auth.user;
 
     const effectiveUserId = forUserId || user.id;
-    const isProxy         = isProxyMode || (forUserId && forUserId !== user.id);
+    const isSupervisor         = isSupervisorMode || (forUserId && forUserId !== user.id);
 
-    const proxyCanAskFeelings = isProxy && isNewestExercise && !proxyFeelingAnsweredToday;
+    const supervisorCanAskFeelings = isSupervisor && isNewestExercise && !supervisorFeelingAnsweredToday;
 
     // Vraag & antwoorden bepalen
     const getQuestion = () => {
@@ -69,7 +69,7 @@ export default function ExercisePage({
     const durationLabel = formatDuration(exercise.duration ?? null);
 
     useEffect(() => {
-        const shouldSkip = !isProxy && (alreadyCompletedToday || !isNewestExercise);
+        const shouldSkip = !isSupervisor && (alreadyCompletedToday || !isNewestExercise);
         setSkipQuestions(shouldSkip);
 
         if (shouldSkip) {
@@ -85,7 +85,7 @@ export default function ExercisePage({
             setShowCompletion(false);
             setIsCompleted(false);
         }
-    }, [exercise.id, alreadyCompletedToday, isProxy]);
+    }, [exercise.id, alreadyCompletedToday, isSupervisor]);
 
     const handleConfirmStart = (valueOneBased) => {
         setFeelingBefore(valueOneBased);
@@ -100,7 +100,7 @@ export default function ExercisePage({
 
     const handleCompletion = () => {
         setIsCompleted(true);
-        const shouldShowEndQuestion = hasQuestions && !skipQuestions && (!isProxy || proxyCanAskFeelings);
+        const shouldShowEndQuestion = hasQuestions && !skipQuestions && (!isSupervisor || supervisorCanAskFeelings);
         if (shouldShowEndQuestion) {
             setShowEndQuestion(true);
         } else {
@@ -155,7 +155,7 @@ export default function ExercisePage({
                             <p className="text-gray-600">
                                 {availableLabel || 'Maak eerst de vorige oefening.'}
                             </p>
-                            {isProxy && (
+                            {isSupervisor && (
                                 <p className="text-sm text-purple-600 bg-purple-50 p-3 rounded-lg">
                                     Deze oefening is voor deze cliënt nog niet beschikbaar.
                                 </p>
@@ -179,7 +179,7 @@ export default function ExercisePage({
                 <div className="flex items-center justify-center min-h-screen bg-gray-100 py-8">
                     <div className="bg-white rounded-lg shadow-lg max-w-lg w-full overflow-hidden p-8">
                         <CompletionScreen
-                            userName={isProxy ? 'de cliënt' : user.name}
+                            userName={isSupervisor ? 'de cliënt' : user.name}
                             onBack={handleBack}
                         />
                     </div>
@@ -191,7 +191,7 @@ export default function ExercisePage({
     return (
         <AuthenticatedLayout
             header={
-                isProxy ? (
+                isSupervisor ? (
                     <p className="text-sm text-purple-600">
                         Je doet deze oefening samen met je cliënt (ID: {forUserId})
                     </p>
@@ -232,7 +232,7 @@ export default function ExercisePage({
                                 <span className="text-sm text-white">De oefening duurt ongeveer {durationLabel}</span>
                             </div>
                         )}
-                        {isProxy && (
+                        {isSupervisor && (
                             <div className="mt-3 text-xs font-semibold text-white bg-white bg-opacity-20 rounded-lg px-3 py-1 inline-block">
                                 Begeleider-modus — namens cliënt
                             </div>
@@ -242,9 +242,9 @@ export default function ExercisePage({
                     <div className="p-6 space-y-4">
 
                         {/* STARTVRAAG */}
-                        {!skipQuestions && hasQuestions && showStartQuestion && (!isProxy || proxyCanAskFeelings) && (
+                        {!skipQuestions && hasQuestions && showStartQuestion && (!isSupervisor || supervisorCanAskFeelings) && (
                             <div>
-                                {isProxy && (
+                                {isSupervisor && (
                                     <p className="text-sm text-purple-700 bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
                                         <strong>Begeleider:</strong> Vraag de cliënt hoe zij/hij zich voelt <em>voor</em> de oefening en vul het in.
                                     </p>
@@ -258,9 +258,9 @@ export default function ExercisePage({
                             </div>
                         )}
 
-                        {isProxy && !proxyCanAskFeelings && showStartQuestion && (
+                        {isSupervisor && !supervisorCanAskFeelings && showStartQuestion && (
                             <div>
-                                {proxyFeelingAnsweredToday && isNewestExercise && (
+                                {supervisorFeelingAnsweredToday && isNewestExercise && (
                                     <div className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
                                         Je hebt vandaag al een gevoelsmeting voor deze cliënt ingevuld. De oefening kan opnieuw gedaan worden zonder nieuwe meting.
                                     </div>
@@ -282,7 +282,7 @@ export default function ExercisePage({
                         )}
 
                         {/* Geen vraag */}
-                        {!skipQuestions && !hasQuestions && showStartQuestion && !isProxy && (
+                        {!skipQuestions && !hasQuestions && showStartQuestion && !isSupervisor && (
                             <div className="text-center text-gray-500">
                                 <p>Geen gevoelsvraag voor deze oefening. Je kunt direct beginnen.</p>
                                 <button
@@ -295,7 +295,7 @@ export default function ExercisePage({
                         )}
 
                         {/* Herhaalde oefening melding (cliënt) */}
-                        {!isProxy && skipQuestions && (
+                        {!isSupervisor && skipQuestions && (
                             <div className="flex items-center gap-4 p-4 rounded-xl border-2" style={{ backgroundColor: '#F0E8FF', borderColor: '#7B5EA7' }}>
                                 <svg className="w-9 h-9 flex-shrink-0" style={{ color: '#7B5EA7' }} fill="currentColor" viewBox="0 0 24 24" role="img" aria-label="Al gedaan vandaag">
                                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
@@ -307,7 +307,7 @@ export default function ExercisePage({
                         )}
 
                         {/* Vandaag al gedaan door cliënt maar begeleider mag altijd verder */}
-                        {isProxy && alreadyCompletedToday && (
+                        {isSupervisor && alreadyCompletedToday && (
                             <div className="text-center text-amber-700 bg-amber-50 border border-amber-200 p-4 rounded-lg">
                                 <p className="font-medium">Deze cliënt heeft deze oefening vandaag al gedaan.</p>
                                 <p className="text-sm mt-1">Je kunt de oefening toch opnieuw doen en de audio beluisteren.</p>
@@ -343,9 +343,9 @@ export default function ExercisePage({
                         )}
 
                         {/* EINDVRAAG */}
-                        {hasQuestions && showEndQuestion && !hasAnsweredEnd && (!isProxy || proxyCanAskFeelings) && (
+                        {hasQuestions && showEndQuestion && !hasAnsweredEnd && (!isSupervisor || supervisorCanAskFeelings) && (
                             <div className="space-y-4 border-t pt-4">
-                                {isProxy && (
+                                {isSupervisor && (
                                     <p className="text-sm text-purple-700 bg-purple-50 border border-purple-200 rounded-lg p-3">
                                         <strong>Begeleider:</strong> Vraag de cliënt hoe zij/hij zich voelt <em>na</em> de oefening en vul het in.
                                     </p>
