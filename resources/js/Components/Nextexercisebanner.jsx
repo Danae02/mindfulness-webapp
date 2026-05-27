@@ -9,9 +9,9 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
                 role="region"
                 aria-label="Status dagelijkse oefening: alle oefeningen zijn gedaan"
                 className="rounded-2xl px-6 py-5 mb-5"
-                style={{ backgroundColor: "#FEF3E8", border: "3px solid #B85B06" }}
+                style={{ backgroundColor: "#F0FDF4", border: "4px solid #0A7431" }}
             >
-                <p className="text-lg font-semibold mb-1" style={{ color: "#4A2400" }}>
+                <p className="text-lg font-semibold mb-1" style={{ color: "#0A7431" }}>
                     Je hebt de oefening van vandaag gedaan!
                 </p>
             </section>
@@ -28,18 +28,18 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
                 role="region"
                 aria-label="Status dagelijkse oefening: vandaag gedaan"
                 className="rounded-2xl px-6 py-5 mb-5"
-                style={{ backgroundColor: "#FEF3E8", border: "2px solid #B85B06" }}
+                style={{ backgroundColor: "#F0FDF4", border: "4px solid #0A7431" }}
             >
                 <p
                     className="text-xs font-semibold uppercase tracking-wider mb-1"
-                    style={{ color: "#B85B06" }}
+                    style={{ color: "#0A7431" }}
                 >
                     Gedaan vandaag ✓
                 </p>
-                <p className="text-lg font-semibold mb-1" style={{ color: "#4A2400" }}>
+                <p className="text-lg font-semibold mb-1" style={{ color: "#0A7431" }}>
                     {nextExercise.exercise_name}
                 </p>
-                <p className="text-sm" style={{ color: "#7A3B00" }}>
+                <p className="text-sm" style={{ color: "#0A7431" }}>
                     Goed gedaan! Kom morgen terug voor je volgende oefening.
                 </p>
             </section>
