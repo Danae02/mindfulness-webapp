@@ -67,6 +67,7 @@ export default function ExerciseRow({ exercise, availability, isFavorite, onTogg
                 )}
             </div>
 
+
             {/* Start button */}
             <Link
                 href={route("exercise.show", { id: exercise.id })}
