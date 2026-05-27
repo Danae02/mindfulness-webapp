@@ -22,9 +22,9 @@ export default function Edit({ mustVerifyEmail, status }) {
 
                         <section
                             aria-labelledby="section-profile-heading"
-                            className="bg-white rounded-xl shadow-card border border-gray-200 overflow-hidden"
+                            className="bg-white rounded-xl shadow-card border border-black overflow-hidden"
                         >
-                            <div className="px-6 py-5 border-b border-gray-100">
+                            <div className="px-6 py-5 border-b border-gray-300">
                                 <h2
                                     id="section-profile-heading"
                                     className="text-lg font-semibold text-darkGray"
@@ -45,9 +45,9 @@ export default function Edit({ mustVerifyEmail, status }) {
 
                         <section
                             aria-labelledby="section-password-heading"
-                            className="bg-white rounded-xl shadow-card border border-gray-200 overflow-hidden"
+                            className="bg-white rounded-xl shadow-card border border-black overflow-hidden"
                         >
-                            <div className="px-6 py-5 border-b border-gray-100">
+                            <div className="px-6 py-5 border-b border-gray-300">
                                 <h2
                                     id="section-password-heading"
                                     className="text-lg font-semibold text-darkGray"

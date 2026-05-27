@@ -137,7 +137,7 @@ export default function DeleteUserForm({ className = '' }) {
                             ref={passwordInput}
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
-                            className="w-full text-base px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-300"
+                            className="w-full text-base px-4 py-3 border-2 border-black rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-300"
                             isFocused
                             placeholder="Jouw wachtwoord"
                             autoComplete="current-password"
@@ -177,7 +177,7 @@ export default function DeleteUserForm({ className = '' }) {
                             type="button"
                             onClick={closeModal}
                             className="w-full py-4 text-base font-semibold text-gray-800 bg-white
-                                       border-2 border-gray-400 rounded-lg
+                                       border-2 border-black rounded-lg
                                        hover:bg-gray-50 transition-all
                                        focus:outline-none focus:ring-4 focus:ring-gray-300
                                        min-h-[44px]"
