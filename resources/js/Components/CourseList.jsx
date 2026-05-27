@@ -94,7 +94,7 @@ export default function CourseList({
 
             {regularCourses.length > 0 && (
                 <p className="text-xs font-semibold uppercase tracking-widest text-gray-600 mb-2 px-1 mt-4">
-                    Vervolg delen
+                    Volgende delen
                 </p>
             )}
 
