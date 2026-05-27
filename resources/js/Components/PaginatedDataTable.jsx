@@ -77,11 +77,13 @@ export default function PaginatedDataTable({
         [linkForPagination, selectedGroup, selectedExercise, dateFrom, dateTo]
     );
 
-    // Herlaad bij filterwijziging
+    // Herlaad bij filterwijziging — altijd vanaf pagina 1
     useEffect(() => {
         setCurrentPage(1);
+        fetchData(1);
     }, [selectedGroup, selectedExercise, dateFrom, dateTo]);
 
+    // Herlaad bij paginawissel
     useEffect(() => {
         fetchData(currentPage);
     }, [currentPage, fetchData]);
