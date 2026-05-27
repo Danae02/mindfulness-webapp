@@ -199,178 +199,197 @@ export default function ExercisePage({
             }
         >
             <div className="flex items-center justify-center bg-gray-100 py-6 px-4">
-                <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full overflow-hidden">
+                <div className="max-w-2xl w-full">
 
-                    {/* Paarse header */}
-                    <div className="px-8 py-5 text-center" style={{ backgroundColor: '#7B5EA7' }}>
-                        <h1 className="text-3xl font-bold text-white">
-                            Oefening: {exercise.exercise_name}
-                        </h1>
-
-                        {/* Timing label: voor / na */}
-                        {showStartQuestion && !showEndQuestion && !isCompleted && (
-                            <div className="mt-3 inline-flex items-center gap-2 rounded-lg px-5 py-2" style={{ backgroundColor: 'rgba(0,0,0,0.25)', border: '2px solid rgba(0,0,0,0.35)' }}>
-                                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
-                                </svg>
-                                <span className="text-base font-bold text-white">Vraag vóór de oefening</span>
-                            </div>
-                        )}
-                        {showEndQuestion && (
-                            <div className="mt-3 inline-flex items-center gap-2 rounded-lg px-5 py-2" style={{ backgroundColor: 'rgba(0,0,0,0.25)', border: '2px solid rgba(0,0,0,0.35)' }}>
-                                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                </svg>
-                                <span className="text-base font-bold text-white">Vraag na de oefening</span>
-                            </div>
-                        )}
-                        {durationLabel && (
-                            <div className="flex items-center justify-center gap-1.5 mt-3">
-                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span className="text-sm text-white">De oefening duurt ongeveer {durationLabel}</span>
-                            </div>
-                        )}
-                        {isSupervisor && (
-                            <div className="mt-3 text-xs font-semibold text-white bg-white bg-opacity-20 rounded-lg px-3 py-1 inline-block">
-                                Begeleider-modus — namens cliënt
-                            </div>
-                        )}
+                    {/* Terugknop */}
+                    <div className="mb-3">
+                        <button
+                            onClick={handleBack}
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6C4092] transition-colors duration-200"
+                            style={{ backgroundColor: '#6C4092' }}
+                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#5a337a'}
+                            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#6C4092'}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Terug naar dashboard
+                        </button>
                     </div>
 
-                    <div className="p-6 space-y-4">
+                    <div className="bg-white rounded-lg shadow-lg w-full overflow-hidden">
 
-                        {/* STARTVRAAG */}
-                        {!skipQuestions && hasQuestions && showStartQuestion && (!isSupervisor || supervisorCanAskFeelings) && (
-                            <div>
-                                {isSupervisor && (
-                                    <p className="text-sm text-purple-700 bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
-                                        <strong>Begeleider:</strong> Vraag de cliënt hoe zij/hij zich voelt <em>voor</em> de oefening en vul het in.
-                                    </p>
-                                )}
-                                <FeelingQuestion
-                                    question={currentQuestion}
-                                    answers={currentAnswers}
-                                    namePrefix="start-answer"
-                                    onConfirm={handleConfirmStart}
-                                />
-                            </div>
-                        )}
+                        {/* Paarse header */}
+                        <div className="px-8 py-5 text-center" style={{ backgroundColor: '#7B5EA7' }}>
+                            <h1 className="text-3xl font-bold text-white">
+                                Oefening: {exercise.exercise_name}
+                            </h1>
 
-                        {isSupervisor && !supervisorCanAskFeelings && showStartQuestion && (
-                            <div>
-                                {supervisorFeelingAnsweredToday && isNewestExercise && (
-                                    <div className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-                                        Je hebt vandaag al een gevoelsmeting voor deze cliënt ingevuld. De oefening kan opnieuw gedaan worden zonder nieuwe meting.
+                            {/* Timing label: voor / na */}
+                            {showStartQuestion && !showEndQuestion && !isCompleted && (
+                                <div className="mt-3 inline-flex items-center gap-2 rounded-lg px-5 py-2" style={{ backgroundColor: 'rgba(0,0,0,0.25)', border: '2px solid rgba(0,0,0,0.35)' }}>
+                                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
+                                    </svg>
+                                    <span className="text-base font-bold text-white">Vraag vóór de oefening</span>
+                                </div>
+                            )}
+                            {showEndQuestion && (
+                                <div className="mt-3 inline-flex items-center gap-2 rounded-lg px-5 py-2" style={{ backgroundColor: 'rgba(0,0,0,0.25)', border: '2px solid rgba(0,0,0,0.35)' }}>
+                                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                    <span className="text-base font-bold text-white">Vraag na de oefening</span>
+                                </div>
+                            )}
+                            {durationLabel && (
+                                <div className="flex items-center justify-center gap-1.5 mt-3">
+                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span className="text-sm text-white">De oefening duurt ongeveer {durationLabel}</span>
+                                </div>
+                            )}
+                            {isSupervisor && (
+                                <div className="mt-3 text-xs font-semibold text-white bg-white bg-opacity-20 rounded-lg px-3 py-1 inline-block">
+                                    Begeleider-modus — namens cliënt
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-6 space-y-4">
+
+                            {/* STARTVRAAG */}
+                            {!skipQuestions && hasQuestions && showStartQuestion && (!isSupervisor || supervisorCanAskFeelings) && (
+                                <div>
+                                    {isSupervisor && (
+                                        <p className="text-sm text-purple-700 bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
+                                            <strong>Begeleider:</strong> Vraag de cliënt hoe zij/hij zich voelt <em>voor</em> de oefening en vul het in.
+                                        </p>
+                                    )}
+                                    <FeelingQuestion
+                                        question={currentQuestion}
+                                        answers={currentAnswers}
+                                        namePrefix="start-answer"
+                                        onConfirm={handleConfirmStart}
+                                    />
+                                </div>
+                            )}
+
+                            {isSupervisor && !supervisorCanAskFeelings && showStartQuestion && (
+                                <div>
+                                    {supervisorFeelingAnsweredToday && isNewestExercise && (
+                                        <div className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                                            Je hebt vandaag al een gevoelsmeting voor deze cliënt ingevuld. De oefening kan opnieuw gedaan worden zonder nieuwe meting.
+                                        </div>
+                                    )}
+                                    {!isNewestExercise && (
+                                        <div className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3 mb-4">
+                                            Gevoelsvragen worden alleen gesteld bij de nieuwste oefening van de cliënt.
+                                        </div>
+                                    )}
+                                    <div className="text-center">
+                                        <button
+                                            onClick={handleSkipStart}
+                                            className="w-full py-2 px-4 bg-[#7B5EA7] text-white rounded-md shadow hover:bg-[#6a4e8e] focus:outline-none transition-colors"
+                                        >
+                                            Begin met oefening
+                                        </button>
                                     </div>
-                                )}
-                                {!isNewestExercise && (
-                                    <div className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3 mb-4">
-                                        Gevoelsvragen worden alleen gesteld bij de nieuwste oefening van de cliënt.
-                                    </div>
-                                )}
-                                <div className="text-center">
+                                </div>
+                            )}
+
+                            {/* Geen vraag */}
+                            {!skipQuestions && !hasQuestions && showStartQuestion && !isSupervisor && (
+                                <div className="text-center text-gray-500">
+                                    <p>Geen gevoelsvraag voor deze oefening. Je kunt direct beginnen.</p>
                                     <button
                                         onClick={handleSkipStart}
-                                        className="w-full py-2 px-4 bg-[#7B5EA7] text-white rounded-md shadow hover:bg-[#6a4e8e] focus:outline-none transition-colors"
+                                        className="mt-4 w-full py-2 px-4 bg-[#7B5EA7] text-white rounded-md shadow hover:bg-[#6a4e8e] focus:outline-none transition-colors"
                                     >
                                         Begin met oefening
                                     </button>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {/* Geen vraag */}
-                        {!skipQuestions && !hasQuestions && showStartQuestion && !isSupervisor && (
-                            <div className="text-center text-gray-500">
-                                <p>Geen gevoelsvraag voor deze oefening. Je kunt direct beginnen.</p>
-                                <button
-                                    onClick={handleSkipStart}
-                                    className="mt-4 w-full py-2 px-4 bg-[#7B5EA7] text-white rounded-md shadow hover:bg-[#6a4e8e] focus:outline-none transition-colors"
-                                >
-                                    Begin met oefening
-                                </button>
-                            </div>
-                        )}
-
-                        {/* Herhaalde oefening melding (cliënt) */}
-                        {!isSupervisor && skipQuestions && (
-                            <div className="flex items-center gap-4 p-4 rounded-xl border-2" style={{ backgroundColor: '#F0E8FF', borderColor: '#7B5EA7' }}>
-                                <svg className="w-9 h-9 flex-shrink-0" style={{ color: '#7B5EA7' }} fill="currentColor" viewBox="0 0 24 24" role="img" aria-label="Al gedaan vandaag">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                </svg>
-                                <p className="text-sm font-medium" style={{ color: '#3B2D6E' }}>
-                                    Je hebt deze oefening vandaag al gedaan. Je kunt de audio opnieuw beluisteren.
-                                </p>
-                            </div>
-                        )}
-
-                        {/* Vandaag al gedaan door cliënt maar begeleider mag altijd verder */}
-                        {isSupervisor && alreadyCompletedToday && (
-                            <div className="text-center text-amber-700 bg-amber-50 border border-amber-200 p-4 rounded-lg">
-                                <p className="font-medium">Deze cliënt heeft deze oefening vandaag al gedaan.</p>
-                                <p className="text-sm mt-1">Je kunt de oefening toch opnieuw doen en de audio beluisteren.</p>
-                            </div>
-                        )}
-
-                        {/* AUDIO SECTIE */}
-                        {!showStartQuestion && !isCompleted && (
-                            <div className="space-y-4">
-                                <div className="p-5 rounded-xl border-2" style={{ backgroundColor: '#F0E8FF', borderColor: '#7B5EA7' }}>
-                                    <div className="flex items-start gap-3">
-                                        <svg className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: '#7B5EA7' }} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                                        </svg>
-                                        <p className="text-sm font-medium" style={{ color: '#3B2D6E' }}>
-                                            Zoek een rustige plek. Je kunt de audio pauzeren en terugspoelen.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="p-5 rounded-xl border-4" style={{ backgroundColor: '#FFFFFF', borderColor: '#7B5EA7' }}>
-                                    <h2 className="text-base font-semibold text-gray-700 mb-3"><span lang="en">Mindfulness</span> audio</h2>
-                                    <AudioControl AudioName={exercise.audio_file_path} />
-                                </div>
-
-                                <button
-                                    onClick={handleCompletion}
-                                    className="w-full py-3 px-4 bg-green-700 text-white font-semibold rounded-xl shadow hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 transition-all duration-200"
-                                >
-                                    Klaar met de oefening
-                                </button>
-                            </div>
-                        )}
-
-                        {/* EINDVRAAG */}
-                        {hasQuestions && showEndQuestion && !hasAnsweredEnd && (!isSupervisor || supervisorCanAskFeelings) && (
-                            <div className="space-y-4 border-t pt-4">
-                                {isSupervisor && (
-                                    <p className="text-sm text-purple-700 bg-purple-50 border border-purple-200 rounded-lg p-3">
-                                        <strong>Begeleider:</strong> Vraag de cliënt hoe zij/hij zich voelt <em>na</em> de oefening en vul het in.
+                            {/* Herhaalde oefening melding (cliënt) */}
+                            {!isSupervisor && skipQuestions && (
+                                <div className="flex items-center gap-4 p-4 rounded-xl border-2" style={{ backgroundColor: '#F0E8FF', borderColor: '#7B5EA7' }}>
+                                    <svg className="w-9 h-9 flex-shrink-0" style={{ color: '#7B5EA7' }} fill="currentColor" viewBox="0 0 24 24" role="img" aria-label="Al gedaan vandaag">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                    <p className="text-sm font-medium" style={{ color: '#3B2D6E' }}>
+                                        Je hebt deze oefening vandaag al gedaan. Je kunt de audio opnieuw beluisteren.
                                     </p>
-                                )}
-                                <FeelingQuestion
-                                    question={currentQuestion}
-                                    answers={currentAnswers}
-                                    namePrefix="end-answer"
-                                    onConfirm={handleConfirmEnd}
-                                />
-                            </div>
-                        )}
+                                </div>
+                            )}
 
-                        {/* Terugknop na voltooiing */}
-                        {isCompleted && !showEndQuestion && !showCompletion && (
-                            <div className="text-center space-y-4 border-t pt-6">
-                                <p className="text-green-600 font-semibold">✓ Oefening klaar!</p>
-                                <button
-                                    onClick={handleBack}
-                                    className="w-full py-3 px-4 bg-[#7B5EA7] text-white font-semibold rounded-xl shadow hover:bg-[#6a4e8e] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200"
-                                >
-                                    Terug naar dashboard
-                                </button>
-                            </div>
-                        )}
+                            {/* Vandaag al gedaan door cliënt maar begeleider mag altijd verder */}
+                            {isSupervisor && alreadyCompletedToday && (
+                                <div className="text-center text-amber-700 bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                                    <p className="font-medium">Deze cliënt heeft deze oefening vandaag al gedaan.</p>
+                                    <p className="text-sm mt-1">Je kunt de oefening toch opnieuw doen en de audio beluisteren.</p>
+                                </div>
+                            )}
+
+                            {/* AUDIO SECTIE */}
+                            {!showStartQuestion && !isCompleted && (
+                                <div className="space-y-4">
+                                    <div className="p-5 rounded-xl border-2" style={{ backgroundColor: '#F0E8FF', borderColor: '#7B5EA7' }}>
+                                        <div className="flex items-start gap-3">
+                                            <svg className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: '#7B5EA7' }} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                            </svg>
+                                            <p className="text-sm font-medium" style={{ color: '#3B2D6E' }}>
+                                                Zoek een rustige plek. Je kunt de audio pauzeren en terugspoelen.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-5 rounded-xl border-4" style={{ backgroundColor: '#FFFFFF', borderColor: '#7B5EA7' }}>
+                                        <h2 className="text-base font-semibold text-gray-700 mb-3"><span lang="en">Mindfulness</span> audio</h2>
+                                        <AudioControl AudioName={exercise.audio_file_path} />
+                                    </div>
+
+                                    <button
+                                        onClick={handleCompletion}
+                                        className="w-full py-3 px-4 bg-green-700 text-white font-semibold rounded-xl shadow hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 transition-all duration-200"
+                                    >
+                                        Klaar met de oefening
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* EINDVRAAG */}
+                            {hasQuestions && showEndQuestion && !hasAnsweredEnd && (!isSupervisor || supervisorCanAskFeelings) && (
+                                <div className="space-y-4 border-t pt-4">
+                                    {isSupervisor && (
+                                        <p className="text-sm text-purple-700 bg-purple-50 border border-purple-200 rounded-lg p-3">
+                                            <strong>Begeleider:</strong> Vraag de cliënt hoe zij/hij zich voelt <em>na</em> de oefening en vul het in.
+                                        </p>
+                                    )}
+                                    <FeelingQuestion
+                                        question={currentQuestion}
+                                        answers={currentAnswers}
+                                        namePrefix="end-answer"
+                                        onConfirm={handleConfirmEnd}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Terugknop na voltooiing */}
+                            {isCompleted && !showEndQuestion && !showCompletion && (
+                                <div className="text-center space-y-4 border-t pt-6">
+                                    <p className="text-green-600 font-semibold">✓ Oefening klaar!</p>
+                                    <button
+                                        onClick={handleBack}
+                                        className="w-full py-3 px-4 bg-[#7B5EA7] text-white font-semibold rounded-xl shadow hover:bg-[#6a4e8e] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200"
+                                    >
+                                        Terug naar dashboard
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

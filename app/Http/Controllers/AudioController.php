@@ -189,6 +189,22 @@ class AudioController extends Controller
         ]);
     }
 
+    public function deleteExercise($id)
+    {
+        $exercise = Exercise::findOrFail($id);
+
+        $filename = basename($exercise->audio_file_path);
+        $filePath = storage_path('app/public/audio/' . $filename);
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
+        $exercise->delete();
+
+        return response()->json(['message' => 'Oefening verwijderd.']);
+    }
+
+
     private function getAudioDurationSeconds(string $absolutePath): ?int
     {
         if (!file_exists($absolutePath)) {

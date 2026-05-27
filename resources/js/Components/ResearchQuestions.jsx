@@ -124,6 +124,32 @@ const ScaleNotice = () => (
     </div>
 );
 
+function SubScreen({ indices, label, color, answers, onAnswerChange }) {
+    return (
+        <div
+            className="mt-2 rounded-xl p-3 space-y-2 border-2"
+            style={{ backgroundColor: `${color}18`, borderColor: color }}
+        >
+            <div className="flex items-center gap-1.5 mb-1">
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 10 10">
+                    <path d="M2 0 L2 5 Q2 8 5 8" stroke={color} strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                </svg>
+                <span className="text-xs font-semibold" style={{ color: "#4A2B6D" }}>
+                    Vervolgscherm
+                </span>
+            </div>
+            {indices.map((i) => (
+                <div key={i} className="bg-white rounded-lg p-2.5 border" style={{ borderColor: `${color}40` }}>
+                    <AnswerRow index={i} answer={answers[i]} onChange={onAnswerChange} />
+                    {answers[i]?.icon?.src && (
+                        <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[i].icon.label}</p>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+}
+
 function AnswersEditor({ answerCount, answers, onAnswerChange }) {
     if (answerCount !== 5) {
         return (
@@ -143,30 +169,6 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
         );
     }
 
-    const SubScreen = ({ indices, label, color }) => (
-        <div
-            className="mt-2 rounded-xl p-3 space-y-2 border-2"
-            style={{ backgroundColor: `${color}18`, borderColor: color }}
-        >
-            <div className="flex items-center gap-1.5 mb-1">
-                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 10 10">
-                    <path d="M2 0 L2 5 Q2 8 5 8" stroke={color} strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                </svg>
-                <span className="text-xs font-semibold" style={{ color: "#4A2B6D" }}>
-                Vervolgscherm
-            </span>
-            </div>
-            {indices.map((i) => (
-                <div key={i} className="bg-white rounded-lg p-2.5 border" style={{ borderColor: `${color}40` }}>
-                    <AnswerRow index={i} answer={answers[i]} onChange={onAnswerChange} />
-                    {answers[i]?.icon?.src && (
-                        <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[i].icon.label}</p>
-                    )}
-                </div>
-            ))}
-        </div>
-    );
-
     return (
         <div className="space-y-3">
             <ScaleNotice />
@@ -175,7 +177,7 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
                 {answers[0]?.icon?.src && (
                     <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[0].icon.label}</p>
                 )}
-                <SubScreen indices={[0, 1]} label="Vervolgscherm" color="#7B5EA7" />
+                <SubScreen indices={[0, 1]} label="Vervolgscherm" color="#7B5EA7" answers={answers} onAnswerChange={onAnswerChange} />
             </div>
 
             <div className="p-3 border-2 border-dashed rounded-lg" style={{ borderColor: "#6C4092", backgroundColor: "#faf8ff" }}>
@@ -209,7 +211,7 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
                 {answers[4]?.icon?.src && (
                     <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[4].icon.label}</p>
                 )}
-                <SubScreen indices={[3, 4]} label="Vervolgscherm" color="#7B5EA7" />
+                <SubScreen indices={[3, 4]} label="Vervolgscherm" color="#7B5EA7" answers={answers} onAnswerChange={onAnswerChange} />
             </div>
 
             <p className="text-xs text-gray-600 mt-1 px-1">
@@ -220,7 +222,7 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
 }
 
 
-//standaard vraag sectie
+// standaard vraag sectie
 function DefaultQuestion() {
     const [question, setQuestion] = useState("");
     const [answers, setAnswers] = useState([]);
@@ -248,7 +250,6 @@ function DefaultQuestion() {
         setAnswers((prev) => {
             const updated = [...prev];
             if (!updated[index]) updated[index] = { text: "", icon: null };
-
             updated[index] = { ...updated[index], [field]: value };
             return updated;
         });
@@ -256,7 +257,6 @@ function DefaultQuestion() {
 
     const handleAnswerCountChange = (n) => {
         setAnswerCount(n);
-
         setAnswers((prev) => {
             const copy = [...prev];
             while (copy.length < n) copy.push({ text: "", icon: null });

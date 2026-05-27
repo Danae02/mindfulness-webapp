@@ -125,7 +125,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/submit', [ExerciseController::class, 'submitCompletedLog'])->name('submit');
         Route::get('/{id}', [ExerciseController::class, 'showExercise'])->name('show');
         Route::put('/{id}', [ExerciseController::class, 'updateExercise'])->name('update');
-        // JSON availability endpoint (voor supervisor die beschikbaarheid voor client checkt)
+        Route::delete('/{id}', [AudioController::class, 'deleteExercise'])->name('delete');
         Route::get('/{id}/availability', [ExerciseController::class, 'getExerciseAvailability'])->name('availability');
     });
 
