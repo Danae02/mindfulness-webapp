@@ -111,10 +111,10 @@ class ExerciseController extends Controller
                 'question' => $researchQuestion,
                 'answers'  => $researchAnswers,
             ],
-            'proxy' => [
-                'forUserId'            => $forUserId,
-                'isProxyMode'          => $isProxyMode,
-                'feelingAnsweredToday'  => $proxyFeelingAnsweredToday,
+            'supervisorMode' => [
+                'forUserId'               => $forUserId,
+                'isSupervisorMode'        => $isProxyMode,
+                'feelingAnsweredToday'    => $proxyFeelingAnsweredToday,
             ],
         ]);
     }
