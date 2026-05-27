@@ -25,7 +25,6 @@ export default function CompletionScreen({ userName, onBack }) {
                 {/* Lees voor knop */}
                 <div className="mb-4">
                     <AudioButton
-                        hidden={true}
                         audioFile="/audio/ElevenLabs_goedgedaanwoordje.mp3"
                         label="Lees voor"
                         aria-label="Lees de felicitatieboodschap voor"
