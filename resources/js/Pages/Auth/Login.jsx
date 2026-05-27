@@ -52,7 +52,7 @@ export default function Login({ status, canResetPassword }) {
                 tabIndex={-1}
                 aria-live="polite"
                 aria-atomic="true"
-                className={`mb-4 text-sm font-medium text-green-600 rounded-lg transition-all focus:outline-none ${successMessage ? 'bg-green-50 p-3' : ''}`}
+                className={`mb-4 text-sm font-medium text-green-700 rounded-lg transition-all focus:outline-none ${successMessage ? 'bg-green-50 p-3 border border-black' : ''}`}
             >
                 {successMessage ?? ''}
                 {successMessage && (
