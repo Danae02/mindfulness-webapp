@@ -29,10 +29,10 @@ export default function CourseCard({ course, onClick, onKeyDown }) {
                         {course.course_name}
                     </p>
                     <p className="text-sm text-gray-500">
-                        {course.available_label || "Nog niet beschikbaar"}
+                        {course.available_label || "Maak eerst het vorige deel af"}
                     </p>
                 </div>
-                <LockIcon className="w-5 h-5 text-gray-300 flex-shrink-0" aria-hidden="true" />
+                <LockIcon className="w-5 h-5 text-gray-300 flex-shrink-0" aria-hidden="true"/>
             </div>
         );
     }
