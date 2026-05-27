@@ -38,6 +38,7 @@ class CourseController extends Controller
         return response()->json(array_merge([$intro], $result->values()->all()));
     }
 
+
     public function createCourse(Request $request)
     {
         $validated = $request->validate([
