@@ -17,7 +17,6 @@ function normalizeFeeling(value, scale = 5) {
 const COLUMN_LABELS = {
     log_id:                "Log ID",
     user_id:               "Gebruiker ID",
-    user_name:             "Naam",
     exercise:              "Oefening",
     date_time:             "Datum en tijd",
     duration_listened_sec: "Duur (sec)",
@@ -121,10 +120,9 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
         data.map((log) => ({
             log_id:                log.log_id,
             user_id:               log.user_id,
-            user_name:             log.user?.name ?? "Anoniem",
             exercise:              log.exercise?.exercise_name ?? "-",
             date_time:             log.date_time,
-            duration_listened_sec: log.duration_listened,
+            duration_listened_sec: log.session_duration,
             completed:             log.completed ? "Ja" : "Nee",
             feeling_before:        log.feeling_before ?? "-",
             feeling_after:         log.feeling_after  ?? "-",
@@ -139,12 +137,14 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
         if (!rows.length) return;
         const headers = Object.keys(rows[0]);
         const lines = [
-            headers.join(","),
+            "sep=;",
+            headers.map((h) => COLUMN_LABELS[h] ?? h).join(";"),
             ...rows.map((r) =>
-                headers.map((h) => `"${String(r[h]).replace(/"/g, '""')}"`).join(",")
+                headers.map((h) => `"${String(r[h]).replace(/"/g, '""')}"`).join(";")
             ),
         ];
-        triggerDownload(lines.join("\n"), "export.csv", "text/csv");
+        const bom = "\uFEFF";
+        triggerDownload(bom + lines.join("\n"), "export.csv", "text/csv;charset=utf-8;");
     };
 
     const exportJSON = (rows) => {
@@ -260,8 +260,6 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
                             onKeyDown={(e) => handleRadioKeyDown(e, index)}
                             className={[
                                 "flex items-center gap-3 px-6 py-4 rounded-xl border-2 font-medium text-sm",
-                                // focus:ring-[#4A2872] = donker paars, >3:1 op wit — voldoet aan WCAG 2.4.11
-                                // focus:ring-offset-2 zorgt dat ring altijd zichtbaar is (WCAG 2.4.7)
                                 "transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4A2872]",
                                 format === value
                                     ? "border-[#4A2872] bg-purple-50 text-[#4A2872]"
