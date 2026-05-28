@@ -64,7 +64,7 @@ export default function UpdatePasswordForm({ className = '' }) {
                         value={data.current_password}
                         onChange={(e) => setData('current_password', e.target.value)}
                         type={showCurrentPassword ? 'text' : 'password'}
-                        className="mt-1 block w-full pr-10"
+                        className="mt-1 block w-full pr-10 border-gray-500"
                         autoComplete="current-password"
                         aria-required="true"
                         aria-invalid={errors.current_password ? 'true' : undefined}
@@ -115,7 +115,7 @@ export default function UpdatePasswordForm({ className = '' }) {
                         value={data.password}
                         onChange={(e) => setData('password', e.target.value)}
                         type={showNewPassword ? 'text' : 'password'}
-                        className="mt-1 block w-full pr-10"
+                        className="mt-1 block w-full pr-10 border-gray-500"
                         autoComplete="new-password"
                         aria-required="true"
                         aria-invalid={errors.password ? 'true' : undefined}
@@ -161,7 +161,7 @@ export default function UpdatePasswordForm({ className = '' }) {
                             setData('password_confirmation', e.target.value)
                         }
                         type={showConfirmPassword ? 'text' : 'password'}
-                        className="mt-1 block w-full pr-10"
+                        className="mt-1 block w-full pr-10 border-gray-500"
                         autoComplete="new-password"
                         aria-required="true"
                         aria-invalid={

@@ -30,7 +30,7 @@ export default function ResetPassword({ token, email }) {
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">
                         Nieuw wachtwoord
                     </h1>
-                    <h2 className="text-lg font-medium text-gray-600">
+                    <h2 className="text-lg font-medium text-gray-800">
                         Kies een sterk wachtwoord
                     </h2>
                 </div>
@@ -54,7 +54,7 @@ export default function ResetPassword({ token, email }) {
                 )}
 
                 <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-800">
                         <span className="font-medium">Wachtwoord herstellen voor:</span>{' '}
                         <span className="text-gray-800">{data.email}</span>
                     </p>
@@ -86,7 +86,7 @@ export default function ResetPassword({ token, email }) {
                             type="password"
                             name="password"
                             value={data.password}
-                            className="mt-1 block w-full pl-10"
+                            className="mt-1 block w-full pl-10 border-gray-500"
                             autoComplete="new-password"
                             isFocused={true}
                             onChange={(e) => setData('password', e.target.value)}
@@ -136,7 +136,7 @@ export default function ResetPassword({ token, email }) {
                             type="password"
                             name="password_confirmation"
                             value={data.password_confirmation}
-                            className="mt-1 block w-full pl-10"
+                            className="mt-1 block w-full pl-10 border-gray-500"
                             autoComplete="new-password"
                             onChange={(e) => setData('password_confirmation', e.target.value)}
                             required
@@ -159,7 +159,7 @@ export default function ResetPassword({ token, email }) {
                     )}
                 </div>
 
-                <div className="mt-4 text-sm text-gray-500">
+                <div className="mt-4 text-sm text-gray-700">
                     <span className="text-red-600 font-bold" aria-hidden="true">*</span>
                     <span className="sr-only">Sterretje betekent: </span>
                     Verplicht veld

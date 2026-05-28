@@ -42,7 +42,7 @@ export default function ForgotPassword({ status }) {
                     <h1 className="text-2xl font-bold text-gray-900 mb-1">
                         Wachtwoord vergeten pagina
                     </h1>
-                    <h2 className="text-base font-medium text-gray-600">
+                    <h2 className="text-base font-medium text-gray-800">
                         Verander je wachtwoord
                     </h2>
                 </div>
@@ -63,7 +63,7 @@ export default function ForgotPassword({ status }) {
                         Tip: Check je spam-map als je de e-mail niet hebt ontvangen.
                     </p>
                     <div className="mt-3 flex items-center gap-2">
-                        <span className="text-xs text-gray-500">Laat dit voorlezen:</span>
+                        <span className="text-xs text-gray-700">Laat dit voorlezen:</span>
                         <AudioButton
                             audioFile={audioFilePath}
                             label="Lees voor"
@@ -99,7 +99,7 @@ export default function ForgotPassword({ status }) {
                             type="email"
                             name="email"
                             value={data.email}
-                            className="mt-1 block w-full pl-10"
+                            className="mt-1 block w-full pl-10 border-gray-500"
                             autoComplete="email"
                             isFocused={true}
                             onChange={(e) => setData('email', e.target.value)}

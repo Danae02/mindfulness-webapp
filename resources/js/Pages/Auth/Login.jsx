@@ -76,7 +76,7 @@ export default function Login({ status, canResetPassword }) {
                             type="email"
                             name="email"
                             value={data.email}
-                            className="mt-1 block w-full pl-10"
+                            className="mt-1 block w-full pl-10 border-gray-500"
                             autoComplete="username"
                             isFocused={true}
                             onChange={(e) => setData('email', e.target.value)}
@@ -114,7 +114,7 @@ export default function Login({ status, canResetPassword }) {
                             type={showPassword ? 'text' : 'password'}
                             name="password"
                             value={data.password}
-                            className="mt-1 block w-full pl-10 pr-10"
+                            className="mt-1 block w-full pl-10 pr-10 border-gray-500"
                             autoComplete="current-password"
                             onChange={(e) => setData('password', e.target.value)}
                             required
@@ -184,7 +184,7 @@ export default function Login({ status, canResetPassword }) {
                             onChange={(e) => setData('remember', e.target.checked)}
                         />
                         <span className="ms-2 text-sm text-gray-600">
-                            Onthoud mij op deze computer
+                            Onthoud mij op dit apparaat
                         </span>
                     </label>
                 </div>

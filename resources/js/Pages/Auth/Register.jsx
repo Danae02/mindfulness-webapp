@@ -45,7 +45,7 @@ export default function Register() {
                     <h1 className="text-2xl font-bold text-gray-900 mb-1">
                         Account aanmaken pagina
                     </h1>
-                    <h2 className="text-base font-medium text-gray-600">
+                    <h2 className="text-base font-medium text-gray-800">
                         Als nieuwe gebruiker kan je hier jouw account aanmaken
                     </h2>
                 </div>
@@ -85,7 +85,7 @@ export default function Register() {
                             name="name"
                             type="text"
                             value={data.name}
-                            className="mt-1 block w-full pl-10"
+                            className="mt-1 block w-full pl-10 border-gray-500"
                             autoComplete="given-name"
                             isFocused={true}
                             onChange={(e) => setData('name', e.target.value)}
@@ -141,7 +141,7 @@ export default function Register() {
                             type="email"
                             name="email"
                             value={data.email}
-                            className="mt-1 block w-full pl-10"
+                            className="mt-1 block w-full pl-10 border-gray-500"
                             autoComplete="email"
                             onChange={(e) => setData('email', e.target.value)}
                             required
@@ -195,7 +195,7 @@ export default function Register() {
                             type="password"
                             name="password"
                             value={data.password}
-                            className="mt-1 block w-full pl-10"
+                            className="mt-1 block w-full pl-10 border-gray-500"
                             autoComplete="new-password"
                             onChange={(e) => setData('password', e.target.value)}
                             required
@@ -248,7 +248,7 @@ export default function Register() {
                             type="password"
                             name="password_confirmation"
                             value={data.password_confirmation}
-                            className="mt-1 block w-full pl-10"
+                            className="mt-1 block w-full pl-10 border-gray-500"
                             autoComplete="new-password"
                             onChange={(e) => setData('password_confirmation', e.target.value)}
                             required
@@ -272,7 +272,7 @@ export default function Register() {
                     )}
                 </div>
 
-                <div className="mt-2 text-sm text-gray-500">
+                <div className="mt-2 text-sm text-gray-700">
                     <span className="text-red-600 font-bold" aria-hidden="true">*</span>
                     <span className="sr-only">Sterretje betekent: </span>
                     Verplicht veld
@@ -296,7 +296,7 @@ export default function Register() {
                         <div className="w-full border-t-2 border-gray-400"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                        <span className="px-4 bg-white text-gray-500 font-medium">
+                        <span className="px-4 bg-white text-gray-700 font-medium">
                             of
                         </span>
                     </div>
