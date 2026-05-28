@@ -225,6 +225,21 @@ export default function Login({ status, canResetPassword }) {
                     </Link>
                 </div>
             </div>
+
+            {/* Contact */}
+            <p className="mt-6 text-center text-sm text-gray-600">
+                <a
+                    href="mailto:info@affect-us.nl"
+                    aria-label="Zijn er vragen of opmerkingen? Neem dan contact op via info@affect-us.nl"
+                    className="underline underline-offset-2 decoration-2 focus:outline-none focus:ring-2 focus:ring-[#0B2B4F] focus:ring-offset-2 rounded"
+                    style={{ color: 'inherit' }}
+                >
+                    <span aria-hidden="true">
+                        Zijn er vragen of opmerkingen? Neem dan contact op via{' '}
+                        <span className="font-semibold" style={{ color: '#0B2B4F' }}>info@affect-us.nl</span>
+                    </span>
+                </a>
+            </p>
         </GuestLayout>
     );
 }

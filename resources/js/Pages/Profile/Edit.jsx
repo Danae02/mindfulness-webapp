@@ -24,7 +24,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                             aria-labelledby="section-profile-heading"
                             className="bg-white rounded-xl shadow-card border border-black overflow-hidden"
                         >
-                            <div className="px-6 py-5 border-b border-gray-300">
+                            <div className="px-6 py-5 border-b border-gray-500">
                                 <h2
                                     id="section-profile-heading"
                                     className="text-lg font-semibold text-darkGray"
@@ -47,7 +47,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                             aria-labelledby="section-password-heading"
                             className="bg-white rounded-xl shadow-card border border-black overflow-hidden"
                         >
-                            <div className="px-6 py-5 border-b border-gray-300">
+                            <div className="px-6 py-5 border-b border-gray-500">
                                 <h2
                                     id="section-password-heading"
                                     className="text-lg font-semibold text-darkGray"
@@ -69,6 +69,21 @@ export default function Edit({ mustVerifyEmail, status }) {
                             </h2>
                             <DeleteUserForm />
                         </section>
+
+                        {/* Contact */}
+                        <p className="text-sm text-gray-800 pb-4">
+                            <a
+                                href="mailto:info@affect-us.nl"
+                                aria-label="Zijn er vragen of opmerkingen? Neem dan contact op via info@affect-us.nl"
+                                className="underline underline-offset-2 decoration-2 focus:outline-none focus:ring-2 focus:ring-[#0B2B4F] focus:ring-offset-2 rounded"
+                                style={{ color: 'inherit' }}
+                            >
+                                <span aria-hidden="true">
+                                    Zijn er vragen of opmerkingen? Neem dan contact op via{' '}
+                                    <span className="font-semibold text-[#0B2B4F]">info@affect-us.nl</span>
+                                </span>
+                            </a>
+                        </p>
 
                     </div>
                 </div>
