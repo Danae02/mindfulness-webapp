@@ -52,18 +52,18 @@ export default function ForgotPassword({ status }) {
                 </div>
 
                 <div
-                    className="mb-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border-2 border-gray-400"
+                    className="mb-3 text-sm text-gray-800 bg-gray-50 p-3 rounded-lg border-2 border-gray-600"
                     role="note"
                 >
                     <p>
                         Vul je e-mailadres in. Je ontvangt dan een e-mail met een link om een nieuw wachtwoord aan te
                         maken.
                     </p>
-                    <p className="mt-2 text-xs text-gray-700">
+                    <p className="mt-2 text-xs text-gray-800">
                         Tip: Check je spam-map als je de e-mail niet hebt ontvangen.
                     </p>
                     <div className="mt-3 flex items-center gap-2">
-                        <span className="text-xs text-gray-700">Laat dit voorlezen:</span>
+                        <span className="text-xs text-gray-800">Laat dit voorlezen:</span>
                         <AudioButton
                             audioFile={audioFilePath}
                             label="Lees voor"
