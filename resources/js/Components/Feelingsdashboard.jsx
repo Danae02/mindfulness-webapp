@@ -286,12 +286,12 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
                         <StatCard label="Actieve cliënten" value={activeClients} />
                         <StatCard label="Metingen gedaan" value={totalMeasurements} />
                         <StatCard
-                            label="Gem. gevoel voor"
+                            label="Gem. resultaat voor"
                             value={avgBefore != null ? `${avgBefore}` : "–"}
                             sub="score / 100"
                         />
                         <StatCard
-                            label="Gem. gevoel na"
+                            label="Gem. resultaat na"
                             value={avgAfter != null ? `${avgAfter}` : "–"}
                             sub="score / 100"
                         />
@@ -305,7 +305,7 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
                     {weekData.length > 0 ? (
                         <div className="bg-white border border-gray-200 rounded-2xl p-6">
                             <h3 className="text-base font-semibold text-gray-800 mb-1">
-                                Gevoel voor en na oefening
+                                Resultaat voor en na oefening
                             </h3>
                             <p className="text-xs text-gray-600 mb-5">
                                 Gemiddelde score per week – {activeGroupName} (anoniem) · scores 0–100
@@ -318,7 +318,7 @@ export default function Feelingsdashboard({ researchGroups = [], exercises = [] 
                                     <Tooltip content={<CustomTooltip />} />
                                     <Legend
                                         formatter={(value) =>
-                                            value === "voor" ? "Gevoel voor oefening" : "Gevoel na oefening"
+                                            value === "voor" ? "Resultaat voor oefening" : "Resultaat na oefening"
                                         }
                                     />
                                     <ReferenceLine y={50} stroke="#e5e7eb" strokeDasharray="4 4" />

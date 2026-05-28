@@ -742,7 +742,7 @@ export default function ResearchQuestions() {
         <div className="max-w-2xl mx-auto px-4 py-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-purple-900 mb-2">Onderzoeksvragen</h1>
             <p className="text-gray-700 mb-6 text-sm">
-                Maak hier de gevoelsvragen aan die een gebruiker vóór en na een oefening invult. De standaard vraag wordt gesteld aan alle cliënten zonder groep. Voor cliënten in een onderzoeksgroep geldt de vraag van die groep en vervangt die dus de standaard vraag.
+                Maak hier de (gevoels)vragen aan die een gebruiker vóór en na een oefening invult. De standaard vraag wordt gesteld aan alle cliënten zonder groep. Voor cliënten in een onderzoeksgroep geldt de vraag van die groep en vervangt die dus de standaard vraag.
             </p>
             <StatusMessage message={status?.message} type={status?.type} />
 

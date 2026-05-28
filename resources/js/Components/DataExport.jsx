@@ -21,11 +21,11 @@ const COLUMN_LABELS = {
     date_time:             "Datum en tijd",
     duration_listened_sec: "Duur (sec)",
     completed:             "Voltooid",
-    feeling_before:        "Gevoel voor",
-    feeling_after:         "Gevoel na",
+    feeling_before:        "Resultaat voor",
+    feeling_after:         "Resultaat na",
     feeling_scale:         "Schaal",
-    feeling_before_pct:    "Gevoel voor (%)",
-    feeling_after_pct:     "Gevoel na (%)",
+    feeling_before_pct:    "Resultaat voor (%)",
+    feeling_after_pct:     "resultaat na (%)",
 };
 
 export default function DataExport({ researchGroups = [], exercises = [] }) {

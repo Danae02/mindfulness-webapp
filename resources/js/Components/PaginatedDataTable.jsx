@@ -128,8 +128,8 @@ export default function PaginatedDataTable({
         "Datum",
         "Sessieduur",
         "Voltooid",
-        "Gevoel voor",
-        "Gevoel na",
+        "Resultaat voor",
+        "Resultaat na",
         "Verschil",
         ...(canDelete ? [""] : []),
     ];
