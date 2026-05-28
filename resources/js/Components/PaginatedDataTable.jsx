@@ -88,10 +88,13 @@ export default function PaginatedDataTable({
         fetchData(currentPage);
     }, [currentPage, fetchData]);
 
-    // zoekterm filter op naam oefening
-    const filtered = dataPoints.filter((dp) =>
-        dp.exercise?.exercise_name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // zoekterm filter op naam oefening en gebruikers ID
+    const filtered = dataPoints.filter((dp) => {
+        const searchLower = searchTerm.toLowerCase();
+        const exerciseName = dp.exercise?.exercise_name?.toLowerCase() || "";
+        const userId = String(dp.user_id).toLowerCase();
+        return exerciseName.includes(searchLower) || userId.includes(searchLower);
+    });
 
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) setCurrentPage(newPage);
@@ -153,7 +156,7 @@ export default function PaginatedDataTable({
                         <SearchBar
                             searchTerm={searchTerm}
                             onSearch={setSearchTerm}
-                            catTerm="oefening"
+                            catTerm="oefening of gebruikers ID"
                         />
                     </div>
 
@@ -169,7 +172,7 @@ export default function PaginatedDataTable({
                                 id="filter-group"
                                 value={selectedGroup}
                                 onChange={(e) => setSelectedGroup(e.target.value)}
-                                className="border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                className="border border-gray-700 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
                             >
                                 <option value="">Alle groepen</option>
                                 {researchGroups.map((g) => (
@@ -193,7 +196,7 @@ export default function PaginatedDataTable({
                                 id="filter-exercise"
                                 value={selectedExercise}
                                 onChange={(e) => setSelectedExercise(e.target.value)}
-                                className="border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                                className="border border-gray-700 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
                             >
                                 <option value="">Alle oefeningen</option>
                                 {exercises.map((e) => (
