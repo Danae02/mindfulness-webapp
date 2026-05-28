@@ -41,6 +41,9 @@ export default function Login({ status, canResetPassword }) {
                 <h1 className="text-2xl font-bold text-gray-900 mb-1">
                     Inlogpagina
                 </h1>
+                <h2 className="text-base font-medium text-gray-800">
+                    Log hier in met jouw bestaand account
+                </h2>
             </div>
 
             <div className="mb-3 flex justify-center">
@@ -204,19 +207,19 @@ export default function Login({ status, canResetPassword }) {
             </form>
 
             {/* Account aanmaken */}
-            <div className="mt-4 text-center">
+            <div className="mt-2 text-center">
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                         <div className="w-full border-t-2 border-gray-400"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                        <span className="px-4 bg-white text-gray-500 font-medium">
+                        <span className="px-2 bg-white text-gray-500 font-medium">
                             of
                         </span>
                     </div>
                 </div>
 
-                <div className="mt-3">
+                <div className="mt-2">
                     <Link
                         href={route('register')}
                         className="block w-full text-center py-2.5 px-4 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
