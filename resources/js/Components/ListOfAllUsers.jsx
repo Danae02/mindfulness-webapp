@@ -57,8 +57,10 @@ export default function ListOfAllUsers({
     return (
         <div>
             {/* Search and Filter Buttons container */}
-            <div className="flex items-end mb-4 gap-6">
-                <SearchBar searchTerm={searchTerm} onSearch={onSearchChange} catTerm="naam"/>
+            <div className="flex flex-col sm:flex-row sm:items-end mb-4 gap-3 sm:gap-6">
+                <div className="w-full sm:w-auto">
+                    <SearchBar searchTerm={searchTerm} onSearch={onSearchChange} catTerm="naam"/>
+                </div>
                 <FilterSwitch filtered={filtered} onToggle={() => onFilterChange(!filtered)} />
             </div>
 
@@ -72,16 +74,16 @@ export default function ListOfAllUsers({
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                     <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                             ID
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                             Naam
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                             Email
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                             Rol
                         </th>
                     </tr>
@@ -93,16 +95,16 @@ export default function ListOfAllUsers({
                             className="cursor-pointer hover:bg-gray-50 transition-colors duration-150"
                             onClick={() => handleRowClick(user)}
                         >
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900">
                                 {user.id}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 {user.name}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                            <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                 {user.email}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                                     <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${roleColors[user.role_id] || 'bg-gray-100 text-gray-800'}`}>
                                         {roleMapping[user.role_id] || 'Onbekend'}
                                     </span>

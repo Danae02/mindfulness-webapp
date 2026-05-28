@@ -10,12 +10,12 @@ export default function Edit({ mustVerifyEmail, status }) {
             <Head title="Mijn profiel instellingen" />
 
             <main id="main-content" tabIndex={-1}>
-                <div className="py-12">
+                <div className="py-6 sm:py-12">
                     <div className="mx-auto max-w-7xl space-y-8 sm:px-6 lg:px-8">
 
-                        <div>
-                            <h1 className="text-2xl font-bold text-darkGray">Mijn profiel</h1>
-                            <p className="text-gray-700 mt-1">
+                        <div className="space-y-2 sm:space-y-1">
+                            <h1 className="text-xl sm:text-2xl font-bold text-darkGray">Mijn profiel</h1>
+                            <p className="text-gray-700">
                                 Pas hier je naam, e-mailadres en wachtwoord aan.
                             </p>
                         </div>

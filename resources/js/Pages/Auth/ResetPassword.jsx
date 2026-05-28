@@ -26,16 +26,16 @@ export default function ResetPassword({ token, email }) {
             <Head title="Wachtwoord herstellen" />
 
             <form onSubmit={submit}>
-                <div className="mb-6 text-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                <div className="mb-3 sm:mb-6 text-center">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
                         Nieuw wachtwoord
                     </h1>
-                    <h2 className="text-lg font-medium text-gray-800">
+                    <h2 className="text-sm sm:text-lg font-medium text-gray-800">
                         Kies een sterk wachtwoord
                     </h2>
                 </div>
 
-                <div className="mb-6 flex justify-center">
+                <div className="mb-3 sm:mb-6 flex justify-center">
                     <AccessibilityButton variant="button"/>
                 </div>
 
@@ -53,7 +53,7 @@ export default function ResetPassword({ token, email }) {
                     </div>
                 )}
 
-                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                <div className="mb-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
                     <p className="text-sm text-gray-800">
                         <span className="font-medium">Wachtwoord herstellen voor:</span>{' '}
                         <span className="text-gray-800">{data.email}</span>
@@ -165,21 +165,21 @@ export default function ResetPassword({ token, email }) {
                     Verplicht veld
                 </div>
 
-                <div className="mt-6">
+                <div className="mt-4 sm:mt-6">
                     <button
                         type="submit"
                         disabled={processing}
-                        className="w-full justify-center py-3 text-base font-semibold bg-[#6c4092] hover:bg-[#5a337a] text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2 disabled:opacity-50"
+                        className="w-full justify-center py-2.5 sm:py-3 text-base font-semibold bg-[#6c4092] hover:bg-[#5a337a] text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2 disabled:opacity-50"
                         aria-busy={processing}
                     >
                         {processing ? 'Bezig met herstellen...' : 'Wachtwoord herstellen'}
                     </button>
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-3">
                     <Link
                         href={route('login')}
-                        className="block w-full text-center py-3 px-4 border-2 border-[#6c4092] text-[#6c4092] font-semibold rounded-lg hover:bg-[#6c4092] hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2"
+                        className="block w-full text-center py-2.5 sm:py-3 px-4 border-2 border-[#6c4092] text-[#6c4092] font-semibold rounded-lg hover:bg-[#6c4092] hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2"
                         aria-label="Terug naar de inlogpagina"
                     >
                         Terug naar inloggen

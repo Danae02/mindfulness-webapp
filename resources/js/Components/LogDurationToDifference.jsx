@@ -34,14 +34,14 @@ export default function LogDurationToDifference({
     };
 
     return (
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             {/* Linkerkant: lijst van oefeningen */}
-            <div className="w-1/3 p-4 bg-white rounded-xl"  style={{ border: "1px solid #5F5F5F", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Oefeningen:</h3>
+            <div className="w-full sm:w-1/3 p-3 sm:p-4 bg-white rounded-xl"  style={{ border: "1px solid #5F5F5F", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Oefeningen:</h3>
                 {loading ? (
                     <p className="text-gray-500">Laden...</p>
                 ) : exerciseNames.length === 0 ? (
-                    <p className="text-gray-400 italic">Geen oefeningen beschikbaar</p>
+                    <p className="text-gray-700 italic">Geen oefeningen beschikbaar</p>
                 ) : (
                     <ul className="space-y-2">
                         {exerciseNames.map((exercise, index) => (
@@ -62,14 +62,14 @@ export default function LogDurationToDifference({
             </div>
 
             {/* Rechterkant: grafiek */}
-            <div className="flex-1 p-4 bg-white rounded-xl" style={{ border: "1px solid #5F5F5F", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
+            <div className="flex-1 p-3 sm:p-4 bg-white rounded-xl" style={{ border: "1px solid #5F5F5F", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
                 {displayLoading ? (
                     <p className="text-gray-500">Laden...</p>
                 ) : error ? (
                     <p className="text-red-500">{error}</p>
                 ) : selectedExercise ? (
                     displayStats.length === 0 ? (
-                        <p className="text-gray-400 italic">
+                        <p className="text-gray-700 italic">
                             Geen logs gevonden met zowel een gevoel als een sessieduur voor deze oefening.
                         </p>
                     ) : (
@@ -91,7 +91,7 @@ export default function LogDurationToDifference({
                         </>
                     )
                 ) : (
-                    <p className="text-gray-400 italic">
+                    <p className="text-gray-700 italic">
                         Selecteer een oefening om de data te bekijken.
                     </p>
                 )}

@@ -21,7 +21,7 @@ function StepIndicator({ currentStep }) {
                     ) : "1"}
                 </div>
                 <span
-                    className="text-sm font-semibold"
+                    className="text-xs sm:text-sm font-semibold"
                     style={{ color: currentStep >= 1 ? "#6C4092" : "#4B5563" }}
                 >
                     Cursus informatie
@@ -46,7 +46,7 @@ function StepIndicator({ currentStep }) {
                     2
                 </div>
                 <span
-                    className="text-sm font-semibold"
+                    className="text-xs sm:text-sm font-semibold"
                     style={{ color: currentStep >= 2 ? "#6C4092" : "#4B5563" }}
                 >
                     Oefening uploaden
@@ -184,7 +184,7 @@ export default function CourseUploader({ onCancel }) {
 
             {/* Stap 1 */}
             {step === 1 && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-400 p-8">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-400 p-4 sm:p-8">
                     <h2 className="text-xl font-bold text-gray-900 mb-1">Nieuwe cursus aanmaken</h2>
                     <p className="text-sm text-gray-600 mb-6">Stap 1 van de 2</p>
 
@@ -293,7 +293,7 @@ export default function CourseUploader({ onCancel }) {
 
             {/* Stap 2 */}
             {step === 2 && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-400 p-8">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-400 p-4 sm:p-8">
                     <h2 className="text-xl font-bold text-gray-900 mb-1">Oefeningen uploaden</h2>
                     <p className="text-sm text-gray-600 mb-6">Stap 2 van de 2</p>
 
@@ -312,29 +312,28 @@ export default function CourseUploader({ onCancel }) {
                     </div>
 
                     {/* Knoppen */}
-                    <div className="flex justify-between pt-6 mt-4 border-t border-gray-100">
-                        <button
-                            type="button"
-                            onClick={() => setStep(1)}
-                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                            Vorige stap
-                        </button>
-
-                        <div className="flex flex-col items-end gap-1">
-                            {!hasAtLeastOneUpload && (
-                                <p className="text-xs text-amber-700" role="alert">
-                                    Upload minimaal één oefening om op te slaan.
-                                </p>
-                            )}
+                    <div className="pt-6 mt-4 border-t border-gray-100">
+                        {!hasAtLeastOneUpload && (
+                            <p className="text-xs text-amber-700 mb-3 text-center sm:text-right" role="alert">
+                                Upload minimaal één oefening om op te slaan.
+                            </p>
+                        )}
+                        <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setStep(1)}
+                                className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Vorige stap
+                            </button>
                             <button
                                 type="button"
                                 disabled={!hasAtLeastOneUpload}
                                 onClick={handleReset}
-                                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 disabled:opacity-40 disabled:cursor-not-allowed"
                                 style={{ backgroundColor: "#6C4092" }}
                                 aria-disabled={!hasAtLeastOneUpload}
                             >

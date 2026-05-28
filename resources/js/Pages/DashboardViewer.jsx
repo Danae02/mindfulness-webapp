@@ -48,7 +48,7 @@ export default function DashboardViewer({ exerciseCountLastWeek, nextExercise, c
 
             <section className="pt-4 pb-8 bg-lightGray">
                 <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="w-full bg-white rounded-xl p-8" style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', border: '1px solid #5F5F5F' }}>
+                    <div className="w-full bg-white rounded-xl p-4 sm:p-8" style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', border: '1px solid #5F5F5F' }}>
                         <ProfileOverview exerciseCountLastWeek={exerciseCountLastWeek} />
                     </div>
                 </div>
@@ -56,7 +56,7 @@ export default function DashboardViewer({ exerciseCountLastWeek, nextExercise, c
 
             <section className="pb-12 bg-lightGray">
                 <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="w-full bg-white rounded-xl p-8" style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', border: '1px solid #5F5F5F' }}>
+                    <div className="w-full bg-white rounded-xl p-4 sm:p-8" style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', border: '1px solid #5F5F5F' }}>
                         <NextExerciseBanner nextExercise={nextExercise} completedTodayIds={completedTodayIds} />
                         {coursesError && <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">{coursesError}</div>}
                         <CourseList courses={courses} loading={coursesLoading} error={coursesError} onFetchCourseDetails={handleFetchCourseDetails} />

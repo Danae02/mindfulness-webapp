@@ -38,15 +38,15 @@ export default function Login({ status, canResetPassword }) {
             <Head title="Log in" />
 
             <div className="mb-3 text-center">
-                <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
                     Inlogpagina
                 </h1>
-                <h2 className="text-base font-medium text-gray-800">
+                <h2 className="text-sm sm:text-base font-medium text-gray-800">
                     Log hier in met jouw bestaand account
                 </h2>
             </div>
 
-            <div className="mb-3 flex justify-center">
+            <div className="mb-2 flex justify-center">
                 <AccessibilityButton variant="button" />
             </div>
 

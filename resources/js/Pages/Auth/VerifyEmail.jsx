@@ -32,20 +32,20 @@ export default function VerifyEmail({ status }) {
             </div>
 
             <form onSubmit={submit}>
-                <div className="mb-6 text-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                <div className="mb-3 sm:mb-6 text-center">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
                         Verifieer je e-mailadres
                     </h1>
-                    <h2 className="text-lg font-medium text-gray-800">
+                    <h2 className="text-sm sm:text-lg font-medium text-gray-800">
                         Nog één stap en dan ben je klaar
                     </h2>
                 </div>
 
-                <div className="mb-6 flex justify-center">
+                <div className="mb-3 sm:mb-6 flex justify-center">
                     <AccessibilityButton variant="button" />
                 </div>
 
-                <div className="mb-6 text-sm text-gray-800 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="mb-3 sm:mb-6 text-sm text-gray-800 bg-blue-50 p-3 rounded-lg border border-blue-200">
                     <p className="flex items-start gap-2">
                         <svg className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -71,11 +71,11 @@ export default function VerifyEmail({ status }) {
                     </div>
                 )}
 
-                <div className="mt-6">
+                <div className="mt-4 sm:mt-6">
                     <button
                         type="submit"
                         disabled={processing}
-                        className="w-full justify-center py-3 text-base font-semibold bg-[#6c4092] hover:bg-[#5a337a] text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2 disabled:opacity-50"
+                        className="w-full justify-center py-2.5 sm:py-3 text-base font-semibold bg-[#6c4092] hover:bg-[#5a337a] text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6c4092] focus:ring-offset-2 disabled:opacity-50"
                     >
                         {resendClicked ? "Verificatielink opnieuw verzonden" : "Verificatielink opnieuw verzenden"}
                     </button>

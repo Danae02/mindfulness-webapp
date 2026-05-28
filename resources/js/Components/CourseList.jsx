@@ -13,7 +13,7 @@ function IntroCard({ exercise }) {
             </p>
             <Link
                 href={route("exercise.show", { id: exercise.id })}
-                className="flex items-center gap-4 p-4 bg-white rounded-xl hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
+                className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-white rounded-xl hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
                 style={{ border: "2px solid #7B5EA7", textDecoration: "none" }}
                 aria-label={`Introductie-oefening: ${exercise.exercise_name}. Klik om te starten.`}
             >
@@ -86,7 +86,7 @@ export default function CourseList({
 
     return (
         <>
-            <h2 className="text-2xl font-bold text-darkGray mb-4" id="courses-heading">
+            <h2 className="text-lg sm:text-2xl font-bold text-darkGray mb-4" id="courses-heading">
                 <span lang="en">Mindfulness</span> oefeningen
             </h2>
 

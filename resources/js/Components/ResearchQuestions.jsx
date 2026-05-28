@@ -14,10 +14,10 @@ function SectionCard({ title, children }) {
 
 function PurpleButton({ onClick, disabled, children, variant = "primary" }) {
     const [hovered, setHovered] = React.useState(false);
-    const base = "px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed";
+    const base = "inline-flex items-center px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed";
     const styles = {
         primary: `${base} text-white`,
-        secondary: `${base} bg-transparent border-2 font-semibold transition-colors`,
+        secondary: `${base} bg-transparent border font-semibold transition-colors`,
         danger: `${base} text-white`,
     };
 
@@ -127,7 +127,7 @@ const ScaleNotice = () => (
 function SubScreen({ indices, label, color, answers, onAnswerChange }) {
     return (
         <div
-            className="mt-2 rounded-xl p-3 space-y-2 border-2"
+            className="mt-2 rounded-xl p-2 sm:p-3 space-y-2 border-2"
             style={{ backgroundColor: `${color}18`, borderColor: color }}
         >
             <div className="flex items-center gap-1.5 mb-1">
@@ -139,7 +139,7 @@ function SubScreen({ indices, label, color, answers, onAnswerChange }) {
                 </span>
             </div>
             {indices.map((i) => (
-                <div key={i} className="bg-white rounded-lg p-2.5 border" style={{ borderColor: `${color}40` }}>
+                <div key={i} className="bg-white rounded-lg p-2 sm:p-2.5 border" style={{ borderColor: `${color}40` }}>
                     <AnswerRow index={i} answer={answers[i]} onChange={onAnswerChange} />
                     {answers[i]?.icon?.src && (
                         <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[i].icon.label}</p>
@@ -156,7 +156,7 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
             <div className="space-y-2">
                 <ScaleNotice />
                 {Array.from({ length: answerCount }).map((_, i) => (
-                    <div key={i} className="p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <div key={i} className="p-2 sm:p-3 border border-gray-200 rounded-lg bg-gray-50">
                         <AnswerRow index={i} answer={answers[i]} onChange={onAnswerChange} />
                         {answers[i]?.icon?.src && (
                             <p className="text-xs text-gray-600 mt-1 ml-7">
@@ -172,7 +172,7 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
     return (
         <div className="space-y-3">
             <ScaleNotice />
-            <div className="p-3 border border-gray-200 rounded-lg bg-gray-50">
+            <div className="p-2 sm:p-3 border border-gray-200 rounded-lg bg-gray-50">
                 <AnswerRow index={0} answer={answers[0]} onChange={onAnswerChange} />
                 {answers[0]?.icon?.src && (
                     <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[0].icon.label}</p>
@@ -180,7 +180,7 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
                 <SubScreen indices={[0, 1]} label="Vervolgscherm" color="#7B5EA7" answers={answers} onAnswerChange={onAnswerChange} />
             </div>
 
-            <div className="p-3 border-2 border-dashed rounded-lg" style={{ borderColor: "#6C4092", backgroundColor: "#faf8ff" }}>
+            <div className="p-2 sm:p-3 border-2 border-dashed rounded-lg" style={{ borderColor: "#6C4092", backgroundColor: "#faf8ff" }}>
                 <AnswerRow index={2} answer={answers[2]} onChange={onAnswerChange} />
                 {answers[2]?.icon?.src && (
                     <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[2].icon.label}</p>
@@ -206,7 +206,7 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
                 </div>
             </div>
 
-            <div className="p-3 border border-gray-200 rounded-lg bg-gray-50">
+            <div className="p-2 sm:p-3 border border-gray-200 rounded-lg bg-gray-50">
                 <AnswerRow index={4} answer={answers[4]} onChange={onAnswerChange} />
                 {answers[4]?.icon?.src && (
                     <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[4].icon.label}</p>
@@ -394,7 +394,7 @@ function DefaultQuestion() {
                         onAnswerChange={handleAnswerChange}
                     />
 
-                    <div className="flex gap-2 mt-4">
+                    <div className="flex flex-wrap gap-2 mt-4">
                         <PurpleButton onClick={handleSave}>Opslaan</PurpleButton>
                         <PurpleButton variant="secondary" onClick={() => setIsEditing(false)}>Annuleren</PurpleButton>
                     </div>
@@ -526,7 +526,7 @@ function GroupForm({ initial, onSave, onCancel }) {
                 onAnswerChange={handleAnswerChange}
             />
 
-            <div className="flex gap-2 mt-4">
+            <div className="flex flex-wrap gap-2 mt-4">
                 <PurpleButton onClick={handleSubmit} disabled={saving}>
                     {saving ? "Opslaan…" : "Opslaan"}
                 </PurpleButton>

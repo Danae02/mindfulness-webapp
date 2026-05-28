@@ -21,9 +21,9 @@ export default function TeamList({
     const getInitial = (name) => name?.charAt(0).toUpperCase() ?? '?';
 
     return (
-        <div className="p-6">
-            <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold" style={{ color: '#4A2B7A' }}>
+        <div className="p-3 sm:p-6">
+            <div className="text-center mb-4 sm:mb-8">
+                <h1 className="text-xl sm:text-2xl font-bold" style={{ color: '#4A2B7A' }}>
                     Mijn cliënten dashboard
                 </h1>
                 <p className="text-sm text-gray-700 mt-1">
@@ -36,7 +36,7 @@ export default function TeamList({
             </div>
 
             <div
-                className="rounded-2xl p-6"
+                className="rounded-2xl p-4 sm:p-6"
                 style={{
                     backgroundColor: '#FFFFFF',
                     border: '1.5px solid #D8C8F0',
@@ -69,18 +69,18 @@ export default function TeamList({
                                         }
                                     }}
                                 >
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 min-w-0">
                                         <div
                                             className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white flex-shrink-0"
                                             style={{ backgroundColor: '#7B5EA7' }}
                                         >
                                             {getInitial(member.name)}
                                         </div>
-                                        <span className="font-semibold text-sm" style={{ color: '#3D2A6E' }}>
+                                        <span className="font-semibold text-sm truncate" style={{ color: '#3D2A6E' }}>
                                             {member.name}
                                         </span>
                                     </div>
-                                    <span className="text-sm flex items-center gap-1" style={{ color: '#7B5EA7' }}>
+                                    <span className="text-sm flex items-center gap-1 flex-shrink-0 ml-2" style={{ color: '#7B5EA7' }}>
                                         Openen
                                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />

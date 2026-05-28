@@ -325,9 +325,9 @@ function TabOefeningen({ clientId, favorites, loading, onStartExercise, onToggle
 
 
 const TABS = [
-    { id: 'voortgang',  label: 'Voortgang'       },
-    { id: 'favorieten', label: 'Favorieten'       },
-    { id: 'oefeningen', label: 'Oefening starten' },
+    { id: 'voortgang',  label: 'Voortgang',        mobileLabel: 'Voortgang'  },
+    { id: 'favorieten', label: 'Favorieten',        mobileLabel: 'Favorieten' },
+    { id: 'oefeningen', label: 'Oefening starten',  mobileLabel: 'Oefeningen' },
 ];
 
 // ClientDetail
@@ -406,9 +406,9 @@ export default function ClientDetail({ client, onClose }) {
         >
             <div aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</div>
 
-            <div className="flex items-center gap-4 px-6 py-5 border-b border-gray-100 bg-[#F5F0FA]">
+            <div className="flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-5 border-b border-gray-100 bg-[#F5F0FA]">
                 <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0"
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg shrink-0"
                     style={{ backgroundColor: '#7B5EA7' }}
                     aria-hidden="true"
                 >
@@ -428,7 +428,7 @@ export default function ClientDetail({ client, onClose }) {
                 </button>
             </div>
 
-            <div role="tablist" aria-label="Cliëntinformatie" className="flex border-b border-gray-200 px-4 pt-2 gap-1 overflow-x-auto">
+            <div role="tablist" aria-label="Cliëntinformatie" className="flex border-b border-gray-200 px-2 sm:px-4 pt-2 gap-0.5 sm:gap-1">
                 {TABS.map((tab, idx) => (
                     <button
                         key={tab.id}
@@ -440,18 +440,19 @@ export default function ClientDetail({ client, onClose }) {
                         tabIndex={activeTab === tab.id ? 0 : -1}
                         onClick={() => setActiveTab(tab.id)}
                         onKeyDown={(e) => handleTabKeyDown(e, idx)}
-                        className={`shrink-0 px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-inset ${
+                        className={`flex-1 sm:flex-none shrink-0 px-2 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-t-lg border-b-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-inset text-center ${
                             activeTab === tab.id
                                 ? 'border-[#7B5EA7] text-[#7B5EA7] bg-[#F5F0FA]'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                         }`}
                     >
-                        {tab.label}
+                        <span className="sm:hidden">{tab.mobileLabel}</span>
+                        <span className="hidden sm:inline">{tab.label}</span>
                     </button>
                 ))}
             </div>
 
-            <div className="px-6 py-5">
+            <div className="px-4 sm:px-6 py-4 sm:py-5">
                 <div id="tabpanel-voortgang" role="tabpanel" aria-labelledby="tab-voortgang" hidden={activeTab !== 'voortgang'} tabIndex={0} className="focus:outline-none">
                     <p className="text-xs text-gray-400 mb-4">Overzicht van voltooide oefeningen. Gevoelsscores worden niet getoond.</p>
                     <TabVoortgang progress={progress} loading={dataLoading} />

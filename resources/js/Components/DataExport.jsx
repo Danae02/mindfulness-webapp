@@ -195,7 +195,7 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
             {/* Filters — fieldset+legend voor semantische groepering  */}
             <fieldset className="border-2 border-gray-500 rounded-xl p-5 mb-6">
                 <legend className="text-sm font-semibold text-gray-900 px-2">Filters</legend>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2">
 
                     <div>
                         <label htmlFor="export-group" className="block text-xs font-semibold text-gray-800 mb-1">
@@ -246,7 +246,7 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
                 <div
                     role="radiogroup"
                     aria-labelledby={formatGroupId}
-                    className="flex gap-4"
+                    className="flex flex-col sm:flex-row gap-3 sm:gap-4"
                 >
                     {formatOptions.map(({ value, label, svg }, index) => (
                         <button
@@ -259,7 +259,7 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
                             onClick={() => setFormat(value)}
                             onKeyDown={(e) => handleRadioKeyDown(e, index)}
                             className={[
-                                "flex items-center gap-3 px-6 py-4 rounded-xl border-2 font-medium text-sm",
+                                "flex items-center justify-center sm:justify-start gap-3 px-4 py-3 sm:px-6 sm:py-4 rounded-xl border-2 font-medium text-sm flex-1 sm:flex-none",
                                 "transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4A2872]",
                                 format === value
                                     ? "border-[#4A2872] bg-purple-50 text-[#4A2872]"
@@ -291,7 +291,7 @@ export default function DataExport({ researchGroups = [], exercises = [] }) {
                 aria-disabled={loading}
                 aria-describedby={statusId}
                 className={[
-                    "flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white text-sm",
+                    "w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl font-semibold text-white text-sm",
                     "transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4A2872]",
                     loading ? "opacity-60 cursor-not-allowed" : "hover:brightness-110",
                 ].join(" ")}

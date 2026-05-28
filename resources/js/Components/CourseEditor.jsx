@@ -271,22 +271,22 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                 className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex items-start justify-between p-6 pb-0">
+                <div className="flex items-start justify-between p-4 sm:p-6 pb-0">
                     <h2 id="modal-course-title" className="text-xl font-bold text-gray-900 pr-4">
                         {localCourse.course_name}
                     </h2>
                     <button
                         ref={closeRef}
                         onClick={onClose}
-                        className="w-11 h-11 flex-shrink-0 flex items-center justify-center border border-gray-400 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-1"
+                        className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-2 border-gray-500 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-1"
                         aria-label="Sluit venster"
                     >
-                        <span aria-hidden="true">✕</span>
-                        <span className="sr-only">Sluit dit venster</span>
+                        <span aria-hidden="true" className="text-base leading-none">✕</span>
+                        <span className="text-sm font-medium">Sluiten</span>
                     </button>
                 </div>
 
-                <div className="px-6 pb-6">
+                <div className="px-4 sm:px-6 pb-4 sm:pb-6">
                     {!editingCourse && (
                         <div className="mt-4">
                             <p className="text-sm font-semibold text-gray-700 mb-1">Omschrijving</p>
@@ -379,12 +379,12 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                     )}
 
                     {!editingCourse && !localCourse.is_intro && (
-                        <div className="flex gap-3 mt-6 pt-4 border-t border-gray-300">
+                        <div className="flex gap-3 mt-6 pt-4 border-t-2 border-gray-400">
                             {!confirmDelete ? (
                                 <button
                                     onClick={() => setConfirmDelete(true)}
-                                    className="flex-1 py-3 text-sm font-semibold text-white rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2"
-                                    style={{ backgroundColor: "#DC2626" }}
+                                    className="flex-1 py-2 sm:py-3 text-sm font-semibold text-white rounded-lg sm:rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2"
+                                    style={{ backgroundColor: "#C0392B" }}
                                     aria-label={`Verwijder cursus ${localCourse.course_name}`}
                                 >
                                     Cursus verwijderen
@@ -400,7 +400,8 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
                                     </button>
                                     <button
                                         onClick={handleDeleteCourse}
-                                        className="px-3 py-2 text-xs font-semibold text-white bg-red-700 rounded-lg hover:bg-red-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-1"
+                                        className="px-3 py-2 text-xs font-semibold text-white rounded-lg hover:bg-red-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-1"
+                                        style={{ backgroundColor: "#C0392B" }}
                                     >
                                         Ja, verwijderen
                                     </button>
@@ -409,7 +410,7 @@ function CourseModal({ course, onClose, onCourseUpdated, onCourseDeleted, onExer
 
                             <button
                                 onClick={() => setEditingCourse(true)}
-                                className="flex-1 py-3 text-sm font-semibold text-white rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-2"
+                                className="flex-1 py-2 sm:py-3 text-sm font-semibold text-white rounded-lg sm:rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-2"
                                 style={{ backgroundColor: "#6C4092" }}
                                 aria-label={`Bewerk cursus ${localCourse.course_name}`}
                             >
@@ -480,7 +481,7 @@ export default function CourseEditor({ onAddCourse }) {
 
     if (loading) {
         return (
-            <div className="flex items-center gap-2 py-8 text-gray-600 text-sm" aria-live="polite">
+            <div className="flex items-center gap-2 py-8 text-gray-700 text-sm" aria-live="polite">
                 <svg className="animate-spin h-4 w-4 text-purple-700" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
@@ -493,7 +494,7 @@ export default function CourseEditor({ onAddCourse }) {
     return (
         <div className="bg-white rounded-xl p-4" style={{ border: "1px solid #5F5F5F", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)" }}>
             {courses.length === 0 && (
-                <p className="text-sm text-gray-600 italic py-4">Nog geen cursussen aangemaakt.</p>
+                <p className="text-sm text-gray-700 italic py-4">Nog geen cursussen aangemaakt.</p>
             )}
 
             <div className="flex flex-col gap-3" role="list" aria-label="Overzicht van alle cursussen">
@@ -512,7 +513,7 @@ export default function CourseEditor({ onAddCourse }) {
                             >
                                 <div className="flex items-center justify-between mb-1">
                                     <p className="font-bold text-gray-800 text-base">{course.course_name}</p>
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold text-gray-600 bg-gray-200 border border-gray-400">
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold text-gray-800 bg-gray-200 border border-gray-400">
                                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                             <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
                                         </svg>
@@ -521,13 +522,13 @@ export default function CourseEditor({ onAddCourse }) {
                                 </div>
 
                                 {course.description && (
-                                    <p className="text-sm text-gray-600 mb-2 leading-snug">
+                                    <p className="text-sm text-gray-700 mb-2 leading-snug">
                                         {course.description}
                                     </p>
                                 )}
 
                                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
-                                     style={{ backgroundColor: "#F0E8FF", color: "#6C4092" }}>
+                                     style={{ backgroundColor: "#F0E8FF", color: "#3f2652" }}>
                                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
                                     </svg>
@@ -548,13 +549,13 @@ export default function CourseEditor({ onAddCourse }) {
                             <p className="font-bold text-gray-900 text-base mb-1">{course.course_name}</p>
 
                             {course.description && (
-                                <p className="text-sm text-gray-600 mb-2 leading-snug">
+                                <p className="text-sm text-gray-700 mb-2 leading-snug">
                                     {course.description}
                                 </p>
                             )}
 
                             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
-                                 style={{ backgroundColor: "#F0E8FF", color: "#6C4092" }}>
+                                 style={{ backgroundColor: "#F0E8FF", color: "#3f2652" }}>
                                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
                                 </svg>

@@ -72,13 +72,13 @@ export default function AudioFileUploader({
 
     return (
         <div
-            className="rounded-xl border-2 p-5 transition-all"
+            className="rounded-xl border-2 p-3 sm:p-5 transition-all"
             style={{
                 borderColor: uploaded ? "#16A34A" : "#6B7280",
                 backgroundColor: uploaded ? "#F0FDF4" : "#FAFAFA",
             }}
         >
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                 <div
                     className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                     style={{
@@ -105,7 +105,7 @@ export default function AudioFileUploader({
             {uploaded ? (
                 <p className="text-sm text-green-700 font-medium">{chapter.chapterName}</p>
             ) : (
-                <form onSubmit={handleUpload} className="space-y-4">
+                <form onSubmit={handleUpload} className="space-y-3 sm:space-y-4">
                     {/* Naam van de oefening */}
                     <div>
                         <label
@@ -140,7 +140,7 @@ export default function AudioFileUploader({
                             onDrop={handleDrop}
                             onClick={() => fileInputRef.current?.click()}
                         >
-                            <div className="py-5 px-4 text-center">
+                            <div className="py-4 px-3 sm:py-5 sm:px-4 text-center">
                                 {chapter.file ? (
                                     <div className="flex items-center justify-center gap-2">
                                         <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

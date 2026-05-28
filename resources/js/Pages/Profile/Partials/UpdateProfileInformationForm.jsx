@@ -1,5 +1,4 @@
 import InputError from '@/Components/InputError';
-import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
@@ -113,9 +112,18 @@ export default function UpdateProfileInformation({
             )}
 
             <div className="flex items-center gap-4 pt-2">
-                <PrimaryButton disabled={processing} aria-disabled={processing}>
+                <button
+                    type="submit"
+                    disabled={processing}
+                    aria-disabled={processing}
+                    className="px-4 py-3 bg-[#6C4092] text-white font-semibold rounded-lg shadow
+                               hover:bg-[#5a3678]
+                               focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-2
+                               transition-colors disabled:opacity-50
+                               min-h-[44px] min-w-[44px]"
+                >
                     {processing ? 'Opslaan…' : 'Opslaan'}
-                </PrimaryButton>
+                </button>
 
                 <Transition
                     show={recentlySuccessful}

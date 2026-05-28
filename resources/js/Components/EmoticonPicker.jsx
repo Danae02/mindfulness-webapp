@@ -43,7 +43,7 @@ export default function EmoticonPicker({ value, onChange, label = "Kies icoon (o
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center justify-center w-10 h-10 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors"
+                className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-colors flex-shrink-0"
                 aria-label={label}
                 aria-expanded={isOpen}
                 aria-haspopup="true"
@@ -52,17 +52,17 @@ export default function EmoticonPicker({ value, onChange, label = "Kies icoon (o
                     <img
                         src={value.src}
                         alt={value.label}
-                        className="w-6 h-6 object-contain"
+                        className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
                     />
                 ) : (
-                    <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 )}
             </button>
 
             {isOpen && (
-                <div className="absolute bottom-full right-0 mb-1 p-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-64">
+                <div className="absolute bottom-full right-0 mb-1 p-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-52 sm:w-64">
                     <p className="text-xs text-gray-500 mb-2 px-1">Kies een icoon:</p>
                     <div className="flex flex-wrap gap-1">
                         {iconOptions.map((icon, idx) => {

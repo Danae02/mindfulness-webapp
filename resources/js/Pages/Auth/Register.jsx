@@ -42,15 +42,15 @@ export default function Register() {
                 aria-label="Registratieformulier voor nieuw account"
             >
                 <div className="mb-3 text-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
                         Account aanmaken pagina
                     </h1>
-                    <h2 className="text-base font-medium text-gray-800">
+                    <h2 className="text-sm sm:text-base font-medium text-gray-800">
                         Als nieuwe gebruiker kan je hier jouw account aanmaken
                     </h2>
                 </div>
 
-                <div className="mb-3 flex justify-center">
+                <div className="mb-2 flex justify-center">
                     <AccessibilityButton variant="button" />
                 </div>
 

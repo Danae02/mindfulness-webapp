@@ -201,9 +201,9 @@ export default function UpdatePasswordForm({ className = '' }) {
                     type="submit"
                     disabled={processing}
                     aria-disabled={processing}
-                    className="px-4 py-3 bg-[#7B5EA7] text-white font-semibold rounded-lg shadow
-                               hover:bg-[#6a4e8e]
-                               focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2
+                    className="px-4 py-3 bg-[#6C4092] text-white font-semibold rounded-lg shadow
+                               hover:bg-[#5a3678]
+                               focus:outline-none focus:ring-2 focus:ring-[#6C4092] focus:ring-offset-2
                                transition-colors disabled:opacity-50
                                min-h-[44px] min-w-[44px]"
                 >
