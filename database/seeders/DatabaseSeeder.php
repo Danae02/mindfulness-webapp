@@ -96,46 +96,40 @@ class DatabaseSeeder extends Seeder
      */
     private function seedDefaultAdmins($adminRoleId): void
     {
-        $admins = [
-            [
-                'name' => 'Hannelies',
-                'email_env' => 'ADMIN_HANNELIES_EMAIL',
-                'password_env' => 'ADMIN_HANNELIES_PASSWORD',
-            ],
-            [
-                'name' => 'Jessica',
-                'email_env' => 'ADMIN_JESSICA_EMAIL',
-                'password_env' => 'ADMIN_JESSICA_PASSWORD',
-            ],
-            [
-                'name' => 'Affect-us',
-                'email_env' => 'ADMIN_AFFECTUS_EMAIL',
-                'password_env' => 'ADMIN_AFFECTUS_PASSWORD',
-            ],
-        ];
+        $index = 1;
 
-        foreach ($admins as $admin) {
-            $email = env($admin['email_env']);
-            $password = env($admin['password_env']);
+        while (true) {
+            $emailKey    = "ADMIN_{$index}_EMAIL";
+            $passwordKey = "ADMIN_{$index}_PASSWORD";
+            $nameKey     = "ADMIN_{$index}_NAME";
 
-            // Alleen aanmaken als beide ingesteld zijn
+            $email    = env($emailKey);
+            $password = env($passwordKey);
+
+            if (!$email && !$password) {
+                break;
+            }
+
+            $name = env($nameKey, "Admin {$index}");
+
             if ($email && $password) {
-                // Check of admin al bestaat
                 if (!User::where('email', $email)->exists()) {
                     User::create([
-                        'name' => $admin['name'],
-                        'email' => $email,
+                        'name'     => $name,
+                        'email'    => $email,
                         'password' => Hash::make($password),
-                        'role_id' => $adminRoleId,
+                        'role_id'  => $adminRoleId,
                     ]);
 
-                    echo "✓ Admin created: {$admin['name']} ({$email})\n";
+                    echo "✓ Admin created: {$name} ({$email})\n";
                 } else {
-                    echo "x Admin already exists: {$admin['name']} ({$email})\n";
+                    echo "x Admin already exists: {$name} ({$email})\n";
                 }
             } else {
-                echo "! Skipped: {$admin['name']} - missing {$admin['email_env']} or {$admin['password_env']}\n";
+                echo "! Skipped: {$name} - missing {$emailKey} or {$passwordKey}\n";
             }
+
+            $index++;
         }
     }
 }
