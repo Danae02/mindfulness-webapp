@@ -40,8 +40,8 @@ export default function CourseCard({ course, onClick, onKeyDown }) {
     return (
         <div role="listitem">
             <div
-                className="flex items-center gap-4 p-4 bg-white rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-[#5C3D8A] focus:ring-offset-2"
-                style={{ border: "2px solid #5C3D8A" }}
+                className="flex items-center gap-4 p-4 bg-white rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
+                style={{ border: "2px solid #7B5EA7" }}
                 onClick={() => onClick(course)}
                 onKeyDown={(e) => onKeyDown(e, course)}
                 tabIndex={0}
@@ -50,7 +50,7 @@ export default function CourseCard({ course, onClick, onKeyDown }) {
             >
                 <div
                     className="flex items-center justify-center w-14 h-14 rounded-lg flex-shrink-0"
-                    style={{ backgroundColor: "#F0E8FF", border: "2px solid #5C3D8A" }}
+                    style={{ backgroundColor: "#F0E8FF", border: "2px solid #7B5EA7" }}
                     aria-hidden="true"
                 >
                     <img
@@ -63,7 +63,7 @@ export default function CourseCard({ course, onClick, onKeyDown }) {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                    <p className="text-base font-bold" style={{ color: "#5C3D8A" }}>
+                    <p className="text-base font-bold" style={{ color: "#7B5EA7" }}>
                         {course.course_name}
                     </p>
                     {course.description && (
@@ -74,14 +74,14 @@ export default function CourseCard({ course, onClick, onKeyDown }) {
                     <p className="text-sm text-gray-600 mt-0.5">
                         {course.exercises?.length || 0} {course.exercises?.length === 1 ? 'oefening' : 'oefeningen'}
                     </p>
-                    <p className="text-sm mt-1.5 font-semibold" style={{ color: "#5C3D8A" }}>
+                    <p className="text-sm mt-1.5 font-semibold" style={{ color: "#7B5EA7" }}>
                         Bekijk oefeningen →
                     </p>
                 </div>
 
                 <div
                     className="flex items-center justify-center w-9 h-9 rounded-lg flex-shrink-0"
-                    style={{ backgroundColor: "#5C3D8A" }}
+                    style={{ backgroundColor: "#7B5EA7" }}
                     aria-hidden="true"
                 >
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
