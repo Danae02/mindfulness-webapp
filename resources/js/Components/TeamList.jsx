@@ -39,7 +39,7 @@ export default function TeamList({
                 className="rounded-2xl p-4 sm:p-6"
                 style={{
                     backgroundColor: '#FFFFFF',
-                    border: '1.5px solid #D8C8F0',
+                    border: '1.5px solid #000000',
                     boxShadow: '0 4px 24px 0 rgba(91,63,140,0.07)',
                 }}
             >
@@ -53,10 +53,10 @@ export default function TeamList({
                             <li key={member.id}>
                                 <button
                                     onClick={() => onSelectClient(member)}
-                                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
+                                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#5C3D8A] focus:ring-offset-2"
                                     style={{
                                         backgroundColor: selectedClient?.id === member.id ? '#E2D5F5' : '#EDE5F8',
-                                        border: '1.5px solid #C9B8E8',
+                                        border: '1.5px solid #000000',
                                     }}
                                     onMouseEnter={(e) => {
                                         if (selectedClient?.id !== member.id) {
@@ -72,7 +72,7 @@ export default function TeamList({
                                     <div className="flex items-center gap-3 min-w-0">
                                         <div
                                             className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white flex-shrink-0"
-                                            style={{ backgroundColor: '#7B5EA7' }}
+                                            style={{ backgroundColor: '#5C3D8A' }}
                                         >
                                             {getInitial(member.name)}
                                         </div>
@@ -80,7 +80,7 @@ export default function TeamList({
                                             {member.name}
                                         </span>
                                     </div>
-                                    <span className="text-sm flex items-center gap-1 flex-shrink-0 ml-2" style={{ color: '#7B5EA7' }}>
+                                    <span className="text-sm flex items-center gap-1 flex-shrink-0 ml-2" style={{ color: '#5C3D8A' }}>
                                         Openen
                                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
@@ -98,11 +98,11 @@ export default function TeamList({
 
                 <button
                     onClick={() => setShowModal(true)}
-                    className="w-full mt-4 py-3 rounded-xl text-sm font-semibold transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
+                    className="w-full mt-4 py-3 rounded-xl text-sm font-semibold transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#5C3D8A] focus:ring-offset-2"
                     style={{
-                        border: '2px dashed #C9B8E8',
+                        border: '2px dashed #000000',
                         backgroundColor: 'transparent',
-                        color: '#7B5EA7',
+                        color: '#5C3D8A',
                     }}
                     onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor = '#F0E8FC';
@@ -156,13 +156,13 @@ export default function TeamList({
                         <div className="mt-6 flex justify-center">
                             <button
                                 onClick={() => setShowModal(false)}
-                                className="py-2 px-6 rounded-lg text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7B5EA7]"
-                                style={{ backgroundColor: '#7B5EA7' }}
+                                className="py-2 px-6 rounded-lg text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#5C3D8A]"
+                                style={{ backgroundColor: '#5C3D8A' }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.backgroundColor = '#6a4e8e';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#7B5EA7';
+                                    e.currentTarget.style.backgroundColor = '#5C3D8A';
                                 }}
                             >
                                 Sluiten

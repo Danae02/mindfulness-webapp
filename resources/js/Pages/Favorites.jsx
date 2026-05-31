@@ -65,7 +65,7 @@ export default function Favorites() {
                         </svg>
                         <p className="text-gray-700 text-lg">Je hebt nog geen favoriete oefeningen</p>
                         <p className="text-gray-600 text-sm mt-2">
-                            Klik op het hartje bij een oefening om hem toe te voegen
+                            Klik op het hartje bij een oefening om hem toe te voegen aan dit overzicht
                         </p>
                         <Link
                             href={route('dashboard')}
@@ -133,7 +133,7 @@ export default function Favorites() {
                             <button
                                 onClick={handleBack}
                                 className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border-2 border-gray-400 rounded-lg hover:bg-gray-100 hover:border-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
-                                aria-label="Terug naar dashboard"
+                                aria-label="Terug naar oefeningen"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

@@ -43,8 +43,8 @@ class DatabaseSeeder extends Seeder
             }
 
             // Seed Users
-            $adminRoleId = Role::where('role_name', 'admin')->first()->id;
-            $viewerRoleId = Role::where('role_name', 'viewer')->first()->id;
+            $adminRoleId      = Role::where('role_name', 'admin')->first()->id;
+            $viewerRoleId     = Role::where('role_name', 'viewer')->first()->id;
             $researcherRoleId = Role::where('role_name', 'researcher')->first()->id;
 
             if (!$adminRoleId || !$viewerRoleId) {
@@ -54,13 +54,18 @@ class DatabaseSeeder extends Seeder
             // Default Admins from .env
             $this->seedDefaultAdmins($adminRoleId);
 
+            // Test users for accessibility pipeline (local + testing)
+            if (app()->environment('local', 'testing')) {
+                $this->seedTestUsers();
+            }
+
             // Seed Demo Users (only if not production)
             if (app()->environment('local')) {
                 // Create researcher
                 User::factory()->create([
                     'role_id' => $researcherRoleId,
-                    'email' => 'researcher@example.com',
-                    'name' => 'Researcher User',
+                    'email'   => 'researcher@example.com',
+                    'name'    => 'Researcher User',
                 ]);
 
                 // Create viewers
@@ -73,7 +78,7 @@ class DatabaseSeeder extends Seeder
                     $logCount = rand(10, 25);
                     for ($i = 0; $i < $logCount; $i++) {
                         UserExerciseLog::factory()->create([
-                            'user_id' => $viewer->id,
+                            'user_id'     => $viewer->id,
                             'exercise_id' => $exercises->random()->id,
                         ]);
                     }
@@ -130,6 +135,66 @@ class DatabaseSeeder extends Seeder
             }
 
             $index++;
+        }
+    }
+
+    //Seed test accounts for accessibility tests.
+    private function seedTestUsers(): void
+    {
+        $testAccounts = [
+            [
+                'env_email'    => 'TEST_ADMIN_EMAIL',
+                'env_password' => 'TEST_ADMIN_PASSWORD',
+                'name'         => 'Test Admin',
+                'role_name'    => 'admin',
+            ],
+            [
+                'env_email'    => 'TEST_CLIENT_EMAIL',
+                'env_password' => 'TEST_CLIENT_PASSWORD',
+                'name'         => 'Test Client',
+                'role_name'    => 'viewer',
+            ],
+            [
+                'env_email'    => 'TEST_SUPERVISOR_EMAIL',
+                'env_password' => 'TEST_SUPERVISOR_PASSWORD',
+                'name'         => 'Test Begeleider',
+                'role_name'    => 'supervisor',
+            ],
+            [
+                'env_email'    => 'TEST_RESEARCHER_EMAIL',
+                'env_password' => 'TEST_RESEARCHER_PASSWORD',
+                'name'         => 'Test Onderzoeker',
+                'role_name'    => 'researcher',
+            ],
+        ];
+
+        foreach ($testAccounts as $account) {
+            $email    = env($account['env_email']);
+            $password = env($account['env_password']);
+
+            if (!$email || !$password) {
+                echo "! Testgebruiker overgeslagen: {$account['env_email']} of {$account['env_password']} niet ingesteld in .env\n";
+                continue;
+            }
+
+            $role = Role::where('role_name', $account['role_name'])->first();
+
+            if (!$role) {
+                echo "! Rol niet gevonden: {$account['role_name']}\n";
+                continue;
+            }
+
+            if (!User::where('email', $email)->exists()) {
+                User::create([
+                    'name'     => $account['name'],
+                    'email'    => $email,
+                    'password' => Hash::make($password),
+                    'role_id'  => $role->id,
+                ]);
+                echo "✓ Testgebruiker aangemaakt: {$account['name']} ({$email})\n";
+            } else {
+                echo "x Testgebruiker bestaat al: {$email}\n";
+            }
         }
     }
 }

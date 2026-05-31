@@ -88,13 +88,6 @@ export default function DashboardSupervisor() {
 
             <div className="py-4 sm:py-8 bg-gray-50 min-h-screen">
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-                    <div className="mb-3 sm:mb-6">
-                        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">De cliënten</h1>
-                        <p className="text-sm text-gray-500 mt-1">
-                            Bekijk voortgang, beheer favorieten en doe oefeningen samen met jouw cliënten.
-                        </p>
-                    </div>
-
                     {/* Persistent collapsible info block — always accessible after modal */}
                     <MindfulnessInfoBlock />
 

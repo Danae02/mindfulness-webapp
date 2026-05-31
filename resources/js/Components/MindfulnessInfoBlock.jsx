@@ -25,7 +25,7 @@ export default function MindfulnessInfoBlock() {
     return (
         <div
             className="mb-6 rounded-2xl overflow-hidden"
-            style={{ border: '1.5px solid #D8C8F0', backgroundColor: '#FDFBFF' }}
+            style={{ border: '1.5px solid #000000', backgroundColor: '#FDFBFF' }}
         >
             {/* Toggle header */}
             <button
@@ -72,7 +72,7 @@ export default function MindfulnessInfoBlock() {
                         <div
                             key={i}
                             className="flex gap-3 p-3 rounded-xl"
-                            style={{ backgroundColor: '#F0E8FF', border: '1px solid #E2D5F5' }}
+                            style={{ backgroundColor: '#F0E8FF', border: '1px solid #000000' }}
                         >
                             <span className="text-xl flex-shrink-0 mt-0.5" aria-hidden="true">{ch.icon}</span>
                             <div>
