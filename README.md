@@ -151,6 +151,7 @@ Make sure the following packages are installed:
 
 ```bash
 npm install
+npm install dotenv --save-dev
 npx playwright install
 ```
 
