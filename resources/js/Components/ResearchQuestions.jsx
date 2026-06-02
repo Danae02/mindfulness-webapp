@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
+import {remapAnswers} from "@/Utils/remapAnswers.js";
 import EmoticonPicker from "@/Components/EmoticonPicker";
 
 
@@ -257,11 +258,7 @@ function DefaultQuestion() {
 
     const handleAnswerCountChange = (n) => {
         setAnswerCount(n);
-        setAnswers((prev) => {
-            const copy = [...prev];
-            while (copy.length < n) copy.push({ text: "", icon: null });
-            return copy;
-        });
+        setAnswers((prev) => remapAnswers(prev, answerCount, n));
     };
 
     const handleSave = async () => {
@@ -434,11 +431,7 @@ function GroupForm({ initial, onSave, onCancel }) {
 
     const handleAnswerCountChange = (n) => {
         setAnswerCount(n);
-        setAnswers((prev) => {
-            const copy = [...prev];
-            while (copy.length < n) copy.push({ text: "", icon: null });
-            return copy;
-        });
+        setAnswers((prev) => remapAnswers(prev, answerCount, n));
     };
 
     const handleSubmit = async () => {
