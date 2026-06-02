@@ -60,7 +60,7 @@ function TextInput({ label, id, value, onChange, placeholder, required }) {
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                className="block w-full px-3 py-2 border border-gray-700 rounded-lg text-sm
                            focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
             />
         </div>
@@ -94,7 +94,7 @@ function AnswerRow({ index, answer, onChange, showNumber = true }) {
                     value={answer?.text || ""}
                     onChange={(e) => onChange(index, "text", e.target.value)}
                     placeholder={`Antwoord ${index + 1}`}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                    className="block w-full px-3 py-2 border border-gray-700 rounded-lg text-sm
                                focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                 />
             </div>
@@ -109,7 +109,7 @@ function AnswerRow({ index, answer, onChange, showNumber = true }) {
 
 const ScaleNotice = () => (
     <div className="flex items-start gap-2 rounded-lg px-3 py-2 mb-3 text-xs"
-         style={{ backgroundColor: "#f0e8ff", border: "1px solid #c9b8e8" }}>
+         style={{ backgroundColor: "#f0e8ff", border: "1px solid #6C4092" }}>
         <svg className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
              stroke="#6C4092" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" />
@@ -139,7 +139,7 @@ function SubScreen({ indices, label, color, answers, onAnswerChange }) {
                 </span>
             </div>
             {indices.map((i) => (
-                <div key={i} className="bg-white rounded-lg p-2 sm:p-2.5 border" style={{ borderColor: `${color}40` }}>
+                <div key={i} className="bg-white rounded-lg p-2 sm:p-2.5 border" style={{ borderColor: color }}>
                     <AnswerRow index={i} answer={answers[i]} onChange={onAnswerChange} />
                     {answers[i]?.icon?.src && (
                         <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[i].icon.label}</p>
@@ -156,7 +156,7 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
             <div className="space-y-2">
                 <ScaleNotice />
                 {Array.from({ length: answerCount }).map((_, i) => (
-                    <div key={i} className="p-2 sm:p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <div key={i} className="p-2 sm:p-3 border border-gray-700 rounded-lg bg-white">
                         <AnswerRow index={i} answer={answers[i]} onChange={onAnswerChange} />
                         {answers[i]?.icon?.src && (
                             <p className="text-xs text-gray-600 mt-1 ml-7">
@@ -172,7 +172,7 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
     return (
         <div className="space-y-3">
             <ScaleNotice />
-            <div className="p-2 sm:p-3 border border-gray-200 rounded-lg bg-gray-50">
+            <div className="p-2 sm:p-3 border border-gray-700 rounded-lg bg-white">
                 <AnswerRow index={0} answer={answers[0]} onChange={onAnswerChange} />
                 {answers[0]?.icon?.src && (
                     <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[0].icon.label}</p>
@@ -206,7 +206,7 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
                 </div>
             </div>
 
-            <div className="p-2 sm:p-3 border border-gray-200 rounded-lg bg-gray-50">
+            <div className="p-2 sm:p-3 border border-gray-700 rounded-lg bg-white">
                 <AnswerRow index={4} answer={answers[4]} onChange={onAnswerChange} />
                 {answers[4]?.icon?.src && (
                     <p className="text-xs text-gray-600 mt-1 ml-7">Emoticon: {answers[4].icon.label}</p>
@@ -332,7 +332,7 @@ function DefaultQuestion() {
                         ))}
                     </div>
 
-                    <div className="text-center mt-5 pt-2 border-t border-gray-100">
+                    <div className="text-center mt-5 pt-2 border-t border-gray-700">
                         <p className="text-sm text-gray-600 leading-relaxed">
                             {answerCount} antwoordopties · Per oefening ·{" "}
                             <span className="font-medium" style={{ color: "#6C4092" }}>Actief voor alle niet-groep cliënten</span>
@@ -346,7 +346,7 @@ function DefaultQuestion() {
                     </div>
                 </div>
             ) : (
-                <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6" style={{ borderColor: "#E9E3F0" }}>
+                <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6" style={{ borderColor: "#6C4092" }}>
                     <TextInput
                         label="Vraag"
                         id="default-question"
@@ -369,7 +369,7 @@ function DefaultQuestion() {
                                     className={`px-3 py-1 rounded-lg text-sm font-medium border transition-colors
                                         ${answerCount === n
                                         ? "text-white border-transparent"
-                                        : "bg-white text-gray-800 border-gray-300 hover:border-purple-400"
+                                        : "bg-white text-gray-800 border-gray-700 hover:border-purple-400"
                                     }`}
                                     style={answerCount === n ? { backgroundColor: "#6C4092" } : {}}
                                 >
@@ -469,7 +469,7 @@ function GroupForm({ initial, onSave, onCancel }) {
     };
 
     return (
-        <div className="bg-purple-100 border border-purple-300 rounded-xl p-4 mb-4">
+        <div className="bg-white border-2 border-gray-900 rounded-xl p-4 mb-4">
             {error && <StatusMessage message={error} type="error" />}
 
             <TextInput
@@ -501,7 +501,7 @@ function GroupForm({ initial, onSave, onCancel }) {
                             className={`px-3 py-1 rounded-lg text-sm font-medium border transition-colors
                                 ${answerCount === n
                                 ? "text-white border-transparent"
-                                : "bg-white text-gray-800 border-gray-300 hover:border-purple-400"
+                                : "bg-white text-gray-800 border-gray-700 hover:border-purple-400"
                             }`}
                             style={answerCount === n ? { backgroundColor: "#6C4092" } : {}}
                         >
@@ -552,12 +552,12 @@ function GroupMembers({ group, allUsers, onAddUser, onRemoveUser }) {
     };
 
     return (
-        <div className="mt-3 pt-3 border-t border-purple-200">
+        <div className="mt-3 pt-3 border-t border-gray-700">
             <p className="text-sm font-medium text-gray-800 mb-2">Leden</p>
             {group.users?.length > 0 ? (
                 <ul className="space-y-1 mb-3">
                     {group.users.map((u) => (
-                        <li key={u.id} className="flex items-center justify-between bg-white rounded-lg px-3 py-1.5 text-sm border border-gray-200 gap-2">
+                        <li key={u.id} className="flex items-center justify-between bg-white rounded-lg px-3 py-1.5 text-sm border border-gray-700 gap-2">
                             <span className="text-gray-800 min-w-0 truncate">{u.name}</span>
                             <button
                                 onClick={() => onRemoveUser(group.id, u.id)}
@@ -579,7 +579,7 @@ function GroupMembers({ group, allUsers, onAddUser, onRemoveUser }) {
                     <select
                         value={selectedUserId}
                         onChange={(e) => setSelectedUserId(e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                        className="flex-1 px-3 py-2 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
                         aria-label="Selecteer een gebruiker om toe te voegen"
                     >
                         <option value="">Selecteer gebruiker…</option>

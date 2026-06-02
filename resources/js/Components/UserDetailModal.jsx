@@ -76,7 +76,7 @@ export default function UserDetailModal({ user, closeModal, setUsers }) {
                             <div>
                                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</p>
                                 <p className="text-base text-gray-900 mt-1">
-                                    {user.is_reviewed ? '✅ Beoordeeld' : '⏳ Nog niet beoordeeld'}
+                                    {user.is_reviewed ? 'Beoordeeld' : 'Nog niet beoordeeld'}
                                 </p>
                             </div>
 

@@ -72,18 +72,18 @@ export default function ListOfAllUsers({
                 aria-label="Gebruikerslijst"
             >
                 <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-gray-200 border-b-2 border-gray-800">
                     <tr>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
                             ID
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
                             Naam
                         </th>
-                        <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
                             Email
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
                             Rol
                         </th>
                     </tr>
@@ -105,7 +105,8 @@ export default function ListOfAllUsers({
                                 {user.email}
                             </td>
                             <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${roleColors[user.role_id] || 'bg-gray-100 text-gray-800'}`}>
+                                    <span
+                                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ring-1 ring-black ${roleColors[user.role_id] || 'bg-gray-100 text-gray-800'}`}>
                                         {roleMapping[user.role_id] || 'Onbekend'}
                                     </span>
                             </td>

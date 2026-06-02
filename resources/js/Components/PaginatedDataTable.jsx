@@ -24,7 +24,7 @@ function ScoreBadge({ value }) {
                 ? "bg-yellow-100 text-yellow-800"
                 : "bg-red-100 text-red-800";
     return (
-        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${color}`}>
+        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ring-1 ring-black ${color}`}>
             {value}/100
         </span>
     );
@@ -256,11 +256,11 @@ export default function PaginatedDataTable({
                     <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Datapunten tabel">
                         <table className="w-full text-sm border-collapse">
                             <thead>
-                            <tr className="border-b-2 border-gray-300">
+                            <tr className="border-b-2 border-gray-900 bg-gray-200">
                                 {columns.map((col, idx) => (
                                     <th
                                         key={idx}
-                                        className="px-4 py-3 text-left font-semibold text-gray-700"
+                                        className="px-4 py-3 text-left font-semibold text-gray-900"
                                     >
                                         {col}
                                     </th>
@@ -305,7 +305,7 @@ export default function PaginatedDataTable({
                                             </td>
                                             <td className="px-4 py-3">
                                                 <span
-                                                    className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                                    className={`px-2 py-0.5 rounded-full text-xs font-semibold ring-1 ring-black ${
                                                         log.completed
                                                             ? "bg-green-100 text-green-800"
                                                             : "bg-red-100 text-red-800"
