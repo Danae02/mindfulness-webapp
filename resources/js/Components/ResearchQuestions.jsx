@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
 import {remapAnswers} from "@/Utils/remapAnswers.js";
 import EmoticonPicker from "@/Components/EmoticonPicker";
@@ -231,17 +231,21 @@ function DefaultQuestion() {
     const [isEditing, setIsEditing] = useState(false);
     const [status, setStatus] = useState(null);
     const [loading, setLoading] = useState(true);
+    // Bewaart de laatst opgeslagen staat zodat Annuleren correct kan herstellen
+    const savedRef = useRef(null);
 
     useEffect(() => {
         axios.get(route("research.questions.default")).then((res) => {
-            setQuestion(res.data.question ?? "");
+            const q = res.data.question ?? "";
             const raw = res.data.answers;
             const parsed = Array.isArray(raw) ? raw : (raw ? JSON.parse(raw) : []);
             const count = parsed.length >= 3 ? parsed.length : 3;
-            setAnswerCount(count);
+            const formatted = parsed.length ? parsed : Array(5).fill({ text: "", icon: null });
 
-            const formattedAnswers = parsed.length ? parsed : Array(5).fill({ text: "", icon: null });
-            setAnswers(formattedAnswers);
+            setQuestion(q);
+            setAnswerCount(count);
+            setAnswers(formatted);
+            savedRef.current = { question: q, answerCount: count, answers: formatted };
         }).catch(() => {
             setStatus({ message: "Kon instellingen niet laden.", type: "error" });
         }).finally(() => setLoading(false));
@@ -259,6 +263,15 @@ function DefaultQuestion() {
     const handleAnswerCountChange = (n) => {
         setAnswerCount(n);
         setAnswers((prev) => remapAnswers(prev, answerCount, n));
+    };
+
+    const handleCancel = () => {
+        if (savedRef.current) {
+            setQuestion(savedRef.current.question);
+            setAnswerCount(savedRef.current.answerCount);
+            setAnswers(savedRef.current.answers);
+        }
+        setIsEditing(false);
     };
 
     const handleSave = async () => {
@@ -284,6 +297,8 @@ function DefaultQuestion() {
                 question,
                 answers: answersToSave,
             });
+            // Ref bijwerken zodat volgende Annuleren de nieuwe opgeslagen staat herstelt
+            savedRef.current = { question, answerCount, answers: answersToSave };
             setStatus({ message: "Standaardvraag opgeslagen.", type: "success" });
             setIsEditing(false);
         } catch (err) {
@@ -393,7 +408,7 @@ function DefaultQuestion() {
 
                     <div className="flex flex-wrap gap-2 mt-4">
                         <PurpleButton onClick={handleSave}>Opslaan</PurpleButton>
-                        <PurpleButton variant="secondary" onClick={() => setIsEditing(false)}>Annuleren</PurpleButton>
+                        <PurpleButton variant="secondary" onClick={handleCancel}>Annuleren</PurpleButton>
                     </div>
                 </div>
             )}
