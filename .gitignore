@@ -23,3 +23,5 @@ yarn-error.log
 .vscode/
 /.zed
 /bootstrap/cache/
+/playwright-report
+/test-results
