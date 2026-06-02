@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Exercise;
 use App\Models\UserExerciseLog;
 use App\Models\Favorite;
+use App\Services\EmailEncryptionService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -14,131 +15,78 @@ use Illuminate\Support\Facades\Hash;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database
+     * Seed the application's database.
      */
     public function run(): void
     {
         try {
-            // Reset database
-            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-            DB::table('user_exercise_logs')->truncate();
-            DB::table('favorites')->truncate();
-            DB::table('exercises')->truncate();
-            DB::table('users')->truncate();
-            DB::table('roles')->truncate();
-            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            // Altijd veilig: rollen en admins
+            $this->call(AdminSeeder::class);
 
-            // Seed Roles
-            $roles = Role::factory()->predefinedRoles();
-
-            foreach ($roles as $role) {
-                Role::create($role);
-            }
-
-            // Seed Exercises
-            $exercises = Exercise::factory(5)->create();
-
-            if ($exercises->isEmpty()) {
-                throw new \Exception('No exercises were created. Check your ExerciseFactory.');
-            }
-
-            // Seed Users
-            $adminRoleId      = Role::where('role_name', 'admin')->first()->id;
-            $viewerRoleId     = Role::where('role_name', 'viewer')->first()->id;
-            $researcherRoleId = Role::where('role_name', 'researcher')->first()->id;
-
-            if (!$adminRoleId || !$viewerRoleId) {
-                throw new \Exception('Roles not found. Ensure roles are seeded correctly.');
-            }
-
-            // Default Admins from .env
-            $this->seedDefaultAdmins($adminRoleId);
-
-            // Test users for accessibility pipeline (local + testing)
+            // Alleen lokaal of bij tests: testdata aanmaken
             if (app()->environment('local', 'testing')) {
-                $this->seedTestUsers();
+                $this->seedLocalData();
             }
-
-            // Seed Demo Users (only if not production)
-            if (app()->environment('local')) {
-                // Create researcher
-                User::factory()->create([
-                    'role_id' => $researcherRoleId,
-                    'email'   => 'researcher@example.com',
-                    'name'    => 'Researcher User',
-                ]);
-
-                // Create viewers
-                User::factory(9)->create()->each(function ($viewer) use ($viewerRoleId, $exercises) {
-                    $viewer->update([
-                        'role_id' => $viewerRoleId,
-                    ]);
-
-                    // Create logs for each viewer
-                    $logCount = rand(10, 25);
-                    for ($i = 0; $i < $logCount; $i++) {
-                        UserExerciseLog::factory()->create([
-                            'user_id'     => $viewer->id,
-                            'exercise_id' => $exercises->random()->id,
-                        ]);
-                    }
-                });
-            }
-
-            echo "Seeding completed successfully!\n";
-            echo "Created: " . Role::count() . " roles\n";
-            echo "Created: " . Exercise::count() . " exercises\n";
-            echo "Created: " . User::count() . " users\n";
-            echo "Created: " . Favorite::count() . " favorites\n";
+            echo "Seeding voltooid!\n";
 
         } catch (\Throwable $e) {
-            dd('Seeding Error: ' . $e->getMessage());
+            dd('Seeding fout: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Seed default admin accounts from .env
-     */
-    private function seedDefaultAdmins($adminRoleId): void
+    //Lokale testdata wordt nooit op productie uitgevoerd
+    private function seedLocalData(): void
     {
-        $index = 1;
+        // Wis bestaande testdata
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('user_exercise_logs')->truncate();
+        DB::table('favorites')->truncate();
+        DB::table('exercises')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        while (true) {
-            $emailKey    = "ADMIN_{$index}_EMAIL";
-            $passwordKey = "ADMIN_{$index}_PASSWORD";
-            $nameKey     = "ADMIN_{$index}_NAME";
+        // seed oefeningen
+        $exercises = Exercise::factory(5)->create();
 
-            $email    = env($emailKey);
-            $password = env($passwordKey);
-
-            if (!$email && !$password) {
-                break;
-            }
-
-            $name = env($nameKey, "Admin {$index}");
-
-            if ($email && $password) {
-                if (!User::where('email', $email)->exists()) {
-                    User::create([
-                        'name'     => $name,
-                        'email'    => $email,
-                        'password' => Hash::make($password),
-                        'role_id'  => $adminRoleId,
-                    ]);
-
-                    echo "✓ Admin created: {$name} ({$email})\n";
-                } else {
-                    echo "x Admin already exists: {$name} ({$email})\n";
-                }
-            } else {
-                echo "! Skipped: {$name} - missing {$emailKey} or {$passwordKey}\n";
-            }
-
-            $index++;
+        if ($exercises->isEmpty()) {
+            throw new \Exception('Geen oefeningen aangemaakt. Controleer ExerciseFactory.');
         }
+
+        // Seed Users
+        $viewerRoleId     = Role::where('role_name', 'viewer')->first()->id;
+        $researcherRoleId = Role::where('role_name', 'researcher')->first()->id;
+
+        // Testgebruikers voor accessibility pipeline
+        if (app()->environment('local', 'testing')) {
+            $this->seedTestUsers();
+        }
+
+        // Researcher
+        User::factory()->create([
+            'role_id' => $researcherRoleId,
+            'email'   => 'researcher@example.com',
+            'name'    => 'Researcher User',
+        ]);
+
+        // Viewers met logs
+        User::factory(9)->create()->each(function ($viewer) use ($viewerRoleId, $exercises) {
+            $viewer->update([
+                'role_id' => $viewerRoleId,
+            ]);
+
+            $logCount = rand(10, 25);
+            for ($i = 0; $i < $logCount; $i++) {
+                UserExerciseLog::factory()->create([
+                    'user_id'     => $viewer->id,
+                    'exercise_id' => $exercises->random()->id,
+                ]);
+            }
+        });
+
+        echo "Lokale testdata aangemaakt.\n";
+        echo "Favorieten: " . Favorite::count() . "\n";
     }
 
-    //Seed test accounts for accessibility tests.
+//Testaccounts voor accessibility tests uit .env.
     private function seedTestUsers(): void
     {
         $testAccounts = [
@@ -184,16 +132,18 @@ class DatabaseSeeder extends Seeder
                 continue;
             }
 
-            if (!User::where('email', $email)->exists()) {
+            $emailIndex = app(EmailEncryptionService::class)->blindIndex($email);
+
+            if (!User::where('email_index', $emailIndex)->exists()) {
                 User::create([
                     'name'     => $account['name'],
                     'email'    => $email,
                     'password' => Hash::make($password),
                     'role_id'  => $role->id,
                 ]);
-                echo "✓ Testgebruiker aangemaakt: {$account['name']} ({$email})\n";
+                echo "Testgebruiker aangemaakt: {$account['name']} ({$email})\n";
             } else {
-                echo "x Testgebruiker bestaat al: {$email}\n";
+                echo "Testgebruiker bestaat al: {$email}\n";
             }
         }
     }
