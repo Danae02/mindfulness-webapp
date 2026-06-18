@@ -1,4 +1,4 @@
-import { Link } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import { usePage } from "@inertiajs/react";
 import LockIcon from "@/Icons/LockIcon";
 
@@ -11,23 +11,19 @@ export default function ExerciseRow({ exercise, availability, isFavorite, onTogg
     if (isDisabled) {
         return (
             <div
-                className="flex items-center gap-4 p-4 bg-white rounded-xl border-2 border-gray-300"
+                className="flex items-center gap-4 p-4 bg-white rounded-xl border-2 border-gray-300
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
                 role="listitem"
-                aria-label={`Oefening ${exercise.exercise_name}: nog niet beschikbaar`}
+                tabIndex={0}
+                aria-disabled="true"
+                aria-label={`Oefening ${exercise.exercise_name}: nog niet beschikbaar. ${avail.available_label || "Wordt ontgrendeld als je elke dag een oefening doet."}`}
                 style={{ opacity: 0.6 }}
             >
-                <p className="sr-only">
-                    Oefening: {exercise.exercise_name}.
-                    Status: nog niet beschikbaar.
-                    {avail.available_label ? `Reden: ${avail.available_label}. ` : ''}
-                    Deze oefening wordt ontgrendeld als je elke dag een oefening doet.
-                    Deze oefening is momenteel disabled en kan niet gestart worden.
-                </p>
                 <div className="flex-1 min-w-0">
-                    <p className="text-base font-semibold text-gray-600" aria-hidden="false">
+                    <p className="text-base font-semibold text-gray-600" aria-hidden="true">
                         {exercise.exercise_name}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1" aria-hidden="false">
+                    <p className="text-sm text-gray-500 mt-1" aria-hidden="true">
                         <svg className="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false" role="presentation" >
                             <path d="M12 1C6.48 1 2 5.48 2 11s4.48 10 10 10 10-4.48 10-10S17.52 1 12 1zm-2 15l-5-5 1.41-1.41L10 12.17l7.59-7.59L19 6l-9 9z"/>
                         </svg>
@@ -37,8 +33,7 @@ export default function ExerciseRow({ exercise, availability, isFavorite, onTogg
                 <div className="flex-shrink-0">
                     <LockIcon
                         className="w-5 h-5 text-gray-400"
-                        aria-label="Gesloten – deze oefening is niet beschikbaar"
-                        aria-hidden="false"
+                        aria-hidden="true"
                     />
                 </div>
             </div>
@@ -68,8 +63,8 @@ export default function ExerciseRow({ exercise, availability, isFavorite, onTogg
             </div>
 
             {/* Start button */}
-            <Link
-                href={route("exercise.show", { id: exercise.id })}
+            <button
+                onClick={() => router.visit(route("exercise.show", { id: exercise.id }))}
                 className="inline-flex items-center gap-2 px-3 py-2 bg-[#7B5EA7] text-white text-sm font-semibold
                     rounded-lg hover:bg-[#5a3a7a]
                     focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7B5EA7]
@@ -80,7 +75,7 @@ export default function ExerciseRow({ exercise, availability, isFavorite, onTogg
                     <path d="M8 5v14l11-7z" />
                 </svg>
                 <span aria-hidden="true">Start</span>
-            </Link>
+            </button>
 
             {/* Favorite button */}
             {auth.user && (

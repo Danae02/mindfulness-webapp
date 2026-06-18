@@ -71,9 +71,6 @@ export default function CourseModal({ course, onClose }) {
         const titleElement  = modalRef.current?.querySelector('[id="modal-title"]');
         titleElement?.focus();
 
-        const htmlElement    = document.documentElement;
-        const prevAriaHidden = htmlElement.getAttribute('aria-hidden');
-        htmlElement.setAttribute('aria-hidden', 'true');
 
         const focusableSelectors =
             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -99,11 +96,6 @@ export default function CourseModal({ course, onClose }) {
         return () => {
             document.removeEventListener("keydown", handleKeyDown);
             previousFocus?.focus();
-            if (prevAriaHidden === null) {
-                htmlElement.removeAttribute('aria-hidden');
-            } else {
-                htmlElement.setAttribute('aria-hidden', prevAriaHidden);
-            }
         };
     }, [onClose]);
 

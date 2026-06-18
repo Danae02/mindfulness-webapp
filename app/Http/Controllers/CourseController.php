@@ -32,7 +32,7 @@ class CourseController extends Controller
 
             return array_merge($course->toArray(), [
                 'available'       => $available,
-                'available_label' => $available ? null : 'Maak eerst het vorige deel af',
+                'available_label' => $available ? null : 'Nog niet open, maak eerst het vorige deel af',
             ]);
         });
         return response()->json(array_merge([$intro], $result->values()->all()));

@@ -1,4 +1,5 @@
-import { usePage, Link } from "@inertiajs/react";
+import { usePage } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 
 export default function ProfileOverview({ exerciseCountLastWeek }) {
     const user = usePage().props.auth.user;
@@ -12,8 +13,8 @@ export default function ProfileOverview({ exerciseCountLastWeek }) {
                 {`Je hebt deze week ${exerciseCountLastWeek} ${exerciseCountLastWeek === 1 ? 'oefening' : 'oefeningen'} gedaan! Blijf oefenen voor de beste resultaten.`}
             </p>
             <div className="flex justify-center">
-                <Link
-                    href={route('favorites')}
+                <button
+                    onClick={() => router.visit(route('favorites'))}
                     className="inline-flex items-center gap-3 rounded-xl font-semibold text-base transition-colors duration-150"
                     style={{
                         backgroundColor: '#F0E8FF',
@@ -55,7 +56,7 @@ export default function ProfileOverview({ exerciseCountLastWeek }) {
                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                     </svg>
                     <span aria-hidden="true">Mijn favoriete oefeningen</span>
-                </Link>
+                </button>
             </div>
         </div>
     );

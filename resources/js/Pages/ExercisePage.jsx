@@ -26,25 +26,29 @@ export default function ExercisePage({
     const { mode: researchMode, question: researchQuestion, answers: researchAnswers } = research;
     const { forUserId, isSupervisorMode, feelingAnsweredToday: supervisorFeelingAnsweredToday } = supervisorMode;
 
+    const user = usePage().props.auth.user;
+
+    const effectiveUserId = forUserId || user.id;
+    const isSupervisor         = isSupervisorMode || (forUserId && forUserId !== user.id);
+
+    const initialShouldSkip = !isSupervisor && (alreadyCompletedToday || !isNewestExercise);
+
     const [isCompleted,       setIsCompleted]       = useState(false);
-    const [showStartQuestion, setShowStartQuestion] = useState(true);
+    const [showStartQuestion, setShowStartQuestion] = useState(!initialShouldSkip);
     const [showEndQuestion,   setShowEndQuestion]   = useState(false);
-    const [hasAnsweredEnd,    setHasAnsweredEnd]     = useState(false);
-    const [skipQuestions,     setSkipQuestions]     = useState(false);
+    const [hasAnsweredEnd,    setHasAnsweredEnd]     = useState(initialShouldSkip);
+    const [skipQuestions,     setSkipQuestions]     = useState(initialShouldSkip);
     const [showCompletion,    setShowCompletion]     = useState(false);
 
     const [feelingBefore, setFeelingBefore] = useState(null);
-    const [statusAnnouncement, setStatusAnnouncement] = useState("");
 
     const sessionStartRef = useRef(null);
     const endQuestionHeadingRef = useRef(null);
     const completedHeadingRef = useRef(null);
     const mainHeadingRef = useRef(null);
     const audioHeadingRef = useRef(null);
-    const user = usePage().props.auth.user;
-
-    const effectiveUserId = forUserId || user.id;
-    const isSupervisor         = isSupervisorMode || (forUserId && forUserId !== user.id);
+    const shouldFocusAudioRef = useRef(false);
+    const hasMountedRef = useRef(false);
 
     const supervisorCanAskFeelings = isSupervisor && isNewestExercise && !supervisorFeelingAnsweredToday;
 
@@ -94,14 +98,14 @@ export default function ExercisePage({
 
     const handleConfirmStart = (valueOneBased) => {
         setFeelingBefore(valueOneBased);
+        shouldFocusAudioRef.current = true;
         setShowStartQuestion(false);
-        setStatusAnnouncement("Vraag beantwoord. Je bent nu bij de mindfulness audio-oefening.");
         sessionStartRef.current = Date.now();
     };
 
     const handleSkipStart = () => {
+        shouldFocusAudioRef.current = true;
         setShowStartQuestion(false);
-        setStatusAnnouncement("Je bent nu bij de mindfulness audio-oefening.");
         sessionStartRef.current = Date.now();
     };
 
@@ -110,7 +114,6 @@ export default function ExercisePage({
         const shouldShowEndQuestion = hasQuestions && !skipQuestions && (!isSupervisor || supervisorCanAskFeelings);
         if (shouldShowEndQuestion) {
             setShowEndQuestion(true);
-            setStatusAnnouncement("Oefening klaar. Je krijgt nu een vraag over hoe je je voelt na de oefening.");
         } else {
             saveLog(null);
         }
@@ -136,7 +139,6 @@ export default function ExercisePage({
         try {
             await axios.post(route('exercises.submit'), payload);
             setShowCompletion(true);
-            setStatusAnnouncement("Oefening helemaal afgerond.");
         } catch (error) {
             console.error('Error creating log:', error);
             alert('Er is een fout opgetreden bij het opslaan.');
@@ -149,31 +151,35 @@ export default function ExercisePage({
         await saveLog(valueOneBased);
     };
 
+    // Focus eindvraag-heading zodra die verschijnt
     useEffect(() => {
         if (showEndQuestion && endQuestionHeadingRef.current) {
             endQuestionHeadingRef.current.focus();
         }
     }, [showEndQuestion]);
 
+    // Focus "Oefening klaar" zodra die verschijnt
     useEffect(() => {
         if (isCompleted && !showEndQuestion && !showCompletion && completedHeadingRef.current) {
             completedHeadingRef.current.focus();
         }
     }, [isCompleted, showEndQuestion, showCompletion]);
 
-    // Focus naar de hoofdheading bij elke nieuwe Inertia-navigatie naar deze pagina,
-    // zodat NVDA niet blijft hangen op een element van de vorige pagina.
+    // Focus hoofdheading alleen bij eerste mount (niet bij elke re-render)
     useEffect(() => {
-        if (mainHeadingRef.current) {
+        if (!hasMountedRef.current && mainHeadingRef.current) {
             mainHeadingRef.current.focus();
+            hasMountedRef.current = true;
         }
-    }, [exercise.id]);
+    }, []);
 
+    // Focus audio-heading alleen als de gebruiker actief de startvraag heeft afgerond
     useEffect(() => {
-        if (!showStartQuestion && !isCompleted && audioHeadingRef.current) {
+        if (!showStartQuestion && !isCompleted && !skipQuestions && shouldFocusAudioRef.current && audioHeadingRef.current) {
+            shouldFocusAudioRef.current = false;
             audioHeadingRef.current.focus();
         }
-    }, [showStartQuestion, isCompleted]);
+    }, [showStartQuestion, isCompleted, skipQuestions]);
 
     const isAvailable = available !== false;
 
@@ -261,9 +267,6 @@ export default function ExercisePage({
                         </button>
                     </div>
 
-                    <div aria-live="polite" aria-atomic="true" className="sr-only">
-                        {statusAnnouncement}
-                    </div>
 
                     <div className="bg-white rounded-lg shadow-lg w-full overflow-hidden">
 

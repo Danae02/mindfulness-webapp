@@ -372,7 +372,7 @@ class ExerciseAvailabilityService
             9 => 'september', 10 => 'oktober',   11 => 'november', 12 => 'december',
         ];
 
-        return 'Beschikbaar op ' . $availableFromCarbon->day . ' ' . $months[$availableFromCarbon->month];
+        return 'Open op ' . $availableFromCarbon->day . ' ' . $months[$availableFromCarbon->month];
     }
 
     private function getCompletionDates(int $userId, $exerciseIds): array

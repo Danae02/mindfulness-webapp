@@ -1,44 +1,53 @@
 import LockIcon from "@/Icons/LockIcon";
 
-export default function CourseCard({ course, onClick, onKeyDown }) {
+export default function CourseCard({ course, onClick, onKeyDown, previousCourseName }) {
     const isAvailable = course.available !== false;
 
     if (!isAvailable) {
+        const beschikbaarLabel = course.available_label
+            ? course.available_label
+            : course.available_from
+                ? `Open vanaf ${course.available_from}`
+                : previousCourseName
+                    ? `Open na ${previousCourseName}`
+                    : 'Nog niet open, maak eerst het vorige deel af. Doe elke dag een oefening om dit deel te ontgrendelen.';
+
         return (
-            <div
-                className="flex items-center gap-4 p-4 bg-white rounded-xl"
-                style={{
-                    border: "2px solid #D1D5DB",
-                    cursor: "not-allowed",
-                    backgroundColor: "#F9FAFB",
-                }}
-                role="listitem"
-            >
-                <p className="sr-only">
-                    {`Deel: ${course.course_name}: nog niet beschikbaar. ${course.available_label ? course.available_label + '. ' : ''}Dit deel wordt ontgrendeld als je elke dag een oefening doet.`}
-                </p>
+            <li style={{ listStyle: "none" }}>
                 <div
-                    className="flex items-center justify-center w-14 h-14 rounded-lg flex-shrink-0"
-                    style={{ backgroundColor: "#F3F4F6", border: "2px solid #D1D5DB" }}
-                    aria-hidden="true"
+                    className="flex items-center gap-4 p-4 bg-white rounded-xl"
+                    style={{
+                        border: "2px solid #D1D5DB",
+                        cursor: "not-allowed",
+                        backgroundColor: "#F9FAFB",
+                    }}
+                    tabIndex={0}
+                    aria-disabled="true"
+                    aria-label={`Vergrendeld deel: ${course.course_name}. ${beschikbaarLabel}`}
                 >
-                    <LockIcon className="w-7 h-7 text-gray-400" />
+                    <div
+                        className="flex items-center justify-center w-14 h-14 rounded-lg flex-shrink-0"
+                        style={{ backgroundColor: "#F3F4F6", border: "2px solid #D1D5DB" }}
+                        aria-hidden="true"
+                    >
+                        <LockIcon className="w-7 h-7 text-gray-400" />
+                    </div>
+                    <div className="flex-1 min-w-0" aria-hidden="true">
+                        <p className="text-base font-bold text-gray-500">
+                            {course.course_name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                            {beschikbaarLabel}
+                        </p>
+                    </div>
+                    <LockIcon className="w-5 h-5 text-gray-300 flex-shrink-0" aria-hidden="true" />
                 </div>
-                <div className="flex-1 min-w-0" aria-hidden="true">
-                    <p className="text-base font-bold text-gray-500">
-                        {course.course_name}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                        {course.available_label || "Maak eerst het vorige deel af"}
-                    </p>
-                </div>
-                <LockIcon className="w-5 h-5 text-gray-300 flex-shrink-0" aria-hidden="true"/>
-            </div>
+            </li>
         );
     }
 
     return (
-        <div role="listitem">
+        <li style={{ listStyle: "none" }}>
             <div
                 className="flex items-center gap-4 p-4 bg-white rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
                 style={{ border: "2px solid #7B5EA7" }}
@@ -90,6 +99,6 @@ export default function CourseCard({ course, onClick, onKeyDown }) {
                     </svg>
                 </div>
             </div>
-        </div>
+        </li>
     );
 }

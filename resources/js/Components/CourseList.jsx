@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import CourseCard from "@/Components/CourseCard";
 import ClientCourseModal from "@/Components/ClientCourseModal";
 import LoadingIndicator from "@/Components/LoadingIndicator.jsx";
@@ -11,9 +11,9 @@ function IntroCard({ exercise }) {
             <p className="text-xs font-semibold uppercase tracking-widest text-gray-600 mb-2 px-1" id="intro-label">
                 Begin hier
             </p>
-            <Link
-                href={route("exercise.show", { id: exercise.id })}
-                className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-white rounded-xl hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
+            <button
+                onClick={() => router.visit(route("exercise.show", { id: exercise.id }))}
+                className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-white rounded-xl hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2 text-left"
                 style={{ border: "2px solid #7B5EA7", textDecoration: "none" }}
                 aria-label={`Introductie-oefening: ${exercise.exercise_name}. Klik om te starten.`}
             >
@@ -42,7 +42,7 @@ function IntroCard({ exercise }) {
                     </svg>
                     Start
                 </span>
-            </Link>
+            </button>
         </div>
     );
 }

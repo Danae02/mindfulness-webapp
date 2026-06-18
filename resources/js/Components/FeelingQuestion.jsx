@@ -269,7 +269,7 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
                 <button
                     onClick={handleConfirmRefined}
                     className="w-full py-2 px-4 bg-[#7B5EA7] text-white rounded-md shadow hover:bg-[#6a4e8e] focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2 transition-colors"
-                    aria-label="Geselecteerde antwoord bevestigen en verder naar volgende vraag"
+                    aria-label="Geselecteerde antwoord bevestigen en verder naar volgende onderdeel"
                 >
                     Bevestigen
                 </button>
