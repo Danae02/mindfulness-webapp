@@ -6,7 +6,7 @@
     <meta name="description" content="Log in op de AffectUs mindfulness-applicatie.">
     <link rel="icon" type="image/png" href="/favicon.png" />
 
-    <title inertia>{{ config('app.name', 'Iedereen Mindful') }}</title>
+    <title inertia>Iedereen Mindful</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">

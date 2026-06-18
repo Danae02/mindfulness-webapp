@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/react';
+import { router, Head } from '@inertiajs/react';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import AudioControl from "@/Components/AudioControl.jsx";
 
@@ -11,6 +11,7 @@ export default function IntroExercisePage({ exercise }) {
                 </h2>
             }
         >
+            <Head title={`Introductie: ${exercise.exercise_name}`} />
             <div className="flex items-center justify-center min-h-screen bg-gray-100 py-8">
                 <div className="bg-white rounded-lg shadow-lg max-w-lg w-full overflow-hidden">
 

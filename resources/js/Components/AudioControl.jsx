@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from "react";
 export default function AudioControl({ AudioName = "", label = "Audio afspelen" }) {
     const audioRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [isStarting, setIsStarting] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const isSeekingRef = useRef(false);
@@ -68,19 +69,23 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
 
     const togglePlayPause = () => {
         if (audioRef.current) {
+            if (isStarting) return;
             if (isPlaying) {
                 clearTimeout(audioTimerRef.current);
                 audioRef.current.pause();
                 setIsPlaying(false);
+                setIsStarting(false);
             } else {
                 const timeToSeek = intendedTimeRef.current;
-                setIsPlaying(true);
+                setIsStarting(true);
                 setAnnouncement("");
                 clearTimeout(audioTimerRef.current);
                 audioTimerRef.current = setTimeout(() => {
                     if (audioRef.current) {
                         audioRef.current.currentTime = timeToSeek;
                         audioRef.current.play();
+                        setIsStarting(false);
+                        setIsPlaying(true);
                     }
                 }, 1500);
             }
@@ -110,8 +115,8 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
 
             <div
                 aria-live="polite"
-                 aria-atomic="true"
-                 className="sr-only"
+                aria-atomic="true"
+                className="sr-only"
             >
                 {announcement}
             </div>
@@ -151,13 +156,18 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
             <div className="flex justify-center pt-4">
                 <button
                     onClick={togglePlayPause}
-                    aria-label={isPlaying ? "Pauzeren" : "Afspelen"}
+                    aria-label={isStarting ? "Wordt gestart" : (isPlaying ? "Pauzeren" : "Afspelen")}
                     className="flex items-center justify-center w-16 h-16 rounded-full shadow-lg transition-all duration-200
                         hover:shadow-xl
                         focus:outline-none focus:ring-4 focus:ring-[#7B5EA7] focus:ring-offset-2"
                     style={{ backgroundColor: '#7B5EA7', color: 'white' }}
                 >
-                    {isPlaying ? (
+                    {isStarting ? (
+                        <svg className="w-10 h-10 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" />
+                            <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                    ) : isPlaying ? (
                         <svg className="w-14 h-14" fill="white" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                         </svg>

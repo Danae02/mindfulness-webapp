@@ -1,9 +1,18 @@
+import { useEffect, useRef } from 'react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Link, usePage } from '@inertiajs/react';
 
 
 export default function AuthenticatedLayout({ header, children, topBar }) {
     const user = usePage().props.auth.user;
+    const mainRef = useRef(null);
+
+    useEffect(() => {
+        if (mainRef.current) {
+            mainRef.current.focus();
+            window.scrollTo(0, 0);
+        }
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -63,6 +72,7 @@ export default function AuthenticatedLayout({ header, children, topBar }) {
                                     viewBox="0 0 24 24"
                                     aria-hidden="true"
                                     focusable="false"
+                                    role="presentation"
                                 >
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                           d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -96,6 +106,7 @@ export default function AuthenticatedLayout({ header, children, topBar }) {
                                     style={{color: '#C0392B'}}
                                     aria-hidden="true"
                                     focusable="false"
+                                    role="presentation"
                                 >
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                           d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
@@ -112,7 +123,14 @@ export default function AuthenticatedLayout({ header, children, topBar }) {
             {topBar && topBar}
 
             {/* hoofdcontent */}
-            <main id="main-content" role="main" className="focus:outline-none">
+            <main
+                id="main-content"
+                role="main"
+                tabIndex={-1}
+                ref={mainRef}
+                className="focus:outline-none"
+            >
+
                 <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     {header && (
                         <header className="mb-6">

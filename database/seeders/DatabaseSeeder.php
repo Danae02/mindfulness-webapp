@@ -82,6 +82,12 @@ class DatabaseSeeder extends Seeder
             }
         });
 
+        // Sessie-logs (los van de UserExerciseLog-records hierboven)
+        $this->call(GenerateSessionLogsSeeder::class);
+
+        // Onderzoeksinstellingen
+        $this->call(ResearchSettingSeeder::class);
+
         echo "Lokale testdata aangemaakt.\n";
         echo "Favorieten: " . Favorite::count() . "\n";
     }

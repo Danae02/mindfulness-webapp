@@ -87,10 +87,10 @@ export default function CourseList({
     return (
         <>
             <h2 className="text-lg sm:text-2xl font-bold text-darkGray mb-4" id="courses-heading">
-                <span lang="en">Mindfulness</span> oefeningen
+                Mindfulness oefeningen
             </h2>
 
-            {introCourse && <IntroCard exercise={introCourse.exercises[0]} />}
+            {introCourse && <IntroCard exercise={introCourse.exercises[0]}/>}
 
             {regularCourses.length > 0 && (
                 <p className="text-xs font-semibold uppercase tracking-widest text-gray-600 mb-2 px-1 mt-4">
@@ -131,7 +131,7 @@ export default function CourseList({
             </ul>
 
             {showModal && selectedCourse && (
-                <ClientCourseModal course={selectedCourse} onClose={() => setShowModal(false)} />
+                <ClientCourseModal course={selectedCourse} onClose={() => setShowModal(false)}/>
             )}
         </>
     );

@@ -135,7 +135,7 @@ export default function BackupManager() {
 
                     {downloadError && (
                         <div className="mt-3 flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-                            <span className="mt-0.5">⚠️</span>
+                            <span className="mt-0.5">⚠︎</span>
                             <span>{downloadError}</span>
                         </div>
                     )}
@@ -179,7 +179,7 @@ export default function BackupManager() {
                         />
                         {selectedFile ? (
                             <div className="space-y-1">
-                                <p className="text-2xl">✅</p>
+                                <p className="text-2xl">✓</p>
                                 <p className="font-medium text-green-700">{selectedFile.name}</p>
                                 <p className="text-sm text-green-600">
                                     {(selectedFile.size / 1024 / 1024).toFixed(2)} MB, klaar om te uploaden
@@ -201,7 +201,7 @@ export default function BackupManager() {
                     {/* Foutmelding */}
                     {restoreError && (
                         <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-                            <span className="mt-0.5">⚠️</span>
+                            <span className="mt-0.5">⚠︎</span>
                             <span>{restoreError}</span>
                         </div>
                     )}
@@ -209,7 +209,7 @@ export default function BackupManager() {
                     {/* Succesmelding */}
                     {restoreResult && (
                         <div className="p-4 rounded-lg bg-green-50 border border-green-200 text-sm space-y-1">
-                            <p className="font-semibold text-green-800">✅ {restoreResult.message}</p>
+                            <p className="font-semibold text-green-800"> ✓ {restoreResult.message}</p>
                             <p className="text-green-700">
                                 Cursussen hersteld: <strong>{restoreResult.restored_courses}</strong>
                             </p>
@@ -225,7 +225,7 @@ export default function BackupManager() {
                     {/* bevestiging */}
                     {confirmVisible && (
                         <div className="p-4 rounded-lg bg-amber-50 border border-amber-400 text-sm space-y-3">
-                            <p className="font-semibold text-amber-800">⚠️ Weet je het zeker?</p>
+                            <p className="font-semibold text-amber-800">⚠︎ Weet je het zeker?</p>
                             <p className="text-amber-700">
                                 Bestaande cursussen worden bijgewerkt, ontbrekende worden opnieuw aangemaakt. Gebruikersdata blijft bewaard.
                             </p>
@@ -284,7 +284,7 @@ export default function BackupManager() {
 
                     {/* Waarschuwing */}
                     <p className="text-xs text-gray-600">
-                        ℹ️ Gebruikersdata wordt <strong className="text-gray-700">niet</strong> overschreven.
+                        Gebruikersdata wordt <strong className="text-gray-700">niet</strong> overschreven.
                         Ontbrekende cursussen en oefeningen worden opnieuw aangemaakt.
                     </p>
                 </div>

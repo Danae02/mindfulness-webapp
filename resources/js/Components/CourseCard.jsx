@@ -57,6 +57,7 @@ export default function CourseCard({ course, onClick, onKeyDown }) {
                         src="/icons/lotus.png"
                         alt=""
                         aria-hidden="true"
+                        role="presentation"
                         className="w-10 h-10 object-contain"
                         style={{ filter: "invert(35%) sepia(40%) saturate(500%) hue-rotate(240deg) brightness(80%)" }}
                     />

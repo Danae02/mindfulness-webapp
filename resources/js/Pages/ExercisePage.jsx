@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { router, usePage } from '@inertiajs/react';
+import { router, usePage, Head } from '@inertiajs/react';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import AudioControl from "@/Components/AudioControl.jsx";
 import AudioButton from "@/Components/AudioButton.jsx";
@@ -34,8 +34,13 @@ export default function ExercisePage({
     const [showCompletion,    setShowCompletion]     = useState(false);
 
     const [feelingBefore, setFeelingBefore] = useState(null);
+    const [statusAnnouncement, setStatusAnnouncement] = useState("");
 
     const sessionStartRef = useRef(null);
+    const endQuestionHeadingRef = useRef(null);
+    const completedHeadingRef = useRef(null);
+    const mainHeadingRef = useRef(null);
+    const audioHeadingRef = useRef(null);
     const user = usePage().props.auth.user;
 
     const effectiveUserId = forUserId || user.id;
@@ -90,11 +95,13 @@ export default function ExercisePage({
     const handleConfirmStart = (valueOneBased) => {
         setFeelingBefore(valueOneBased);
         setShowStartQuestion(false);
+        setStatusAnnouncement("Vraag beantwoord. Je bent nu bij de mindfulness audio-oefening.");
         sessionStartRef.current = Date.now();
     };
 
     const handleSkipStart = () => {
         setShowStartQuestion(false);
+        setStatusAnnouncement("Je bent nu bij de mindfulness audio-oefening.");
         sessionStartRef.current = Date.now();
     };
 
@@ -103,6 +110,7 @@ export default function ExercisePage({
         const shouldShowEndQuestion = hasQuestions && !skipQuestions && (!isSupervisor || supervisorCanAskFeelings);
         if (shouldShowEndQuestion) {
             setShowEndQuestion(true);
+            setStatusAnnouncement("Oefening klaar. Je krijgt nu een vraag over hoe je je voelt na de oefening.");
         } else {
             saveLog(null);
         }
@@ -128,6 +136,7 @@ export default function ExercisePage({
         try {
             await axios.post(route('exercises.submit'), payload);
             setShowCompletion(true);
+            setStatusAnnouncement("Oefening helemaal afgerond.");
         } catch (error) {
             console.error('Error creating log:', error);
             alert('Er is een fout opgetreden bij het opslaan.');
@@ -140,18 +149,51 @@ export default function ExercisePage({
         await saveLog(valueOneBased);
     };
 
+    useEffect(() => {
+        if (showEndQuestion && endQuestionHeadingRef.current) {
+            endQuestionHeadingRef.current.focus();
+        }
+    }, [showEndQuestion]);
+
+    useEffect(() => {
+        if (isCompleted && !showEndQuestion && !showCompletion && completedHeadingRef.current) {
+            completedHeadingRef.current.focus();
+        }
+    }, [isCompleted, showEndQuestion, showCompletion]);
+
+    // Focus naar de hoofdheading bij elke nieuwe Inertia-navigatie naar deze pagina,
+    // zodat NVDA niet blijft hangen op een element van de vorige pagina.
+    useEffect(() => {
+        if (mainHeadingRef.current) {
+            mainHeadingRef.current.focus();
+        }
+    }, [exercise.id]);
+
+    useEffect(() => {
+        if (!showStartQuestion && !isCompleted && audioHeadingRef.current) {
+            audioHeadingRef.current.focus();
+        }
+    }, [showStartQuestion, isCompleted]);
+
     const isAvailable = available !== false;
 
     if (!isAvailable) {
         return (
             <AuthenticatedLayout>
+                <Head title="Oefening nog niet beschikbaar" />
                 <div className="flex items-center justify-center min-h-screen bg-gray-100 py-8">
                     <div className="bg-white rounded-lg shadow-lg max-w-lg w-full overflow-hidden p-8">
                         <div className="text-center space-y-4">
                             <svg className="w-16 h-16 mx-auto text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <h3 className="text-lg font-semibold text-gray-800">Oefening nog niet beschikbaar</h3>
+                            <h3
+                                ref={mainHeadingRef}
+                                tabIndex={-1}
+                                className="text-lg font-semibold text-gray-800 focus:outline-none"
+                            >
+                                Oefening nog niet beschikbaar
+                            </h3>
                             <p className="text-gray-600">
                                 {availableLabel || 'Maak eerst de vorige oefening.'}
                             </p>
@@ -176,6 +218,7 @@ export default function ExercisePage({
     if (showCompletion) {
         return (
             <AuthenticatedLayout>
+                <Head title={`Klaar: ${exercise.exercise_name}`} />
                 <div className="flex items-center justify-center min-h-screen bg-gray-100 py-8">
                     <div className="bg-white rounded-lg shadow-lg max-w-lg w-full overflow-hidden p-8">
                         <CompletionScreen
@@ -198,6 +241,7 @@ export default function ExercisePage({
                 ) : null
             }
         >
+            <Head title={`Oefening: ${exercise.exercise_name}`} />
             <div className="flex items-center justify-center bg-gray-100 py-6 px-4">
                 <div className="max-w-2xl w-full">
 
@@ -210,18 +254,26 @@ export default function ExercisePage({
                             onMouseEnter={e => e.currentTarget.style.backgroundColor = '#5a337a'}
                             onMouseLeave={e => e.currentTarget.style.backgroundColor = '#6C4092'}
                         >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" role="presentation">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
                             Terug naar dashboard
                         </button>
                     </div>
 
+                    <div aria-live="polite" aria-atomic="true" className="sr-only">
+                        {statusAnnouncement}
+                    </div>
+
                     <div className="bg-white rounded-lg shadow-lg w-full overflow-hidden">
 
                         {/* Paarse header */}
                         <div className="px-8 py-5 text-center" style={{ backgroundColor: '#7B5EA7' }}>
-                            <h1 className="text-3xl font-bold text-white">
+                            <h1
+                                ref={mainHeadingRef}
+                                tabIndex={-1}
+                                className="text-3xl font-bold text-white focus:outline-none"
+                            >
                                 Oefening: {exercise.exercise_name}
                             </h1>
 
@@ -315,7 +367,7 @@ export default function ExercisePage({
                             {/* Herhaalde oefening melding (cliënt) */}
                             {!isSupervisor && skipQuestions && (
                                 <div className="flex items-center gap-4 p-4 rounded-xl border-2" style={{ backgroundColor: '#F0E8FF', borderColor: '#7B5EA7' }}>
-                                    <svg className="w-9 h-9 flex-shrink-0" style={{ color: '#7B5EA7' }} fill="currentColor" viewBox="0 0 24 24" role="img" aria-label="Al gedaan vandaag">
+                                    <svg className="w-9 h-9 flex-shrink-0" style={{ color: '#7B5EA7' }} fill="currentColor" viewBox="0 0 24 24" role="presentation" aria-label="Al gedaan vandaag">
                                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                                     </svg>
                                     <p className="text-sm font-medium" style={{ color: '#3B2D6E' }}>
@@ -347,7 +399,13 @@ export default function ExercisePage({
                                     </div>
 
                                     <div className="p-5 rounded-xl border-4" style={{ backgroundColor: '#FFFFFF', borderColor: '#7B5EA7' }}>
-                                        <h2 className="text-base font-semibold text-gray-700 mb-3"><span lang="en">Mindfulness</span> audio</h2>
+                                        <h2
+                                            ref={audioHeadingRef}
+                                            tabIndex={-1}
+                                            className="text-base font-semibold text-gray-700 mb-3 focus:outline-none"
+                                        >
+                                            Mindfulness audio
+                                        </h2>
                                         <AudioControl AudioName={exercise.audio_file_path} />
                                     </div>
 
@@ -363,6 +421,13 @@ export default function ExercisePage({
                             {/* EINDVRAAG */}
                             {hasQuestions && showEndQuestion && !hasAnsweredEnd && (!isSupervisor || supervisorCanAskFeelings) && (
                                 <div className="space-y-4 border-t pt-4">
+                                    <h2
+                                        ref={endQuestionHeadingRef}
+                                        tabIndex={-1}
+                                        className="sr-only"
+                                    >
+                                        Vraag na de oefening
+                                    </h2>
                                     {isSupervisor && (
                                         <p className="text-sm text-purple-700 bg-purple-50 border border-purple-200 rounded-lg p-3">
                                             <strong>Begeleider:</strong> Vraag de cliënt hoe zij/hij zich voelt <em>na</em> de oefening en vul het in.
@@ -380,7 +445,13 @@ export default function ExercisePage({
                             {/* Terugknop na voltooiing */}
                             {isCompleted && !showEndQuestion && !showCompletion && (
                                 <div className="text-center space-y-4 border-t pt-6">
-                                    <p className="text-green-600 font-semibold">✓ Oefening klaar!</p>
+                                    <p
+                                        ref={completedHeadingRef}
+                                        tabIndex={-1}
+                                        className="text-green-600 font-semibold focus:outline-none"
+                                    >
+                                        ✓ Oefening klaar!
+                                    </p>
                                     <button
                                         onClick={handleBack}
                                         className="w-full py-3 px-4 bg-[#7B5EA7] text-white font-semibold rounded-xl shadow hover:bg-[#6a4e8e] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200"

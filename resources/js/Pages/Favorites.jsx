@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Link, router } from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
@@ -7,10 +7,17 @@ import { Head } from "@inertiajs/react";
 export default function Favorites() {
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
+    const headingRef = useRef(null);
 
     useEffect(() => {
         fetchFavorites();
     }, []);
+
+    useEffect(() => {
+        if (!loading && headingRef.current) {
+            headingRef.current.focus();
+        }
+    }, [loading]);
 
     const fetchFavorites = async () => {
         try {
@@ -41,7 +48,7 @@ export default function Favorites() {
         return (
             <AuthenticatedLayout>
                 <Head title="Mijn favorieten" />
-                <div className="text-center py-12">
+                <div className="text-center py-12" role="status" aria-live="polite">
                     <p>Laden...</p>
                 </div>
             </AuthenticatedLayout>
@@ -53,7 +60,9 @@ export default function Favorites() {
             <Head title="Mijn favorieten" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h1 className="text-3xl font-bold text-darkGray mb-2">Mijn favorieten</h1>
+                <h1 ref={headingRef}
+                    tabIndex={-1}
+                    className="text-3xl font-bold text-darkGray mb-2">Mijn favorieten</h1>
                 <p className="text-gray-700 mb-8">
                     Hier vind je de oefeningen die je hebt opgeslagen omdat je ze fijn vond.
                 </p>

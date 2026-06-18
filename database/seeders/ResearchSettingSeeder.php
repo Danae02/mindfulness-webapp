@@ -10,9 +10,9 @@ class ResearchSettingSeeder extends Seeder
 {
     public function run()
     {
-        ResearchSettings::create([
-            'key_name' => 'mode',
-            'value' => 'per_session', // Standaardinstelling
-        ]);
+        ResearchSettings::updateOrCreate(
+            ['key_name' => 'mode'],
+            ['value' => 'per_session'] // Standaardinstelling
+        );
     }
 }

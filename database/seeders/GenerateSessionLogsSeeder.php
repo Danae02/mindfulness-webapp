@@ -14,6 +14,11 @@ class GenerateSessionLogsSeeder extends Seeder
      */
     public function run()
     {
+        // Wis bestaande sessie-logs zodat herhaald seeden niet stapelt
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('session_logs')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         // Haal alle gebruikers met role_id = 2 op
         $users = DB::table('users')->where('role_id', 2)->get();
 

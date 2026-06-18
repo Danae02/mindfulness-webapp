@@ -5,6 +5,12 @@ import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 
 export default function Edit({ mustVerifyEmail, status }) {
+    const headingRef = useRef();
+
+    useEffect(() => {
+        headingRef.current?.focus();
+    }, []);
+
     return (
         <AuthenticatedLayout>
             <Head title="Mijn profiel instellingen" />
@@ -14,7 +20,9 @@ export default function Edit({ mustVerifyEmail, status }) {
                     <div className="mx-auto max-w-7xl space-y-8 sm:px-6 lg:px-8">
 
                         <div className="space-y-2 sm:space-y-1">
-                            <h1 className="text-xl sm:text-2xl font-bold text-darkGray">Mijn profiel</h1>
+                            <h1 ref={headingRef}
+                                tabIndex={-1}
+                                className="text-xl sm:text-2xl font-bold text-darkGray">Mijn profiel</h1>
                             <p className="text-gray-700">
                                 Pas hier je naam, e-mailadres en wachtwoord aan.
                             </p>

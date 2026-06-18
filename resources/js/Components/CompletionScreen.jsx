@@ -1,11 +1,25 @@
+import { useEffect, useRef } from 'react';
 import AudioButton from './AudioButton';
 import CheckIcon from '@/Icons/CheckIcon';
 
 export default function CompletionScreen({ userName, onBack }) {
+    const headingRef = useRef(null);
+
+    useEffect(() => {
+        if (headingRef.current) {
+            headingRef.current.focus();
+        }
+    }, []);
+
     return (
         <div className="space-y-6">
             <div className="text-center">
-                <h1 className="text-2xl font-bold text-white px-8 py-6 rounded-lg" style={{ backgroundColor: '#7B5EA7' }}>
+                <h1
+                    ref={headingRef}
+                    tabIndex={-1}
+                    className="text-2xl font-bold text-white px-8 py-6 rounded-lg focus:outline-none"
+                    style={{ backgroundColor: '#7B5EA7' }}
+                >
                     Oefening klaar!
                 </h1>
             </div>

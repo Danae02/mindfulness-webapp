@@ -9,20 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class UserExerciseLogController extends Controller
 {
-//    public function index(Request $request) {
-//        // Haal logs op met de gekoppelde exercises
-//        $userExerciseLogs = UserExerciseLog::with('exercise')->get();
-//
-//        // Optionele filter op naam van de oefening
-//        $exerciseName = $request->query('exercise_name');
-//        if ($exerciseName) {
-//            $userExerciseLogs = $userExerciseLogs->filter(function ($log) use ($exerciseName) {
-//                return stripos($log->exercise->exercise_name, $exerciseName) !== false;
-//            });
-//        }
-//
-//        return response()->json($userExerciseLogs);
-//    }
 
     public function index(Request $request)
     {

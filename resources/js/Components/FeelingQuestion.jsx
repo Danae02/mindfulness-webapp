@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import AnswerOption from "@/Components/AnswerOption.jsx";
 
 export default function FeelingQuestion({ question, answers, namePrefix, onConfirm }) {
     const isTwoStep = answers.length === 5;
@@ -134,6 +133,13 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
         }
     }, [globalChoice, refinedIndex]);
 
+    // Zet alleen focus (zonder de keuze te markeren) zodra de verfijningsstap verschijnt
+    useEffect(() => {
+        if (globalChoice !== null && refinedIndex === null) {
+            buttonRefsRefined.current[0]?.focus();
+        }
+    }, [globalChoice, refinedIndex]);
+
     // enkelvoudige modus
     if (!isTwoStep) {
         return (
@@ -174,6 +180,7 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
                                         <img
                                             src={icon.src}
                                             alt=""
+                                            role="presentation"
                                             className="w-12 h-12 object-contain flex-shrink-0"
                                         />
                                     )}
@@ -220,6 +227,7 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
                 >
                     Kies tussen twee opties. Gebruik de pijltjestoetsen (↑ omhoog, ↓ omlaag)
                     om te navigeren. Druk op Enter of Spatie om te selecteren.
+                    Gebruik daarna Tab om naar de bevestigknop te gaan.
                 </p>
 
                 <fieldset
@@ -282,7 +290,6 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
             <p id={`${namePrefix}-hint`} className="sr-only">
                 Kies een van drie opties. Gebruik de pijltjestoetsen (omhoog of omlaag)
                 om te navigeren. Druk op Enter of Spatie om te selecteren.
-                {`Als je "${answers[2]?.text || answers[2]}" kiest, ga je direct verder naar de audio oefening. Bij de andere twee antwoorden krijg je nog een extra optie.`}
             </p>
             <fieldset
                 role="group"

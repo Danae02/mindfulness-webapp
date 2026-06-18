@@ -10,10 +10,12 @@ class ExerciseFactory extends Factory
 {
     protected $model = Exercise::class;
 
+    protected static int $counter = 1;
+
     public function definition()
     {
         return [
-            'exercise_name' => $this->faker->word() . ' Exercise',
+            'exercise_name' => 'Dummy data oefening ' . self::$counter++,
 //            'category' => $this->faker->randomElement(['relaxation', 'mindfulness']),
             'keywords' => json_encode($this->faker->words(3)),
 //            'difficulty_level' => $this->faker->randomElement(['beginner', 'advanced']),
