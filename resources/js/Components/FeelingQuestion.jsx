@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 
-export default function FeelingQuestion({ question, answers, namePrefix, onConfirm }) {
+export default function FeelingQuestion({ question, answers, namePrefix, onConfirm, exerciseName, timingLabel }) {
     const isTwoStep = answers.length === 5;
 
     const isStart = namePrefix?.startsWith("start");
-    const timingLabel = isStart ? "Vóór de oefening" : "Na de oefening";
+    const computedTimingLabel = timingLabel ?? (isStart ? "Vóór de oefening" : "Na de oefening");
+    const fullSrAnnouncement = exerciseName
+        ? `Oefening: ${exerciseName}. ${computedTimingLabel}. ${question}`
+        : `${computedTimingLabel}. ${question}`;
     const timingIcon = isStart
         ? "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" // check
         : "M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"; // done
@@ -144,6 +147,7 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
     if (!isTwoStep) {
         return (
             <div className="space-y-4">
+                <p className="sr-only" role="alert">{fullSrAnnouncement}</p>
                 <h2 className="text-lg font-semibold text-gray-700">{question}</h2>
                 <p id={`${namePrefix}-hint`} className="sr-only">
                     Gebruik de pijltjestoetsen (↑ omhoog, ↓ omlaag) om tussen opties te navigeren.
@@ -221,11 +225,11 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
                 <h2 className="text-lg font-semibold text-gray-700">{question}</h2>
                 <p
                     id={hintId}
-                    className="text-xs text-gray-500"
+                    className="sr-only"
                     aria-live="polite"
                     aria-atomic="true"
                 >
-                    Kies tussen twee opties. Gebruik de pijltjestoetsen (↑ omhoog, ↓ omlaag)
+                    Kies nu nog tussen twee opties. Gebruik de pijltjestoetsen (↑ omhoog, ↓ omlaag)
                     om te navigeren. Druk op Enter of Spatie om te selecteren.
                     Gebruik daarna Tab om naar de bevestigknop te gaan.
                 </p>
@@ -286,15 +290,15 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
 
     return (
         <div className="space-y-4">
+            <p className="sr-only" role="alert">{fullSrAnnouncement}</p>
             <h2 className="text-lg font-semibold text-gray-700">{question}</h2>
             <p id={`${namePrefix}-hint`} className="sr-only">
-                Kies een van drie opties. Gebruik de pijltjestoetsen (omhoog of omlaag)
-                om te navigeren. Druk op Enter of Spatie om te selecteren.
+                Kies een van drie opties. Gebruik de pijltjestoetsen (omhoog of omlaag) om te navigeren.
             </p>
             <fieldset
                 role="group"
                 aria-labelledby={`${namePrefix}-legend`}
-                aria-describedby={`${namePrefix}-hint`}
+                aria-describedby={`${namePrefix}-hint ${namePrefix}-extra-hint`}
                 className="space-y-3"
             >
                 <legend id={`${namePrefix}-legend`} className="sr-only">
@@ -343,8 +347,8 @@ export default function FeelingQuestion({ question, answers, namePrefix, onConfi
                     );
                 })}
             </fieldset>
-            <p className="text-xs text-gray-400 text-center">
-                Kies een optie, bij de eerste of laatste optie volgt een tweede optie.
+            <p id={`${namePrefix}-extra-hint`} className="text-xs text-gray-400 text-center">
+                Kies een optie, bij de eerste of laatste optie komt er straks een extra vraag.
             </p>
         </div>
     );

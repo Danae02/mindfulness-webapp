@@ -113,7 +113,7 @@ export default function CourseList({
                 <p className="sr-only" aria-live="polite">
                     {`Er zijn ${totalCourses} vervolg delen: ${availableCourses} te doen${
                         lockedCourses > 0
-                            ? ` en ${lockedCourses} nog niet open. Doe elke dag een oefening, dan komen er meer bij.`
+                            ? ` en ${lockedCourses} nog niet open. Doe elke dag een oefening, dan komen er meer vrij.`
                             : '.'
                     }`}
                 </p>

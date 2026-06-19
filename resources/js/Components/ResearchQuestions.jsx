@@ -216,7 +216,7 @@ function AnswersEditor({ answerCount, answers, onAnswerChange }) {
             </div>
 
             <p className="text-xs text-gray-600 mt-1 px-1">
-                Bij 5 antwoorden ziet de gebruiker eerst 3 globale opties. Kiest hij de eerste of laatste, dan volgt een tweede verfijningsstap.
+                Bij 5 antwoorden ziet de gebruiker eerst 3 globale opties. Kiest hij de eerste of laatste, dan komt een tweede vraag.
             </p>
         </div>
     );

@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { router, usePage, Head } from '@inertiajs/react';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import AudioControl from "@/Components/AudioControl.jsx";
-import AudioButton from "@/Components/AudioButton.jsx";
 import FeelingQuestion from "@/Components/FeelingQuestion.jsx";
 import CompletionScreen from "@/Components/CompletionScreen.jsx";
 import axios from 'axios';
@@ -24,7 +23,7 @@ export default function ExercisePage({
     // Destructure grouped props
     const { available, availableLabel, alreadyCompletedToday, isNewestExercise } = availability;
     const { mode: researchMode, question: researchQuestion, answers: researchAnswers } = research;
-    const { forUserId, isSupervisorMode, feelingAnsweredToday: supervisorFeelingAnsweredToday } = supervisorMode;
+    const { forUserId, forUserName, isSupervisorMode, feelingAnsweredToday: supervisorFeelingAnsweredToday } = supervisorMode;
 
     const user = usePage().props.auth.user;
 
@@ -165,9 +164,11 @@ export default function ExercisePage({
         }
     }, [isCompleted, showEndQuestion, showCompletion]);
 
-    // Focus hoofdheading alleen bij eerste mount (niet bij elke re-render)
+    // Focus hoofdheading alleen bij eerste mount, en niet als de gevoelsvraag al actief is
+    // (die kondigt zichzelf al aan via een live region, dubbele aankondiging anders)
     useEffect(() => {
-        if (!hasMountedRef.current && mainHeadingRef.current) {
+        const startQuestionActive = !skipQuestions && hasQuestions && showStartQuestion && (!isSupervisor || supervisorCanAskFeelings);
+        if (!hasMountedRef.current && mainHeadingRef.current && !startQuestionActive) {
             mainHeadingRef.current.focus();
             hasMountedRef.current = true;
         }
@@ -223,12 +224,12 @@ export default function ExercisePage({
 
     if (showCompletion) {
         return (
-            <AuthenticatedLayout>
+            <AuthenticatedLayout announcePageLoad={false}>
                 <Head title={`Klaar: ${exercise.exercise_name}`} />
                 <div className="flex items-center justify-center min-h-screen bg-gray-100 py-8">
                     <div className="bg-white rounded-lg shadow-lg max-w-lg w-full overflow-hidden p-8">
                         <CompletionScreen
-                            userName={isSupervisor ? 'de cliënt' : user.name}
+                            userName={isSupervisor ? (forUserName ?? 'de cliënt') : user.name}
                             onBack={handleBack}
                         />
                     </div>
@@ -239,6 +240,7 @@ export default function ExercisePage({
 
     return (
         <AuthenticatedLayout
+            announcePageLoad={false}
             header={
                 isSupervisor ? (
                     <p className="text-sm text-purple-600">
@@ -327,6 +329,8 @@ export default function ExercisePage({
                                         answers={currentAnswers}
                                         namePrefix="start-answer"
                                         onConfirm={handleConfirmStart}
+                                        exerciseName={exercise.exercise_name}
+                                        timingLabel="Vraag vóór de oefening"
                                     />
                                 </div>
                             )}
@@ -391,7 +395,7 @@ export default function ExercisePage({
                             {!showStartQuestion && !isCompleted && (
                                 <div className="space-y-4">
                                     <div className="p-5 rounded-xl border-2" style={{ backgroundColor: '#F0E8FF', borderColor: '#7B5EA7' }}>
-                                        <div className="flex items-start gap-3">
+                                        <div className="flex items-start gap-3" aria-hidden="true">
                                             <svg className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: '#7B5EA7' }} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                                             </svg>
@@ -407,7 +411,11 @@ export default function ExercisePage({
                                             tabIndex={-1}
                                             className="text-base font-semibold text-gray-700 mb-3 focus:outline-none"
                                         >
+                                            <span className="sr-only">
+                                                Oefening: {exercise.exercise_name}. Zoek een rustige plek. Je kunt de audio pauzeren en terugspoelen.{' '}
+                                            </span>
                                             Mindfulness audio
+                                            <span className="sr-only">. Ga naar de afspeelknop om de oefening te luisteren.</span>
                                         </h2>
                                         <AudioControl AudioName={exercise.audio_file_path} />
                                     </div>
@@ -441,6 +449,8 @@ export default function ExercisePage({
                                         answers={currentAnswers}
                                         namePrefix="end-answer"
                                         onConfirm={handleConfirmEnd}
+                                        exerciseName={exercise.exercise_name}
+                                        timingLabel="Vraag na de oefening"
                                     />
                                 </div>
                             )}

@@ -7,6 +7,7 @@ import { Head } from "@inertiajs/react";
 export default function Favorites() {
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [announcement, setAnnouncement] = useState("");
     const headingRef = useRef(null);
 
     useEffect(() => {
@@ -16,6 +17,9 @@ export default function Favorites() {
     useEffect(() => {
         if (!loading && headingRef.current) {
             headingRef.current.focus();
+            setTimeout(() => {
+                setAnnouncement("Mijn favorieten. Hier vind je de oefeningen die je hebt opgeslagen omdat je ze fijn vond.");
+            }, 500);
         }
     }, [loading]);
 
@@ -60,6 +64,9 @@ export default function Favorites() {
             <Head title="Mijn favorieten" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div aria-live="polite" aria-atomic="true" className="sr-only">
+                    {announcement}
+                </div>
                 <h1 ref={headingRef}
                     tabIndex={-1}
                     className="text-3xl font-bold text-darkGray mb-2">Mijn favorieten</h1>

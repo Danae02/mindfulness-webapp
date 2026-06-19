@@ -102,7 +102,12 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
     };
 
     const handleSeekStart = () => { isSeekingRef.current = true; };
-    const handleSeekEnd   = () => { isSeekingRef.current = false; };
+    const handleSeekEnd   = () => {
+        isSeekingRef.current = false;
+        // Eenmalige aankondiging na seek, alleen huidige positie
+        setAnnouncement(`Gezet op ${formatTimeSpoken(intendedTimeRef.current)}.`);
+        setTimeout(() => setAnnouncement(""), 2000);
+    };
 
     return (
         <div className="w-full space-y-4">
@@ -128,7 +133,7 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
             </div>
 
             {/* Slider */}
-            <div className="space-y-2">
+            <div className="space-y-2" aria-hidden="true">
                 <input
                     type="range"
                     min="0"
@@ -139,8 +144,7 @@ export default function AudioControl({ AudioName = "", label = "Audio afspelen" 
                     onMouseUp={handleSeekEnd}
                     onTouchStart={handleSeekStart}
                     onTouchEnd={handleSeekEnd}
-                    aria-label="Audio voortgang"
-                    aria-valuetext={`${formatTimeSpoken(currentTime)} van ${formatTimeSpoken(duration)}`}
+                    tabIndex="-1"
                     className="w-full h-2 bg-gray-200 rounded-full cursor-pointer accent-[#7B5EA7]
                         focus:outline-none focus:ring-2 focus:ring-[#7B5EA7] focus:ring-offset-2"
                     style={{

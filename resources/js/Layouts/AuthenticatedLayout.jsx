@@ -3,13 +3,14 @@ import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Link, usePage, router } from '@inertiajs/react';
 
 
-export default function AuthenticatedLayout({ header, children, topBar }) {
+export default function AuthenticatedLayout({ header, children, topBar, announcePageLoad = true }) {
     const user = usePage().props.auth.user;
     const { url } = usePage();
     const announceRef = useRef(null);
     const skipLinkRef = useRef(null);
 
     useEffect(() => {
+        if (!announcePageLoad) return;
         const title = document.title || 'Pagina geladen';
         if (announceRef.current) {
             announceRef.current.textContent = '';
@@ -17,7 +18,7 @@ export default function AuthenticatedLayout({ header, children, topBar }) {
                 announceRef.current.textContent = `${title} is geladen`;
             }, 100);
         }
-    }, [url]);
+    }, [url, announcePageLoad]);
 
     // na het laatste focusbare element op de pagina springt Tab terug naar de skiplink
     useEffect(() => {

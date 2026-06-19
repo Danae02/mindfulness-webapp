@@ -1,4 +1,4 @@
-import { Link } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 
 export default function NextExerciseBanner({ nextExercise, completedTodayIds = [] }) {
 
@@ -71,8 +71,9 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
                         {nextExercise.exercise_name}
                     </p>
                 </div>
-                <Link
-                    href={`/exercises/${nextExercise.id}`}
+                <button
+                    type="button"
+                    onClick={() => router.visit(`/exercises/${nextExercise.id}`)}
                     className="inline-flex items-center gap-2 px-5 py-2.5 text-white text-base font-semibold rounded-xl transition-colors focus:outline-none focus:ring-4 focus:ring-[#6C4092] focus:ring-offset-2 flex-shrink-0"
                     style={{ backgroundColor: "#6C4092" }}
                 >
@@ -89,7 +90,7 @@ export default function NextExerciseBanner({ nextExercise, completedTodayIds = [
                         <path d="M8 5v14l11-7z"/>
                     </svg>
                     <span aria-hidden="true">Start nu</span>
-                </Link>
+                </button>
             </div>
         </section>
     );

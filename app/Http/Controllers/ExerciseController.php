@@ -65,6 +65,7 @@ class ExerciseController extends Controller
         $researchQuestion = null;
         $researchAnswers = null;
         $forUserId = null;
+        $forUserName = null;
         $isProxyMode = false;
         $proxyFeelingAnsweredToday = false;
 
@@ -96,6 +97,10 @@ class ExerciseController extends Controller
             $userForQuestion = User::find($userForAvailability);
             [$researchMode, $researchQuestion, $researchAnswers] =
                 $this->getResearchSettingsForUser($userForQuestion);
+
+            if ($isProxyMode && $userForQuestion) {
+                $forUserName = $userForQuestion->name;
+            }
         }
 
         return Inertia::render('ExercisePage', [
@@ -113,6 +118,7 @@ class ExerciseController extends Controller
             ],
             'supervisorMode' => [
                 'forUserId'               => $forUserId,
+                'forUserName'             => $forUserName,
                 'isSupervisorMode'        => $isProxyMode,
                 'feelingAnsweredToday'    => $proxyFeelingAnsweredToday,
             ],

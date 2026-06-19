@@ -1,18 +1,27 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import AudioButton from './AudioButton';
 import CheckIcon from '@/Icons/CheckIcon';
 
 export default function CompletionScreen({ userName, onBack }) {
     const headingRef = useRef(null);
+    const [announcement, setAnnouncement] = useState("");
 
     useEffect(() => {
         if (headingRef.current) {
             headingRef.current.focus();
         }
+        // Kleine timeout zodat de screenreader de DOM-wissel eerst verwerkt
+        const t = setTimeout(() => {
+            setAnnouncement(`Oefening klaar! Goed gedaan, ${userName}! Je hebt de oefening gedaan. Kom morgen terug voor de volgende oefening of herhaal oude oefeningen.`);
+        }, 500);
+        return () => clearTimeout(t);
     }, []);
 
     return (
         <div className="space-y-6">
+            <div aria-live="polite" aria-atomic="true" className="sr-only">
+                {announcement}
+            </div>
             <div className="text-center">
                 <h1
                     ref={headingRef}
